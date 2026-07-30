@@ -1,0 +1,23 @@
+# MAIN S5 behavioral run (post-G2): all six core checkpoints on the frozen
+# v1.0 release, N=25 (decision 2026-07-30: power curves nearly flat in N
+# between 25 and 40; family count is the binding constraint, so the run
+# waits for the 250-family G2 freeze rather than raising N).
+#
+# The release string below is manifest-guard-checked (spec §3.10): elicit
+# refuses to run unless data/release/v1.0/manifest.json exists and its
+# files hash-match. No --skip-manifest-check on the main run, ever.
+release: v1.0
+models:
+  - llama-3.1-8b-pretrained
+  - llama-3.1-8b-instruct
+  - mistral-7b-v0.1-pretrained
+  - mistral-7b-v0.1-instruct
+  - gemma-2-9b-pretrained
+  - gemma-2-9b-instruct
+formats:
+  - raw
+n_samples: 25
+questions:
+  - intentionality
+  - blame
+  - praise

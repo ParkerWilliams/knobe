@@ -358,6 +358,42 @@ class TestManifestGuard:
         with pytest.raises(elicit_vllm.ManifestGuardError, match="declares release"):
             elicit_vllm.verify_release_manifest("v9.10", release_root)
 
+    def test_run_honors_custom_release_root(self, tmp_path):
+        """The CLI wrapper (run) must forward release_root to run_elicit so a
+        wheel-installed knobe can verify a release dir shipped alongside the
+        job data (the on-cluster main-run layout) -- with the guard ON."""
+        prompts = _toy_prompts(2, ["intentionality"])
+        prompts_path = tmp_path / "prompts.jsonl"
+        write_jsonl(prompts, prompts_path)
+        built_jobs = jobs_mod.build_jobs(
+            prompts, release="v9.9", models=["gemma-2-2b-pretrained"], formats=["raw"],
+            questions=["intentionality"], n_samples=1,
+        )
+        jobs_path = tmp_path / "jobs.jsonl"
+        jobs_mod.write_jobs_jsonl(built_jobs, jobs_path)
+        run_config_path = tmp_path / "run.yaml"
+        _write_run_config(
+            run_config_path, release="v9.9", models=["gemma-2-2b-pretrained"], formats=["raw"],
+            n_samples=1, questions=["intentionality"],
+        )
+        release_root = tmp_path / "release"
+        _write_release(release_root, "v9.9", {"vignettes.csv": b"a,b\n1,2\n"})
+
+        # Without release_root the guard must refuse (v9.9 is not in the
+        # repo's own data/release/); with it, the run must succeed.
+        rc_missing = elicit_vllm.run(
+            jobs_path=jobs_path, prompts_path=prompts_path, run_config_path=run_config_path,
+            out_path=tmp_path / "r1.jsonl", engine_name="fake", registry_path=MODELS_YAML,
+        )
+        assert rc_missing == 1
+        rc = elicit_vllm.run(
+            jobs_path=jobs_path, prompts_path=prompts_path, run_config_path=run_config_path,
+            out_path=tmp_path / "r2.jsonl", engine_name="fake", registry_path=MODELS_YAML,
+            release_root=release_root,
+        )
+        assert rc == 0
+        assert len(read_jsonl(tmp_path / "r2.jsonl", ResultRecord)) == len(built_jobs)
+
 
 # ---------------------------------------------------------------------------
 # Sharding

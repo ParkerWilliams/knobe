@@ -306,6 +306,12 @@ def _register_elicit(subparsers: argparse._SubParsersAction) -> None:
         help="Path to configs/models.yaml (default: the repo's own).",
     )
     parser.add_argument(
+        "--release-root", default=None, dest="release_root",
+        help="Directory containing <release>/manifest.json for the manifest guard "
+             "(default: the repo's own data/release/). Needed when knobe is "
+             "wheel-installed and the release dir ships alongside the job data.",
+    )
+    parser.add_argument(
         "--logit-fallback", default="", dest="logit_fallback",
         metavar="model_key[,model_key...]",
         help="Comma-separated model_keys whose measured regex parse rate fell below 95%% in "
@@ -348,6 +354,7 @@ def _run_elicit(args: argparse.Namespace) -> int:
         batch_size=args.batch_size,
         report_every_batches=args.report_every_batches,
         skip_manifest_check=args.skip_manifest_check,
+        release_root=args.release_root,
         registry_path=args.registry_path,
         logit_fallback_checkpoints=logit_fallback_checkpoints,
         dtype=args.dtype,
