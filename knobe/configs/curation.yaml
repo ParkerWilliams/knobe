@@ -1,0 +1,23 @@
+# Curation-check thresholds (WO-3 §3/§4; src/knobe/curate.py's
+# CurationConfig). These are starting heuristics, not frozen scientific
+# instruments -- curate.py's report_distributions() emits the empirical
+# severity-delta / vividness-gap / moral_relevance distributions to
+# --report-dir precisely so these numbers can be revisited once real data
+# is in hand (the legacy curate_vignettes.py script's own caveat).
+#
+#   severity_match_max_diff: matched low/high-evocativeness pairs within a
+#     (family_id, typicality) cell should NOT differ in severity by more
+#     than this many points (evocativeness is meant to change *vividness*,
+#     not the underlying severity of the outcome).
+#   vividness_min_gap: ...but vividness SHOULD differ by at least this many
+#     points between the low- and high-evocative renderings of the same
+#     fact -- that's the manipulation the pair is meant to produce.
+#   moral_min: MB/MG items should score at least this high on
+#     moral_relevance (0-10) -- DR §13's category-manipulation check.
+#   nonmoral_max: NMB/NMG/NEU items should score at or below this on
+#     moral_relevance -- the mirror half of the same check.
+
+severity_match_max_diff: 2
+vividness_min_gap: 2
+moral_min: 6
+nonmoral_max: 4

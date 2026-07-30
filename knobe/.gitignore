@@ -1,0 +1,20 @@
+.superpowers/
+
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+*.pyc
+.coverage
+.DS_Store
+
+# results/ contents are gitignored except for a placeholder so the
+# directory itself is tracked; H200 outputs land here and are large.
+results/*
+!results/.gitkeep
+orca/
+
+# Cluster-internal details — local-only, never push
+scripts/cluster_connect.sh
+configs/storage.yaml
+docs/PILOT_G1_PROVENANCE.md

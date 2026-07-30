@@ -1,0 +1,17 @@
+# Study data — must stay local per data agreement. Never commit.
+knobe/orca/
+orca/
+
+# Cluster-internal reference docs — local-only
+specs/01_MASTER_SPEC.md
+specs/work_orders/WO5_behavioral_h200.md
+
+# Large archive — exceeds GitHub's 100MB limit; knobe/ is the source of truth
+knobe.zip
+
+# Python cruft
+__pycache__/
+*.pyc
+
+# OS cruft
+.DS_Store

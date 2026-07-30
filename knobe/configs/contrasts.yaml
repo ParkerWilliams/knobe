@@ -1,0 +1,254 @@
+# configs/contrasts.yaml -- THE PREREGISTRATION OF RECORD for RQ1 (WO-8 §2b).
+#
+# Every planned RQ1 contrast is declared here, and ONLY here. analysis/models.py
+# READS this file and REFUSES to fit any contrast that is not declared in it
+# (an undeclared contrast requested by name is a hard error). This file is
+# human-approved before gate G2 and frozen into the release; the freeze flips
+# `prereg_frozen` from false to true (nothing in this file may change once
+# frozen without a version bump -- master spec §7.2/§7.5).
+#
+# Field reference (analysis.models.ContrastSpec):
+#   name        -- unique contrast id (the governance key: this is what code
+#                  looks up; requesting a name absent here hard-errors).
+#   rq          -- the Holm family this contrast belongs to. Holm correction
+#                  (statsmodels multipletests) is applied WITHIN each
+#                  (model_family, rq) group across the p-values of its
+#                  contrasts.
+#   kind        -- how models.py fits it:
+#                    "lmm"        : linear mixed model, test one fixed-effect
+#                                   `term` (main effect or interaction).
+#                    "lmm_offset" : center the outcome at the 0-10 scale
+#                                   midpoint (5.0) and test the Intercept
+#                                   (used for the NEU-vs-midpoint offset, 1d).
+#                    "lmm_1b"     : the 1b item-level-pairing model (see below).
+#   formula     -- statsmodels mixedlm formula over the coded predictor columns
+#                  models.prepare_frame() constructs (sign_c, tuning_c, vt_c,
+#                  typ_c, evoc_c, all effect-coded +/-0.5; rating; and for 1b
+#                  pred_c/sg_c built by the 1b prep).
+#   term        -- the fixed-effect coefficient whose Wald test IS the contrast
+#                  (e.g. an interaction "sign_c:vt_c", or "Intercept" for an
+#                  offset).
+#   direction   -- expected sign of `estimate`: positive | negative | two-sided.
+#                  Reported as direction_ok (does the estimate's sign match AND
+#                  is the Holm-corrected p significant); does not gate the fit.
+#   holm_family -- alias of rq for readers (kept identical; rq is authoritative).
+#   tuning      -- "finetuned" restricts to the finetuned checkpoint (the Knobe
+#                  effect is finetuning-contingent, DR §0); "both" keeps both
+#                  checkpoints (only the base contrast, which crosses tuning).
+#   subset      -- extra row filters (valence_type/question_type/valence).
+#   note        -- prose rationale + caveats surfaced in the generated report.
+#
+# Random-effects structure (all lmm/lmm_offset/lmm_1b): random intercept for
+# `family_id`; `domain` as a variance component via vc_formula where estimable
+# (dropped with a logged note when a subset spans too few domains to estimate
+# it -- master spec §6 / DR §2). Response-level ratings are NEVER aggregated
+# for inference (master spec §6.3); item means are computed only for the
+# descriptive figures.
+#
+# LMM-PRIMARY / ORDINAL-SENSITIVITY (deviation from WO-8's stated preference,
+# documented, not silent -- master spec §7.6): the work order prefers an
+# ordinal CLMM as primary with LMM as the sensitivity check. statsmodels'
+# OrderedModel has NO random-effects support, and the crossed family/domain
+# random-effects structure above is load-bearing for these clustered designs,
+# so primary inference is the LMM (mixedlm) and the ordinal model (OrderedModel,
+# logit link, fixed effects only) is run as the DISTRIBUTIONAL SENSITIVITY
+# check instead. This inversion is stated in analysis/models.py's docstring and
+# in every generated report.
+
+prereg_frozen: false
+
+contrasts:
+  # -- RQ1 base: the Raimondi replication over decomposed items. Is the
+  #    bad>good intentionality asymmetry finetuning-contingent? --------------
+  - name: rq1_base_sign_finetuned
+    rq: RQ1_base
+    holm_family: RQ1_base
+    kind: lmm
+    formula: "rating ~ sign_c"
+    term: sign_c
+    direction: positive
+    tuning: finetuned
+    subset:
+      question_type: intentionality
+      valence_type: [moral, nonmoral]
+    note: >
+      The base Knobe asymmetry within the finetuned checkpoint: bad-valence
+      items rated more intentional than good-valence items (bad coded +0.5),
+      over the pooled moral+nonmoral valenced items. Raimondi et al.'s core
+      finding, now measured over the decomposed stimulus set.
+
+  - name: rq1_base_sign_x_tuning
+    rq: RQ1_base
+    holm_family: RQ1_base
+    kind: lmm
+    formula: "rating ~ sign_c * tuning_c"
+    term: sign_c:tuning_c
+    direction: positive
+    tuning: both
+    subset:
+      question_type: intentionality
+      valence_type: [moral, nonmoral]
+    note: >
+      Finetuning-contingency (DR §0): the sign effect is expected to be
+      LARGER in the finetuned checkpoint than the pretrained one (tuning coded
+      finetuned +0.5), i.e. a positive sign_c:tuning_c interaction. This is
+      the estimand for "the base asymmetry is finetuning-contingent".
+
+  # -- 1a (valence type): is the asymmetry moral-specific or general? --------
+  - name: rq1a_sign_x_valence_type
+    rq: RQ1a
+    holm_family: RQ1a
+    kind: lmm
+    formula: "rating ~ sign_c * vt_c"
+    term: sign_c:vt_c
+    direction: positive
+    tuning: finetuned
+    subset:
+      question_type: intentionality
+      valence_type: [moral, nonmoral]
+    note: >
+      sign x valence-type interaction (NEU excluded, handled by 1d). vt coded
+      moral +0.5 / nonmoral -0.5, sign coded bad +0.5. A positive interaction
+      means the bad>good gap is LARGER for moral than nonmoral items -- the
+      asymmetry is (at least partly) moral-specific rather than general
+      evaluative valence.
+
+  # -- 1b (responsibility / Hindriks asymmetry): intentionality~blame slope on
+  #    bad items vs intentionality~praise slope on good items, ITEM-LEVEL
+  #    pairing (response-level pairing is impossible -- independent
+  #    completions, DR §12). See models._prepare_1b_frame. -------------------
+  - name: rq1b_moral
+    rq: RQ1b
+    holm_family: RQ1b
+    kind: lmm_1b
+    formula: "rating ~ pred_c * sg_c"
+    term: pred_c:sg_c
+    direction: positive
+    tuning: finetuned
+    subset:
+      valence_type: [moral]
+    note: >
+      Within MORAL items: intentionality responses regressed on the ITEM's
+      blame mean (bad items) or praise mean (good items) as the predictor
+      pred_c, crossed with a bad/good indicator sg_c. The pred_c:sg_c
+      interaction is the Hindriks asymmetry (blame slope on bad > praise slope
+      on good). EIV CAVEAT: the item blame/praise mean is itself an estimate
+      (finite completions per item), so pred_c carries measurement error that
+      biases its slope toward 0 -- the interaction is still interpretable in
+      sign but its magnitude is a conservative (attenuated) estimate.
+
+  - name: rq1b_nonmoral
+    rq: RQ1b
+    holm_family: RQ1b
+    kind: lmm_1b
+    formula: "rating ~ pred_c * sg_c"
+    term: pred_c:sg_c
+    direction: positive
+    tuning: finetuned
+    subset:
+      valence_type: [nonmoral]
+    note: >
+      As rq1b_moral, within NONMORAL items -- tests whether the Hindriks
+      responsibility asymmetry is moral-specific or general. Same EIV caveat.
+
+  # -- 1c (mechanism / Ngo dissociation): typicality effect concentrated on
+  #    positive items, evocativeness effect on negative items. ---------------
+  - name: rq1c_typicality_x_sign
+    rq: RQ1c
+    holm_family: RQ1c
+    kind: lmm
+    formula: "rating ~ typ_c * sign_c"
+    term: typ_c:sign_c
+    direction: two-sided
+    tuning: finetuned
+    subset:
+      question_type: intentionality
+      valence_type: [moral, nonmoral]
+    note: >
+      typicality x sign interaction (typ coded uncommon +0.5). Ngo et al.'s
+      normativity mechanism predicts the typicality effect is concentrated on
+      POSITIVE (good) items -- a sign-dependent typicality effect, hence a
+      non-zero interaction (two-sided: the concentration direction is the
+      claim, tested descriptively alongside).
+
+  - name: rq1c_evocativeness_x_sign
+    rq: RQ1c
+    holm_family: RQ1c
+    kind: lmm
+    formula: "rating ~ evoc_c * sign_c"
+    term: evoc_c:sign_c
+    direction: two-sided
+    tuning: finetuned
+    subset:
+      question_type: intentionality
+      valence_type: [moral, nonmoral]
+    note: >
+      evocativeness x sign interaction (evoc coded high +0.5). Ngo's second,
+      dissociable mechanism: evocative presentation predicts intentionality
+      ASCRIPTION concentrated on NEGATIVE (bad) items -- again a sign-dependent
+      effect, a non-zero interaction.
+
+  # -- 1d (stakeless baseline): NEU intentionality offset from midpoint, and
+  #    typicality within NEU (can typicality move intentionality with NO
+  #    valence at stake?). ---------------------------------------------------
+  - name: rq1d_neu_offset
+    rq: RQ1d
+    holm_family: RQ1d
+    kind: lmm_offset
+    formula: "rating_centered ~ 1"
+    term: Intercept
+    direction: two-sided
+    tuning: finetuned
+    subset:
+      question_type: intentionality
+      valence: [NEU]
+    note: >
+      Does foreseen-plus-indifferent action with NO evaluative stake produce
+      any intentionality elevation? The NEU-only outcome is centered at the
+      0-10 scale midpoint (5.0) and the Intercept tests the offset from it.
+
+  - name: rq1d_typicality_within_neu
+    rq: RQ1d
+    holm_family: RQ1d
+    kind: lmm
+    formula: "rating ~ typ_c"
+    term: typ_c
+    direction: two-sided
+    tuning: finetuned
+    subset:
+      question_type: intentionality
+      valence: [NEU]
+    note: >
+      Can typicality alone move intentionality in the absence of any valence?
+      The typicality main effect within NEU items only.
+
+# ---------------------------------------------------------------------------
+# Declared SENSITIVITY ANALYSES (researcher decision, 2026-07-28: the middle
+# course). The primary model stays the family-RI LMM (domain = family
+# clustering only; see models.py). Master spec §6's "domain = random effect"
+# intent is honored by a DECLARED domain-random-slope sensitivity analysis on
+# the headline cross-domain-generalization contrasts, governed here exactly
+# like the contrasts themselves: analysis code refuses any sensitivity analysis
+# not declared in this section (models.select_sensitivity_analysis). The
+# domain-intercept cluster fit (--domain-sensitivity, groups=domain) is retained
+# as the SECONDARY check.
+# ---------------------------------------------------------------------------
+sensitivity_analyses:
+  domain_random_slope:
+    # The cross-domain generalization claims: the finetuning-contingency (base),
+    # the moral-specificity of the asymmetry (1a), and Ngo's two mechanisms (1c).
+    # For each, mixedlm groups=domain with a random intercept + random SLOPE for
+    # the focal term (re_formula="~<term>"), same fixed effects as the primary.
+    contrasts:
+      - rq1_base_sign_x_tuning
+      - rq1a_sign_x_valence_type
+      - rq1c_typicality_x_sign
+      - rq1c_evocativeness_x_sign
+    # Interpretation rule (human-readable; the code mirrors it via
+    # models.CI_WIDTH_RATIO_THRESHOLD=1.5 and SLOPE_VAR_THRESHOLD, plus a
+    # non-convergence guard):
+    interpretation_rule: >
+      If the domain-random-slope fit's CI for a contrast is materially wider
+      than the primary CI (ratio > 1.5) or the slope variance is non-negligible,
+      the cross-domain generalization claim for that contrast is reported as
+      qualified.

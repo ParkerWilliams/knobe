@@ -1,0 +1,53 @@
+# Example run config for `knobe jobs build --config configs/run_example.yaml
+# --prompts prompts.jsonl --out jobs.jsonl` (WO-2 Part C item 1). Not read
+# by any test -- copy this to configs/run_<name>.yaml and edit for a real
+# run.
+#
+# Schema (src/knobe/jobs.py's RunConfig):
+#   release:   str          -- release string folded into the seeding
+#                               material (spec §3.5); should match the
+#                               data/release/vX.Y/ this run's prompts.jsonl
+#                               was rendered from.
+#   models:    [model_key]  -- model_key convention is
+#                               "{family}-{pretrained|instruct}" (see
+#                               registry.model_key_for(); model_keys here
+#                               need not be validated against
+#                               configs/models.yaml at build time -- WO-5's
+#                               runner does that check when it actually
+#                               loads a checkpoint).
+#   formats:   [raw|chat]   -- which prompts.jsonl records to expand into
+#                               jobs. "raw" is the primary format; "chat"
+#                               is the robustness pass (spec §3.4). List
+#                               both to include both.
+#   n_samples: int          -- completions per (prompt, model_key); expands
+#                               into sample_idx 0..n_samples-1.
+#   questions: [intentionality|blame|praise]  -- optional; defaults to all
+#                               three if omitted.
+#   logit_fallback_checkpoints: [model_key]  -- optional (WO-5 §4.4/§7);
+#                               model_keys whose measured regex parse rate
+#                               fell below the 95% threshold in a prior
+#                               G0/G1 run, and should therefore use
+#                               logit-fallback (expected-value-from-logprobs)
+#                               scoring instead. Defaults to empty (no
+#                               fallback). `knobe elicit --logit-fallback`
+#                               unions with this list at run time.
+
+release: v1.0
+
+models:
+  - llama-3.1-8b-pretrained
+  - llama-3.1-8b-instruct
+  - mistral-7b-v0.1-pretrained
+  - mistral-7b-v0.1-instruct
+  - gemma-2-9b-pretrained
+  - gemma-2-9b-instruct
+
+formats:
+  - raw
+
+n_samples: 5
+
+questions:
+  - intentionality
+  - blame
+  - praise

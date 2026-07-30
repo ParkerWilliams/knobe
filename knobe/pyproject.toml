@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "knobe"
+version = "0.1.0"
+description = "Decomposed Knobe-effect study in LLMs (extends Raimondi et al., arXiv:2510.12229)"
+requires-python = ">=3.10"  # H200 cluster workers run Python 3.10 (G1 run-12 lesson); dev/CI venv is 3.13
+readme = { file = "README.md", content-type = "text/markdown" }
+dependencies = [
+    "pydantic>=2",
+    "pyyaml",
+    "openpyxl",
+    "numpy",
+    "pandas",
+]
+
+[project.optional-dependencies]
+# pyarrow: parquet engine for the δ_l / patch-metrics tables (WO-6);
+# safetensors: activation-cache format (spec §3.7). Both pure library
+# deps (no GPU), kept in `dev` so the laptop suite can round-trip the
+# artifacts, and also declared in `mech` (their production home).
+dev = ["pytest", "pytest-cov", "safetensors", "pyarrow", "matplotlib"]
+stats = ["statsmodels", "matplotlib", "scipy", "scikit-learn"]
+hf = ["torch", "transformers", "safetensors"]
+vllm = ["vllm"]
+# scikit-learn: per-layer probes (mech/probes.py); statsmodels: RQ3
+# MixedLM / anova decomposition (mech/decompose.py). Both pure-Python (no
+# GPU) but live here because they are the mech stage's analysis engines.
+mech = ["transformer_lens", "nnsight", "safetensors", "pyarrow", "matplotlib", "scikit-learn", "statsmodels"]
+sae = ["sae-lens"]
+eval = ["lm-eval"]
+aws = ["boto3"]
+
+[project.scripts]
+knobe = "knobe.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/knobe"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error"]
+# The `gpu` marker tags tests that need a real GPU + heavy optional extras
+# (torch/transformer_lens/nnsight/lm-eval) -- e.g. the TL/nnsight backend
+# equivalence check and the real debug-model cache->delta->sweep smoke path
+# (WO-6). They are DESELECTED by default via addopts so the laptop suite
+# never needs those deps; the H200 runs them with `pytest -m gpu` (a
+# command-line `-m` overrides this addopts default).
+markers = [
+    "gpu: requires a GPU + heavy deps (torch/transformer_lens/nnsight/lm-eval); deselected by default",
+    "slow: long-running simulation tests (e.g. WO-8's 200-sim Type-I check); deselected by default (a 25-sim smoke version stays in the default suite)",
+]
+addopts = "-m 'not gpu and not slow'"

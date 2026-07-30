@@ -1,0 +1,51 @@
+# WO-4 power-simulation defaults (src/knobe/power.py). These are the
+# REAL research-grade defaults -- the "knobe power simulate" CLI's grid
+# and n_sims override flags exist precisely so tests/dry-runs can shrink
+# this without editing the file (task-6-brief.md: "Keep the default test
+# grid tiny so the suite stays fast").
+#
+# item_counts: PER-CELL item targets to test (DR §16's "per-cell item
+#   target" framing) -- e.g. for 1a (a 2x2 valence-type x sign design)
+#   an item_count of 30 means 30 families in EACH of the 4 cells (120
+#   families total for that grid point). See power_sim.py's per-contrast
+#   docstrings for exactly what "item_count" and "n" mean for each
+#   contrast.
+# response_ns: response-level N per item (or per within-family
+#   condition-cell) to test.
+# n_sims: simulation replicates per grid point. WO-4 §2 requires >= 1000
+#   for the real run; this file ships that default. A full grid at this
+#   n_sims (5 item_counts x 5 response_ns x 5 contrasts x 1000 sims, each
+#   fitting a mixedlm) is an overnight-on-a-laptop job by design (task-6-
+#   brief.md / WO4_pilot_power.md §4) -- shard it with --shard i/n.
+# mu: assumed grand-mean intentionality rating (0-10 scale) under the null.
+# alpha: significance threshold for the planned-contrast Wald test.
+# effect_sizes: null means "derive from the pilot: half the observed
+#   MB-MG intentionality gap" (WO-4 §2's stated default), computed once by
+#   `knobe power simulate` from --pilot-results/--pilot-vignettes. Set an
+#   explicit float here to override any single contrast's effect size.
+#   NOTE units: 1a/1c_typicality/1c_evocativeness/1d are rating-point
+#   mean-difference-style contrasts (0-10 scale) -- the pilot-derived
+#   default is dimensionally appropriate there. 1b's effect size is a
+#   difference-of-regression-slopes (see power_sim.simulate_1b's
+#   docstring) -- reusing the same pilot-derived magnitude as its default
+#   is a documented placeholder, not a claim the units genuinely match;
+#   override it here once pilot blame/praise data supports a better
+#   estimate.
+
+seed: 20260101
+n_sims: 1000
+item_counts: [15, 25, 40, 60, 90, 120]
+response_ns: [5, 10, 15, 25, 40]
+mu: 5.0
+alpha: 0.05
+contrasts: [1a, 1b, 1c_typicality, 1c_evocativeness, 1d]
+
+effect_sizes:
+  1a: null
+  1b: null
+  1c_typicality: null
+  1c_evocativeness: null
+  1d: null
+
+pilot:
+  question: intentionality

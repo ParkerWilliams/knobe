@@ -1,0 +1,20 @@
+# G1 behavioral pilot (PLAN gate G1): full trio base+instruct on the 420
+# already-assembled variants, N=25, raw format. Pre-release run: prompts
+# rendered from the current authoring matrix (105 approved families), so
+# elicit runs with --skip-manifest-check; the seeding release string
+# "pilot-g1" is frozen here and in every job_id.
+release: pilot-g1
+models:
+  - llama-3.1-8b-pretrained
+  - llama-3.1-8b-instruct
+  - mistral-7b-v0.1-pretrained
+  - mistral-7b-v0.1-instruct
+  - gemma-2-9b-pretrained
+  - gemma-2-9b-instruct
+formats:
+  - raw
+n_samples: 25
+questions:
+  - intentionality
+  - blame
+  - praise
