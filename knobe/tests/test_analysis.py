@@ -83,6 +83,67 @@ def test_exclusions_never_silent(tmp_path):
     assert ledger.n_excluded == 2
 
 
+def test_logit_fallback_scores_whole_checkpoint_uniformly(tmp_path):
+    """Spec §4.4: a checkpoint listed in logit_fallback_checkpoints gets EV
+    scoring from logprobs_0_10 for EVERY row (even ones that parsed fine),
+    rows without logprobs are excluded as logprobs_missing, and unlisted
+    checkpoints keep their parsed ratings."""
+    import math
+
+    from knobe.schemas import VignetteRow, write_csv_validated
+
+    vig = VignetteRow(
+        variant_id="ENV-MB-00-A", family_id="ENV-MB-00", domain="Environment", valence="MB",
+        nonmoral_subdomain="", sign="bad", typicality="common", evocativeness="low",
+        scenario="s", q_intentionality="q", q_blame="q", q_praise="q",
+    )
+    vig_path = tmp_path / "vignettes.csv"
+    write_csv_validated([vig], vig_path, VignetteRow)
+
+    # Mass concentrated on rating 8 => EV close to 8, far from parsed 2.
+    lp = [-20.0] * 11
+    lp[8] = 0.0
+    fb_parsed_ok = ResultRecord(
+        job_id="ENV-MB-00-A::intentionality::raw::gemma-2-9b-instruct::0",
+        prompt_id="ENV-MB-00-A::intentionality::raw", model_key="gemma-2-9b-instruct",
+        sample_idx=0, temperature=1.0, seed=1, raw_response="2", parsed_rating=2,
+        parse_ok=True, parse_method="regex", logprobs_0_10=lp,
+        model_revision="x", runner_version="t", timestamp=0.0,
+    )
+    fb_parse_fail = fb_parsed_ok.model_copy(update={
+        "job_id": "ENV-MB-00-A::intentionality::raw::gemma-2-9b-instruct::1",
+        "sample_idx": 1, "raw_response": "no number", "parsed_rating": None, "parse_ok": False,
+    })
+    fb_no_logprobs = fb_parsed_ok.model_copy(update={
+        "job_id": "ENV-MB-00-A::intentionality::raw::gemma-2-9b-instruct::2",
+        "sample_idx": 2, "logprobs_0_10": None,
+    })
+    unlisted = fb_parsed_ok.model_copy(update={
+        "job_id": "ENV-MB-00-A::intentionality::raw::llama-3.1-8b-instruct::0",
+        "model_key": "llama-3.1-8b-instruct",
+    })
+    results_path = tmp_path / "results.jsonl"
+    write_jsonl([fb_parsed_ok, fb_parse_fail, fb_no_logprobs, unlisted], results_path)
+
+    df, ledger = ingest.ingest(
+        [results_path], vig_path, release="v1",
+        logit_fallback_checkpoints=["gemma-2-9b-instruct"],
+    )
+    reasons = {e.reason: e.count for e in ledger.entries}
+    assert reasons == {"logprobs_missing": 1}
+    assert ledger.n_included == 3
+
+    ev = ingest.logit_ev_rating(lp)
+    assert math.isclose(ev, 8.0, abs_tol=1e-6)
+    fb_rows = df[df["model_key"] == "gemma-2-9b-instruct"]
+    assert set(fb_rows["score_source"]) == {"logit_ev"}
+    assert all(math.isclose(r, ev, abs_tol=1e-9) for r in fb_rows["rating"])
+
+    unlisted_rows = df[df["model_key"] == "llama-3.1-8b-instruct"]
+    assert set(unlisted_rows["score_source"]) == {"parsed"}
+    assert list(unlisted_rows["rating"]) == [2.0]
+
+
 def test_cancel_format_filtered_with_note(tmp_path):
     """format=='cancel' robustness-stub rows are filtered out of primary
     analyses with a logged reason (WO-8 §4), never silently."""

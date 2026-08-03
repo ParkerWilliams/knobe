@@ -820,6 +820,13 @@ def _register_analyze(subparsers: argparse._SubParsersAction) -> None:
         "--chat-comparison", action="store_true", dest="chat_comparison",
         help="Also run the chat-vs-raw format robustness comparison (WO-8 §4; off by default).",
     )
+    parser.add_argument(
+        "--logit-fallback", default="", dest="logit_fallback",
+        metavar="model_key[,model_key...]",
+        help="Comma-separated model_keys whose measured regex parse rate fell below 95%% "
+             "(spec §4.4): ALL their rows are scored as the softmax-EV over logprobs_0_10 "
+             "(score_source='logit_ev') instead of the parsed rating.",
+    )
     parser.set_defaults(func=_run_analyze)
 
 
@@ -866,6 +873,7 @@ def _run_analyze(args: argparse.Namespace) -> int:
             domain_sensitivity=args.domain_sensitivity,
             domain_slope_sensitivity=args.domain_slope_sensitivity,
             chat_comparison=args.chat_comparison,
+            logit_fallback_checkpoints=_parse_str_list(args.logit_fallback) or (),
         )
     except (UndeclaredContrastError, UndeclaredSensitivityError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

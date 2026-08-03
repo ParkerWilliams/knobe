@@ -29,6 +29,7 @@ written to ``exclusions.json`` and printed.
 """
 from __future__ import annotations
 
+import math
 import sys
 from pathlib import Path
 from typing import Sequence
@@ -65,9 +66,20 @@ ANALYSIS_COLUMNS = [
     "model_key", "model_family", "tuning_status",
     "family_id", "valence", "valence_type", "sign", "typicality",
     "evocativeness", "domain", "nonmoral_subdomain",
-    "rating",
+    "rating", "score_source",
     "moral_relevance", "severity", "vividness", "typicality_perception",
 ]
+
+
+def logit_ev_rating(logprobs_0_10: Sequence[float]) -> float:
+    """Spec §4.4 logit-fallback score: the expected value of the rating
+    under the softmax-renormalized first-token distribution over the "0"
+    ... "10" candidate tokens. ``logprobs_0_10`` holds RAW (unnormalized)
+    log-probabilities, one per rating 0..10, as stored by elicit."""
+    m = max(logprobs_0_10)
+    weights = [math.exp(lp - m) for lp in logprobs_0_10]
+    total = sum(weights)
+    return sum(i * w for i, w in enumerate(weights)) / total
 
 
 def _default_registry_path() -> Path:
@@ -112,6 +124,7 @@ def ingest(
     jobs_path: str | Path | None = None,
     registry_path: str | Path | None = None,
     release: str = "unknown",
+    logit_fallback_checkpoints: Sequence[str] = (),
 ) -> tuple[pd.DataFrame, ExclusionsLedger]:
     """Joins results + release vignettes (+ optional curated ratings) into a
     tidy response-level DataFrame (``ANALYSIS_COLUMNS``), returning it with
@@ -121,7 +134,15 @@ def ingest(
     (when ``curated_path`` given); unresolvable model_keys; and parse
     failures (``parse_ok`` false or ``parsed_rating`` null). Jobs in
     ``jobs_path`` with no result are reported as an ``incomplete`` category
-    (spec §3.5 row-count validation)."""
+    (spec §3.5 row-count validation).
+
+    ``logit_fallback_checkpoints`` (spec §4.4): model_keys whose measured
+    regex parse rate fell below 95%. EVERY row of such a checkpoint is
+    scored as ``logit_ev_rating(logprobs_0_10)`` (``score_source ==
+    "logit_ev"``) -- not just its parse failures, so the measurement is
+    uniform within checkpoint -- and rows missing logprobs are excluded as
+    ``logprobs_missing``. All other checkpoints keep the parsed rating
+    (``score_source == "parsed"``)."""
     registry = load_registry(registry_path or _default_registry_path())
     key_index = build_model_key_index(registry)
 
@@ -175,9 +196,18 @@ def ingest(
             _drop("variant_not_accepted", r.job_id)
             continue
 
-        if not r.parse_ok or r.parsed_rating is None:
-            _drop("parse_failure", r.job_id)
-            continue
+        if r.model_key in logit_fallback_checkpoints:
+            if r.logprobs_0_10 is None:
+                _drop("logprobs_missing", r.job_id)
+                continue
+            rating = logit_ev_rating(r.logprobs_0_10)
+            score_source = "logit_ev"
+        else:
+            if not r.parse_ok or r.parsed_rating is None:
+                _drop("parse_failure", r.job_id)
+                continue
+            rating = float(r.parsed_rating)
+            score_source = "parsed"
 
         curated_row = curated_by_id.get(variant_id)
         rows.append(
@@ -198,7 +228,8 @@ def ingest(
                 "evocativeness": vignette.evocativeness,
                 "domain": vignette.domain,
                 "nonmoral_subdomain": vignette.nonmoral_subdomain,
-                "rating": float(r.parsed_rating),
+                "rating": rating,
+                "score_source": score_source,
                 "moral_relevance": curated_row.moral_relevance if curated_row else None,
                 "severity": curated_row.severity if curated_row else None,
                 "vividness": curated_row.vividness if curated_row else None,

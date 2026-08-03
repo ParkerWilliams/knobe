@@ -432,6 +432,7 @@ def run_analyze(
     domain_sensitivity: bool = False,
     domain_slope_sensitivity: bool = False,
     chat_comparison: bool = False,
+    logit_fallback_checkpoints: Sequence[str] = (),
 ) -> int:
     """Full S8 pipeline: ingest (join + exclusions ledger) -> fit the declared
     RQ1 contrasts (Holm-corrected) -> descriptive figures -> paper artifacts.
@@ -447,6 +448,7 @@ def run_analyze(
     df, ledger = ingest.ingest(
         results_paths, vignettes_path, curated_path=curated_path, jobs_path=jobs_path,
         registry_path=registry_path, release=release,
+        logit_fallback_checkpoints=logit_fallback_checkpoints,
     )
     ingest.write_exclusions(ledger, out_dir / "exclusions.json")
 
