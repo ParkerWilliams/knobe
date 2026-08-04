@@ -18,3 +18,5 @@ orca/
 scripts/cluster_connect.sh
 configs/storage.yaml
 docs/PILOT_G1_PROVENANCE.md
+build/
+*.bak

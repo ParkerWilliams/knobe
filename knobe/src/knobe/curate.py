@@ -214,6 +214,11 @@ class AnthropicClient:
             resp = await self._client.messages.create(
                 model=self.model,
                 max_tokens=max_tokens,
+                # Claude 5-generation models run adaptive thinking by default,
+                # and max_tokens caps thinking + text TOGETHER -- at curation's
+                # small max_tokens the whole budget goes to thinking and the
+                # text comes back empty. Rating elicitation needs no thinking.
+                thinking={"type": "disabled"},
                 messages=[{"role": "user", "content": prompt}],
             )
         except _TRANSIENT_ANTHROPIC_ERRORS as exc:
