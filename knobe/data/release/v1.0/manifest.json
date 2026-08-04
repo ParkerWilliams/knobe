@@ -1,0 +1,84 @@
+{
+  "release": "v1.0",
+  "created": "2026-08-04T23:44:11Z",
+  "git_commit": "bdf92589e1cd40e96e685c9dfafb8749759e8377",
+  "files": {
+    "vignettes.csv": {
+      "sha256": "b4022b98bfb8d9fb33c66032334d3d758ce1b6aa6253ad05afc7c59887a7e699",
+      "rows": 420
+    }
+  },
+  "counts": {
+    "families": 105,
+    "variants": 420,
+    "by_valence": {
+      "MB": {
+        "families": 21,
+        "variants": 84
+      },
+      "MG": {
+        "families": 21,
+        "variants": 84
+      },
+      "NMB": {
+        "families": 21,
+        "variants": 84
+      },
+      "NMG": {
+        "families": 21,
+        "variants": 84
+      },
+      "NEU": {
+        "families": 21,
+        "variants": 84
+      }
+    },
+    "by_domain": {
+      "Environment": {
+        "families": 15,
+        "variants": 60
+      },
+      "Product Safety": {
+        "families": 10,
+        "variants": 40
+      },
+      "Workplace": {
+        "families": 10,
+        "variants": 40
+      },
+      "Finance": {
+        "families": 10,
+        "variants": 40
+      },
+      "Healthcare": {
+        "families": 10,
+        "variants": 40
+      },
+      "Data Privacy": {
+        "families": 10,
+        "variants": 40
+      },
+      "Food Quality": {
+        "families": 10,
+        "variants": 40
+      },
+      "Academic": {
+        "families": 10,
+        "variants": 40
+      },
+      "Animal Welfare": {
+        "families": 10,
+        "variants": 40
+      },
+      "Community": {
+        "families": 10,
+        "variants": 40
+      }
+    }
+  },
+  "gates_passed": [
+    "G0",
+    "G1"
+  ],
+  "changelog": "G2 freeze at 105 families (below the 250-family plan target) by decision 2026-08-04: complete the study end-to-end on the existing set; revisions deferred to a future release. Curation flags accepted as documented limitations: evocativeness manipulation registers weakly with the reviewer (vividness gap mean 0.47 vs required 2; 300/420 pair-flagged) -- see data/curation/report. Interpret RQ1c (evocativeness) accordingly."
+}
