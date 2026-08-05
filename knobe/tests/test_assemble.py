@@ -624,11 +624,15 @@ class TestReleaseMode:
 
     def test_real_repo_data_release_dir_untouched(self):
         """Safety net: nothing in this test module should ever write into
-        the real data/release/ directory (append-only; brief explicitly
-        says it must stay empty in git except README)."""
+        the real data/release/ directory (append-only). Real releases are
+        cut deliberately (v1.0 froze 2026-08-04, G2); tests must add no
+        OTHER entries and never touch a frozen release's contents."""
         real_release_dir = REPO_ROOT / "data" / "release"
         entries = sorted(p.name for p in real_release_dir.iterdir())
-        assert entries == [".gitkeep", "README.md"]
+        assert entries == [".gitkeep", "README.md", "v1.0"]
+        assert sorted(p.name for p in (real_release_dir / "v1.0").iterdir()) == [
+            "manifest.json", "vignettes.csv",
+        ]
 
 
 # ---------------------------------------------------------------------------

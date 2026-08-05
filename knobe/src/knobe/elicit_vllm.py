@@ -754,7 +754,12 @@ def read_results_tolerating_torn_tail(path: str | Path) -> list[ResultRecord]:
     if not path.exists() or path.stat().st_size == 0:
         return []
 
-    lines = [line for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    # Split on "\n" ONLY -- str.splitlines() also splits on U+2028/U+0085
+    # etc., and pydantic writes non-ASCII raw, so a completion containing a
+    # unicode line separator INSIDE a (legal-JSON) string would be shredded
+    # into two invalid fragments and misread as mid-file corruption
+    # (main-run job 42, 2026-08-05: llama-instruct row at line 31850).
+    lines = [line for line in path.read_text(encoding="utf-8").split("\n") if line.strip()]
     if not lines:
         return []
 

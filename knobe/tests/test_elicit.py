@@ -539,6 +539,37 @@ class TestReadResultsTolerantOfTornTail:
     def test_missing_file_returns_empty(self, tmp_path):
         assert elicit_vllm.read_results_tolerating_torn_tail(tmp_path / "does_not_exist.jsonl") == []
 
+    def test_unicode_line_separator_in_raw_response_is_not_misread_as_corruption(self, tmp_path):
+        """Regression (main-run job 42, 2026-08-05): pydantic serializes
+        non-ASCII raw, so a completion containing U+2028/U+0085 puts a
+        literal unicode line separator INSIDE a legal-JSON string. A
+        splitlines()-based loader shreds that record into two invalid
+        fragments and raises the mid-file-corruption error on a file the
+        line-oriented repair pass (correctly) considers clean. The loader
+        must split on \\n only and hand the record back intact."""
+        from knobe.schemas import ResultRecord
+
+        weird = ResultRecord(
+            job_id="ENV-MB-00-A::intentionality::raw::llama-3.1-8b-instruct::0",
+            prompt_id="ENV-MB-00-A::intentionality::raw", model_key="llama-3.1-8b-instruct",
+            sample_idx=0, temperature=1.0, seed=1,
+            raw_response="7 because the managerknew",
+            parsed_rating=7, parse_ok=True, parse_method="regex",
+            model_revision="x", runner_version="t", timestamp=0.0,
+        )
+        path = tmp_path / "results.jsonl"
+        path.write_text(
+            weird.model_dump_json() + "\n" + _valid_result_line(job_id="j2") + "\n",
+            encoding="utf-8",
+        )
+        # Precondition making the regression real: the serialized record
+        # must actually contain the raw separator (not an escape sequence).
+        assert " " in path.read_text(encoding="utf-8")
+
+        results = elicit_vllm.read_results_tolerating_torn_tail(path)
+        assert [r.job_id for r in results] == [weird.job_id, "j2"]
+        assert results[0].raw_response == "7 because the managerknew"
+
     def test_empty_file_returns_empty(self, tmp_path):
         path = tmp_path / "results.jsonl"
         path.write_text("")
