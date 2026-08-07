@@ -84,12 +84,27 @@ generation instructions. `high_evocative_outcome` was written to be more
 Those aren't the same axis, so most pairs don't show a gap on the axis being
 measured even when they do differ on the axis being manipulated.
 
-**Next steps:** this needs a v1.1 redesign, not per-item patching —
-either rewrite `high_evocative_outcome` generation to target emotional
-evocativeness directly, or change the curation question to ask about
-concreteness/specificity instead. Don't spend review time rewriting
-individual pairs until the construct itself is fixed; you'd be re-fighting
-the same failure 173 times.
+**"36 reversed" counting convention:** that figure (and the 173/210 above)
+counts at the **pair level** — 210 total `(family_id, typicality)` pairs,
+the exact unit `check_pairs` operates on. A family-level count (mean gap
+across a family's up-to-two typicality-conditioned pairs) gives a different
+number — 27 families with a strictly negative mean gap, 51 including
+exact-zero-mean ties — which is not a data discrepancy, just a different
+unit of analysis. State which one you're using when citing either number.
+
+**Next steps:** this needs a v1.1 redesign, not per-item patching. See
+`docs/V1_1_REVISION_PLAN.md` Workstream B §3 for the current thinking:
+external-lexicon scoring was considered and rejected (it encodes what human
+lexicographers tagged as emotionally loaded, not what's salient to the
+subject models being tested); personal-report wording framing ("residents
+said..." vs. "a survey found...") was tested directly against this data and
+does *not* meaningfully move the vividness gap (0.51 vs. 0.45 mean gap with
+vs. without that framing — no real difference), so don't rely on it as a
+fix. Current candidates are subject-model self-report of affect salience or
+a surprisal-based signal — both grounded in the models being tested rather
+than an external judge. Don't spend review time rewriting individual pairs
+until the construct itself is decided; you'd be re-fighting the same
+failure 173 times.
 
 ### `severity_mismatch_flagged.csv` — 6/187 pairs (3.2%)
 Small and not patterned (mild MG concentration, 5/6). Spot-fixable — review
