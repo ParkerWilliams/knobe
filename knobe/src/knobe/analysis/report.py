@@ -31,7 +31,7 @@ from typing import Sequence
 from knobe.analysis import figures, ingest, models
 from knobe.analysis.models import (
     ChatComparisonRow, ContrastSpec, DomainSensitivity, DomainSlopeSensitivity,
-    OrdinalSensitivity, Prereg,
+    OrdinalSensitivity, Prereg, SetSensitivity,
 )
 from knobe.schemas import ContrastResultRecord, ExclusionsLedger
 
@@ -160,6 +160,40 @@ def write_domain_sensitivity(sens: Sequence[DomainSensitivity], out_path: str | 
     return out_path
 
 
+SET_NOTE = (
+    "**Set-cluster sensitivity (v1.1 proposal, not yet a confirmed primary spec).** "
+    "`sign` and `valence_type` are both fixed per family, so `rq1_base`/`rq1a` are fully "
+    "between-family under the primary family-RI fit, paying the entire `var_family` "
+    "component as noise. A \"set\" is the five valence-siblings (MB/MG/NMB/NMG/NEU) sharing "
+    "one storyline by construction; clustering on `set_id` instead of `family_id` recovers "
+    "that matched structure. Before trusting this over the primary, confirm the term's "
+    "point estimate is stable relative to `contrast_table.csv` (only the SE should shrink) "
+    "-- `set_id` is derived from the same string `valence_type` is read from, so it could "
+    "absorb the fixed effect instead of just de-noising it. See `set_sensitivity.csv`."
+)
+
+_SET_COLUMNS = ["contrast", "model_family", "term", "estimate", "se", "p_value", "n_sets", "method"]
+
+
+def set_sensitivity_csv(sens: Sequence[SetSensitivity]) -> str:
+    buf = io.StringIO()
+    writer = csv.writer(buf, lineterminator="\n")
+    writer.writerow(_SET_COLUMNS)
+    for s in sorted(sens, key=lambda x: (x.contrast, x.model_family)):
+        writer.writerow([
+            s.contrast, s.model_family, s.term, _fmt(s.estimate, True), _fmt(s.se, True),
+            _fmt(s.p_value, True), s.n_sets, s.method,
+        ])
+    return buf.getvalue()
+
+
+def write_set_sensitivity(sens: Sequence[SetSensitivity], out_path: str | Path) -> Path:
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(set_sensitivity_csv(sens), encoding="utf-8")
+    return out_path
+
+
 _SLOPE_COLUMNS = [
     "contrast", "model_family", "term", "primary_estimate", "primary_ci_low", "primary_ci_high",
     "slope_estimate", "slope_ci_low", "slope_ci_high", "slope_variance", "ci_width_ratio",
@@ -219,6 +253,7 @@ def summary_markdown(
     figure_names: Sequence[str] = (),
     n_ordinal: int = 0,
     domain_sens: Sequence[DomainSensitivity] | None = None,
+    set_sens: Sequence[SetSensitivity] | None = None,
     slope_sens: Sequence[DomainSlopeSensitivity] | None = None,
     slope_rule: str = "",
     chat_rows: Sequence[ChatComparisonRow] | None = None,
@@ -241,6 +276,8 @@ def summary_markdown(
         DEVIATION_NOTE,
         "",
         DOMAIN_NOTE,
+        "",
+        SET_NOTE,
         "",
         EIV_CAVEAT_1B,
         "",
@@ -332,6 +369,31 @@ def summary_markdown(
         lines.append(
             "_Not run (config-gated, off by default) or no cell spanned >=2 domains -- pass "
             "`--domain-sensitivity` on a multi-domain release to populate it._"
+        )
+        lines.append("")
+
+    lines.append("## Set-cluster sensitivity (v1.1 proposal, not yet a confirmed primary spec)")
+    lines.append("")
+    if set_sens:
+        lines.append(
+            "Same fixed effects refit with `groups=set_id` (the shared-storyline valence-sibling "
+            "set as the clustering unit) -- proposed fix for RQ1a's between-family power problem "
+            "(`set_sensitivity.csv`). Confirm the estimate below is stable vs. the primary "
+            "`contrast_table.csv` before trusting the SE shrinkage -- see the note above."
+        )
+        lines.append("")
+        lines.append("| contrast | model_family | estimate | p | n_sets | method |")
+        lines.append("|---|---|---|---|---|---|")
+        for s in sorted(set_sens, key=lambda x: (x.contrast, x.model_family)):
+            lines.append(
+                f"| {s.contrast} | {s.model_family} | {s.estimate:.3f} | {s.p_value:.4f} | "
+                f"{s.n_sets} | {s.method} |"
+            )
+        lines.append("")
+    else:
+        lines.append(
+            "_Not run (config-gated, off by default) or no cell spanned >=2 sets -- pass "
+            "`--set-sensitivity` to populate it._"
         )
         lines.append("")
 
@@ -430,9 +492,11 @@ def run_analyze(
     alpha: float = 0.05,
     make_figures: bool = True,
     domain_sensitivity: bool = False,
+    set_sensitivity: bool = False,
     domain_slope_sensitivity: bool = False,
     chat_comparison: bool = False,
     logit_fallback_checkpoints: Sequence[str] = (),
+    exclude_flagged: bool = False,
 ) -> int:
     """Full S8 pipeline: ingest (join + exclusions ledger) -> fit the declared
     RQ1 contrasts (Holm-corrected) -> descriptive figures -> paper artifacts.
@@ -449,6 +513,7 @@ def run_analyze(
         results_paths, vignettes_path, curated_path=curated_path, jobs_path=jobs_path,
         registry_path=registry_path, release=release,
         logit_fallback_checkpoints=logit_fallback_checkpoints,
+        exclude_flagged=exclude_flagged,
     )
     ingest.write_exclusions(ledger, out_dir / "exclusions.json")
 
@@ -464,6 +529,11 @@ def run_analyze(
     if domain_sensitivity and not prepared.empty:
         domain_sens = models.domain_sensitivity_all(prepared, specs)
         write_domain_sensitivity(domain_sens, out_dir / "domain_sensitivity.csv")
+
+    set_sens: list[SetSensitivity] = []
+    if set_sensitivity and not prepared.empty:
+        set_sens = models.set_sensitivity_all(prepared, specs)
+        write_set_sensitivity(set_sens, out_dir / "set_sensitivity.csv")
 
     slope_sens: list[DomainSlopeSensitivity] = []
     slope_rule = ""
@@ -490,14 +560,14 @@ def run_analyze(
 
     summary = summary_markdown(
         records, ledger, prereg, figure_names=figure_names, n_ordinal=len(sens),
-        domain_sens=domain_sens, slope_sens=slope_sens, slope_rule=slope_rule,
+        domain_sens=domain_sens, set_sens=set_sens, slope_sens=slope_sens, slope_rule=slope_rule,
         chat_rows=chat_rows, chat_enabled=chat_comparison, chat_had_rows=chat_had_rows,
     )
     (out_dir / "summary.md").write_text(summary, encoding="utf-8")
 
     print(
         f"[analysis] wrote {len(records)} contrast rows, {len(sens)} ordinal-sensitivity "
-        f"fits, {len(domain_sens)} domain-cluster + {len(slope_sens)} domain-slope sensitivity "
-        f"fits, {len(figure_names)} figures to {out_dir}"
+        f"fits, {len(domain_sens)} domain-cluster + {len(set_sens)} set-cluster + "
+        f"{len(slope_sens)} domain-slope sensitivity fits, {len(figure_names)} figures to {out_dir}"
     )
     return 0

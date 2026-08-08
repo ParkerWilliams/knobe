@@ -158,53 +158,91 @@ wording-explicitness confound correlated with valence_type or evocativeness.
    *for NMB/NMG, the outcome must be as dimensionally independent from the
    shared goal's real stakes as NEU is already required to be.*
 3. **Re-ground the evocativeness construct in the model, not in an external
-   judge.** The original human finding this design traces to (Ngo) is that
-   *strong emotional reactions in the individual* amplify the asymmetry —
-   the construct is affective salience *as experienced by the subject*, not
-   "vivid wording" as an external property. An external lexicon (e.g. NRC)
-   doesn't fix this: it encodes what human lexicographers tagged as
-   emotionally loaded, which has no guaranteed relationship to what's
-   salient to the models actually being tested, and doesn't solve the
-   reviewer-model-convergence problem, it just moves it to a different
-   fixed proxy. Two candidate operationalizations that are grounded in the
-   subject models themselves instead:
-   - **Direct self-report from subject models**: add an affect-salience
-     question ("how emotionally striking is this scenario, 0-10?") to the
-     elicitation set per subject model per variant. Lets affect salience
-     vary *by model* — a model-specific difference here is itself an
-     etiology-relevant finding, not just noise.
-   - **Surprisal/perplexity as a model-native signal**: token-level
-     surprisal of the subject model on the scenario text, computed from
-     retained logprobs. No judge, no subjective rating, directly measures
-     how strongly the text registers to the model's own predictive
-     distribution — closer to a mechanistic measure and ties into the
-     planned S6/S7 activation-level work.
-   - **Ruled out, tested and didn't hold up:** personal-report framing
-     ("residents said/reported..." vs. "a survey found...") was checked
-     directly against `curated.csv` as a candidate wording-level lever.
-     It correlates with *less* severity drift (0.51 vs. 0.92 mean diff) as
-     hoped, but does **not** meaningfully raise the vividness gap (0.51 vs.
-     0.45 mean gap, ~18% vs. 17% pass rate at the ≥2 threshold — no real
-     difference). Don't rely on this framing trick; it doesn't move the
-     variable that matters.
-   This is an open decision (see below), not resolved here — pick one
-   operationalization (or both, as complementary evidence) before rewriting
-   any content.
+   judge, and — decided — do NOT rewrite vignette text for this yet.**
+
+   **What it's trying to proxy.** The human finding this design traces to
+   (Ngo) is that *strong emotional reactions in the individual* amplify the
+   Knobe-style asymmetry. The construct of interest is therefore affective
+   salience *as experienced by the subject having the reaction* — not
+   "vivid wording" as a property of the text itself. `high_evocative_outcome`
+   was authored as a textual proxy for that (more concrete/specific
+   phrasing, on the assumption that concreteness reads as more emotionally
+   vivid), and the curation question was a second, independent proxy (an
+   external judge's rating of vividness). Both are proxies for the same
+   underlying thing — the subject's own affective response — and neither
+   *is* that thing.
+
+   **Why not rewrite the text this time.** Two reasons, not one:
+   - *Track record.* The original authors already tried to write vivid
+     content in good faith and it failed the vividness-gap check 82% of the
+     time, including on MB items. That's real evidence that hand-rewriting
+     for "more vivid" is unreliable here — unlike the moral-category fix,
+     where the failure was diagnosable and the rule for fixing it was
+     mechanically checkable by reasoning alone ("does this outcome still
+     connect to the goal's real stakes?"). "Does this read as more
+     emotionally vivid" has no equivalent reasoning-only check — it's a
+     perceptual judgment, not a semantic one.
+   - *No way to verify a rewrite without a real measurement.* Any hand-drafted
+     "more vivid" text can only be confirmed to work by running it through
+     an actual judge or eliciting real model responses — there is no
+     dry-run for affect the way there was for moral-category dimensional
+     independence. Spending an authoring+curation cycle on unverifiable
+     content is a worse bet than testing the *existing* content under a
+     better-targeted measure first.
+   - Also ruled out separately: an external emotion-word lexicon (e.g. NRC)
+     doesn't fix either problem — it encodes what human lexicographers
+     tagged as emotionally loaded, with no guaranteed relationship to what's
+     salient to the models being tested, and personal-report wording framing
+     ("residents said/reported..." vs. "a survey found...") was tested
+     directly against `curated.csv`: it correlates with *less* severity
+     drift (0.51 vs. 0.92 mean diff, as hoped) but does **not** move the
+     vividness gap at all (0.51 vs. 0.45 mean gap — no real difference).
+     Neither is worth pursuing.
+
+   **What to do instead: measure affect directly on the existing content.**
+   - **Decided: add subject-model self-report** — an affect-salience
+     question ("how emotionally striking is this scenario, 0-10?") elicited
+     from each subject model on each variant, using the *current, unchanged*
+     `low_evocative_outcome`/`high_evocative_outcome` text. Lets affect
+     salience vary *by model* — a model-specific difference here is itself
+     an etiology-relevant finding, not noise. Requires adding a field to
+     the elicitation job spec (joint schema decision with Parker — see
+     `NEXT_RUN_ACTION_ITEMS.md`).
+   - Surprisal/perplexity (token-level, computed from retained logprobs, no
+     new elicitation) remains a second, complementary candidate signal —
+     Parker's side entirely, no vignette or wording work involved.
+   - **Reframing this implies, worth stating explicitly**: this converts
+     RQ1c-evocativeness from "does the assigned low/high label predict a
+     difference" (a balanced, manipulated 2-level design) into "does
+     measured affect salience correlate with/moderate intentionality" (a
+     continuous, observational analysis over whatever affect distribution
+     naturally emerges). That's arguably closer to Ngo's original claim, but
+     it's a different analytic target than what was originally planned —
+     document it as a reframing, not a patch, when this run's results are
+     written up. One thing to check as soon as results land: whether
+     self-reported affect correlates with `sign` itself — if bad items are
+     just generally rated more affectively salient than good ones
+     regardless of the low/high manipulation, that confounds the
+     affect×sign interaction specifically (affect and sign lose independent
+     variation), and would need to be residualized or reported as a
+     limitation.
+   - Content rewriting for evocativeness is not off the table permanently —
+     only deferred until this measurement is tried on the existing 420
+     variants and shown (or not shown) to produce a gap.
 4. **Rewrite the ~30 flagged non-MB families against the moral-category rule
-   and the chosen affect-salience construct in one pass**, using researcher
-   judgment, not trial resubmission, preserving `family_id`/`set_id` so set
-   membership for the Workstream A blocking model is restored rather than
-   lost.
-5. **Extend the evocativeness fix to MB and NEU separately, once the
-   construct is redefined.** If only the non-MB families revised for
-   `moral_relevance` get the new evocativeness treatment, evocativeness's
-   effective manipulation strength would differ *by valence* purely as a
-   revision-history artifact — a new confound for both RQ1a and RQ1c. MB/NEU
-   don't need a `moral_relevance` edit, but do need the same evocativeness
-   redefinition applied, as a lighter follow-up pass (no moral-category
-   rewrite needed there, so this should be mechanical).
-6. **Validate with a model that had no part in the diagnosis.** Run the
-   revised batch through a model other than the primary reviewer (e.g.
+   only** (evocativeness content is unchanged, per the decision above), using
+   researcher judgment, not trial resubmission, preserving `family_id`/
+   `set_id` so set membership for the Workstream A blocking model is
+   restored rather than lost. Already drafted: `data/authoring/v1.1_candidate/`
+   (24 families patched, `human_approved` correctly reset to `False` pending
+   Parker's review).
+5. **Add the self-report affect-salience question to MB/NEU elicitation
+   too, alongside the non-MB families**, not just the ones revised for
+   `moral_relevance` — this is a measurement addition applied uniformly
+   across all 420 variants regardless of valence, so it doesn't need to wait
+   on or follow the moral-category rewrite the way a content change would.
+6. **Validate with a model that had no part in the diagnosis — done.** Run
+   the revised batch through a model other than the primary reviewer (e.g.
    GPT-5/GPT-4-class) — not to pick whichever model agrees, but as a check
    that the moral-category fix generalizes past one judge's quirks. (This
    check is for the `moral_relevance` fix specifically; the affect-salience
@@ -216,6 +254,21 @@ wording-explicitness confound correlated with valence_type or evocativeness.
    - If they disagree: that disagreement is itself worth recording
      (judge-dependent ambiguity), not resolved by picking the model that
      gives the answer you want.
+   - **Result**: all 24 revised NMB/NMG families run through ChatGPT
+     (browser, manual, one fresh conversation per family — no API access
+     needed for this check) using the exact `CURATION_PROMPT_TEMPLATE`
+     format and the (since-reverted, see Workstream B §8 note below) reworded
+     `moral_relevance` question. Scores ranged 0-3 (mean 1.62), all
+     comfortably under the ≤4 nonmoral threshold, zero disagreement with
+     the intended categorization. The reword's own "count benefits as
+     moral" clause is unlikely to matter for genuinely nonmoral
+     procedural/aesthetic content either way, so this result should hold
+     under the original (now live-again) wording too — but the upcoming
+     real curation run against the original wording is what actually
+     confirms that, not this validation alone. See
+     `data/authoring/v1.1_candidate/chatgpt_validation_results.csv` (raw
+     scores) and `chatgpt_validation_prompts.txt` (what was actually
+     pasted, for reproducibility). Cross-model agreement achieved — proceed.
 7. **No-peeking firewall.** Revise based on the curation diagnostics only.
    Do not consult v1.0's `sign_c:vt_c` or evocativeness×sign point estimates
    while deciding which families to rewrite or how. Record the revision
@@ -224,9 +277,16 @@ wording-explicitness confound correlated with valence_type or evocativeness.
 8. **Separately flagged, not part of this revision:** MG's much looser
    `moral_relevance` spread than MB's (stdev 2.31 vs 0.59) may reflect a
    reviewer-instrument asymmetry (harms read as unambiguously moral,
-   equivalent benefits don't) rather than a stimulus defect. Worth a small
-   calibration check (rate matched harm/benefit pairs of equal magnitude)
-   independent of the family-by-family rewrite.
+   equivalent benefits don't) rather than a stimulus defect — sharpest
+   evidence: `PS-MB-02-D`/`PS-MG-02`, the same storyline differing only in
+   outcome sign, scored 10 vs. 2. A reworded question addressing this was
+   drafted and briefly landed in code, then **reverted** — this release
+   tests only the Type-2 content fix, one variable at a time, since the
+   reword's own validation protocol (11 target families + clean-MB sample +
+   clean-nonmoral sample, no regressions) had never been run. The reworded
+   question is parked for its own later cycle:
+   `NEXT_RUN_ACTION_ITEMS.md` §1b, decision trees in
+   `V1_1_CURATION_DECISION_TREES.md` Tree 3.
 
 ## Workstream C — measurement fixes independent of vignette content
 
@@ -309,17 +369,59 @@ full re-elicitation (see costs below).
 - **Real preregistration** (OSF or similar) of the RQ1a `set_id` model, the
   evocativeness redefinition, and the v1.1 family-count target.
 
-## Decisions needed before implementation (mirrors `DECISIONS_FOR_HUMANS.md` format)
+## Status: what's done, what's a standing recommendation, what's actually still open
 
-- [ ] Confirm `set_id` as primary vs. sensitivity spec for RQ1a (Workstream A).
+**Done — no action needed:**
+- [x] Guardrail wording for NMB/NMG dimensional independence — written into
+      `GENERATION_SYSTEM_PROMPT` (`src/knobe/constants.py`).
+- [x] Evocativeness operationalization for this run — subject-model
+      self-report, on unchanged vignette text. Content rewriting deferred.
+- [x] Independent validation of the moral-category fix — ChatGPT (browser,
+      manual), all 24/24 revised families scored 0-3 (mean 1.62), well under
+      the ≤4 threshold. `data/authoring/v1.1_candidate/chatgpt_validation_results.csv`.
+- [x] `set_id` and `--exclude-flagged` sensitivity tooling implemented and
+      ready to run (`--set-sensitivity`, `--exclude-flagged` on `knobe analyze`).
+- [x] Content approved — or one command away: `knobe generate approve
+      <the 24 family_ids> --matrix data/authoring/v1.1_candidate/ALL_DOMAINS_master_matrix_v1.1_candidate.csv`
+      (pure local CSV op, no API needed — run it directly rather than
+      waiting on a separate review round).
+
+**Standing recommendations (acting on these unless someone objects):**
+- `set_id` runs as a sensitivity fit, not primary, until real data shows
+  the primary vs. sensitivity promotion is warranted.
+- Run `--exclude-flagged` as a standard companion re-analysis on every v1.1
+  contrast — near-zero marginal cost, and it's the direct check against the
+  "accept despite flags" release decision.
+- Bundle Workstreams A + B + C into one v1.1 release rather than staging
+  them — the re-elicitation cost is paid once regardless, per "Cutting v1.1"
+  above.
+- v1.1 supersedes v1.0 as the release of record, with a v1.0-vs-v1.1
+  stability check on the untouched RQs (base replication, typicality×sign)
+  called out explicitly in the writeup rather than run as a separate
+  comparison release.
+
+**Actually still open — these need Parker specifically:**
+- [ ] **Self-report question — schema touchpoints identified, needs his
+      go-ahead on naming/wording and to implement.** Confirmed this is a
+      contained change, not a redesign: add a 4th `QuestionType` value
+      (currently `Literal["intentionality", "blame", "praise"]` in BOTH
+      `schemas.py` and `jobs.py` — they duplicate the type, watch for drift)
+      alongside a new entry in `constants.MAIN_QUESTION_COLUMNS`
+      (`render.py` already loops over this dict generically, so no renderer
+      changes needed) and the two `choices=(...)` tuples in `cli.py`.
+      Recommend a **static** question (no per-variant template needed,
+      unlike intentionality/blame/praise, which reference the agent/outcome)
+      — e.g. literally "How emotionally striking is this scenario, on a
+      scale from 0 (not at all) to 10 (extremely)?" for every variant. Also
+      worth a quick grep for any place that assumes exactly 3 questions per
+      variant (e.g. the "420 × 3 questions × N × 6 checkpoints" job-count
+      math) before adding a 4th.
+- [ ] Run the real S3 curation pass on the patched matrix (needs his API
+      access) — confirms the fix on the pipeline's own terms, not just
+      ChatGPT's. Do this before the elicitation run, not after.
 - [ ] Run the item-within-family power resim before setting any v1.1/v2
-      family-count target (Workstream A).
-- [ ] Confirm the generalized NMB/NMG dimensional-independence guardrail
-      wording (Workstream B, step 2) before rewriting flagged families.
-- [ ] Choose the affect-salience operationalization for evocativeness:
-      subject-model self-report, surprisal-based, or both (Workstream B,
-      step 3).
-- [ ] Choose the independent validation model for the moral-category fix
-      (Workstream B, step 6).
-- [ ] Confirm v1.1 scope: A+B+C bundled in one release?
-- [ ] Confirm v1.1 supersedes v1.0 vs. runs as a comparison release.
+      family-count target — needs his pilot raw response-level data
+      (not available in this repo; `results/` is local-only) and new code
+      (the DGP in `power_sim.py`/`power.py` currently has no item-in-family
+      variance component at all, per its own docstring — this is a real
+      simulation-design addition, not a parameter tweak).

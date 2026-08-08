@@ -73,6 +73,17 @@ _EVOC_CODE = {"high": 0.5, "low": -0.5}
 # Coded predictor columns prepare_frame() adds, keyed by the source column.
 _CODED_COLUMNS = ("sign_c", "tuning_c", "vt_c", "typ_c", "evoc_c", "rating_centered")
 
+# Strips the valence token out of a family_id to recover its set_id -- the
+# five valence-siblings (MB/MG/NMB/NMG/NEU) of one storyline share a set_id
+# by construction (GENERATION_SYSTEM_PROMPT: "A set is ONE storyline...
+# shared across 5 FAMILIES"). E.g. "ENV-MB-01" and "ENV-MG-01" -> "ENV-01";
+# "ENV-MB-01r2" -> "ENV-01r2" (the optional revision suffix survives).
+_SET_ID_VALENCE_RE = re.compile(r"-(MB|MG|NMB|NMG|NEU)-")
+
+
+def _derive_set_id(family_id: str) -> str:
+    return _SET_ID_VALENCE_RE.sub("-", family_id)
+
 
 # ---------------------------------------------------------------------------
 # contrasts.yaml -- the prereg of record (WO-8 §2b)
@@ -259,6 +270,7 @@ def prepare_frame(df: pd.DataFrame) -> pd.DataFrame:
     out["evoc_c"] = out["evocativeness"].map(_EVOC_CODE)
     out["rating"] = out["rating"].astype(float)
     out["rating_centered"] = out["rating"] - NEUTRAL_MIDPOINT
+    out["set_id"] = out["family_id"].map(_derive_set_id)
     return out
 
 
@@ -594,6 +606,78 @@ def domain_sensitivity(prepared: pd.DataFrame, spec: ContrastSpec, model_family:
         n_domains=fit.n_groups, method=fit.method,
         note="domain as clustering unit (groups=domain); companion to lmm-familyRI primary",
     )
+
+
+# ---------------------------------------------------------------------------
+# Set-cluster sensitivity (v1.1 proposal, RQ1a power fix -- NOT yet a
+# confirmed primary-vs-sensitivity decision, see NEXT_RUN_ACTION_ITEMS.md).
+# A "set" is the five valence-siblings (MB/MG/NMB/NMG/NEU) generated from one
+# shared storyline (agent/goal/actions) -- see _derive_set_id. sign and
+# valence_type are both fixed per family, so contrasts on them (rq1_base,
+# rq1a) are fully between-family under the primary family-RI fit, which pays
+# the entire var_family component as noise. Modeling set_id as the
+# clustering unit instead recovers the matched-storyline structure that
+# family-RI clustering discards.
+#
+# VALIDATION CAVEAT, check every time this is used: set_id is derived from
+# the same family_id string that valence_type is read from, so there is a
+# real risk set_id partially absorbs the fixed effect it's meant to de-noise
+# rather than just tightening its SE. Before trusting a set-cluster result,
+# confirm the term's point estimate is stable relative to the family-RI
+# primary (see ``estimate`` on both records) -- only the SE should shrink.
+# If the estimate itself moves, treat that as a red flag, not a win.
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class SetSensitivity:
+    contrast: str
+    model_family: str
+    term: str
+    estimate: float
+    se: float | None
+    p_value: float
+    n_sets: int
+    method: str
+    note: str
+
+
+def set_sensitivity(prepared: pd.DataFrame, spec: ContrastSpec, model_family: str, *, fmt: str = "raw") -> SetSensitivity | None:
+    """Refits ``spec`` with ``groups=set_id`` (the shared-storyline set as the
+    clustering unit) -- the set-aware companion to the family-RI primary,
+    proposed specifically for RQ1a's between-family power problem (see the
+    module-level caveat above). Returns None when the cell spans fewer than
+    2 sets (nothing set-level to estimate). Best-effort: uses ``_fit_lmm``'s
+    own mixed/OLS-cluster cascade."""
+    df = _subset_for_fit(prepared, spec, model_family, fmt=fmt)
+    if df.empty or "set_id" not in df or df["set_id"].nunique() < 2:
+        return None
+    fit = _fit_lmm(df, spec.formula, spec.term, groups="set_id")
+    return SetSensitivity(
+        contrast=spec.name, model_family=model_family, term=spec.term,
+        estimate=fit.estimate, se=fit.se, p_value=fit.p_value,
+        n_sets=fit.n_groups, method=fit.method,
+        note=(
+            "set_id (shared-storyline valence-siblings) as clustering unit; "
+            "companion to lmm-familyRI primary -- confirm estimate is stable "
+            "vs. the primary before trusting the SE shrinkage (see module docstring)"
+        ),
+    )
+
+
+def set_sensitivity_all(
+    prepared: pd.DataFrame, specs: Sequence[ContrastSpec],
+) -> list[SetSensitivity]:
+    """Set-cluster sensitivity for every estimable (contrast, model_family)
+    cell (see ``set_sensitivity``)."""
+    model_families = sorted(prepared["model_family"].unique())
+    out: list[SetSensitivity] = []
+    for spec in specs:
+        for mf in model_families:
+            ss = set_sensitivity(prepared, spec, mf)
+            if ss is not None:
+                out.append(ss)
+    return out
 
 
 # ---------------------------------------------------------------------------

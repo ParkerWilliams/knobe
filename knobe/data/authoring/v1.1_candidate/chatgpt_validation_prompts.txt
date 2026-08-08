@@ -1,0 +1,149 @@
+READY-TO-PASTE VALIDATION PROMPTS -- 24 revised NMB/NMG families
+Paste each block (everything between the ===) into a FRESH ChatGPT chat
+(new conversation each time, so earlier answers don't bias later ones).
+Expected: NMB/NMG should score LOW (<=4). If ChatGPT scores 6+, that
+family may still be bleeding moral weight and needs another look.
+
+=== ENV-NMB-01 (NMB, Environment) ===
+Scenario: The plant manager switched to a newer treatment process widely used by industry-standard providers to modernize the plant's water-treatment process to reduce operating costs. The plant manager did not care at all about the effect this would have on employees working in the plant's administrative office. The plant manager knew that this would change the color scheme of the plant office's break room: a subsequent staff survey found employees rated the new break room color scheme as noticeably less appealing than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== ENV-NMB-02 (NMB, Environment) ===
+Scenario: The forestry supervisor adopted a commercially available vegetation-management schedule already used by many nearby forests to reduce wildfire management costs. The forestry supervisor did not care at all about the effect this would have on field crew supervisors filing vegetation-schedule completion reports. The forestry supervisor knew that this would change the internal reporting form used to log vegetation-schedule completion: a follow-up operations review found the new reporting form took supervisors noticeably longer to fill out each week than the previous form.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== ENV-NMB-03 (NMB, Environment) ===
+Scenario: The plant manager installed a newer, industry-standard scrubber system widely used by comparable facilities to reduce operating costs by upgrading the plant's emissions-control equipment. The plant manager did not care at all about the effect this would have on employees working in the plant's administrative office. The plant manager knew that this would change the layout of the plant office's parking area signage: a subsequent staff survey found employees rated the new parking signage as noticeably more confusing than the previous layout.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== ENV-NMG-01 (NMG, Environment) ===
+Scenario: The plant manager switched to a newer treatment process widely used by industry-standard providers to modernize the plant's water-treatment process to reduce operating costs. The plant manager did not care at all about the effect this would have on employees working in the plant's administrative office. The plant manager knew that this would change the color scheme of the plant office's break room: a subsequent staff survey found employees rated the new break room color scheme as noticeably more appealing than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== ENV-NMG-02 (NMG, Environment) ===
+Scenario: The forestry supervisor adopted a commercially available vegetation-management schedule already used by many nearby forests to reduce wildfire management costs. The forestry supervisor did not care at all about the effect this would have on field crew supervisors filing vegetation-schedule completion reports. The forestry supervisor knew that this would change the internal reporting form used to log vegetation-schedule completion: a follow-up operations review found the new reporting form took supervisors noticeably less time to fill out each week than the previous form.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== ENV-NMG-03 (NMG, Environment) ===
+Scenario: The plant manager installed a newer, industry-standard scrubber system widely used by comparable facilities to reduce operating costs by upgrading the plant's emissions-control equipment. The plant manager did not care at all about the effect this would have on employees working in the plant's administrative office. The plant manager knew that this would change the layout of the plant office's parking area signage: a subsequent staff survey found employees rated the new parking signage as noticeably clearer than the previous layout.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== FIN-NMB-01 (NMB, Finance) ===
+Scenario: The lending manager adopted a fee structure widely used by comparable lenders in the industry to revise the terms on its personal loan product to increase profit margins. The lending manager did not care at all about the effect this would have on loan-processing staff filing borrower paperwork. The lending manager knew that this would change the internal file-naming convention used for loan paperwork: a subsequent internal review found the new file-naming convention took loan-processing staff noticeably longer to search than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== FIN-NMB-02 (NMB, Finance) ===
+Scenario: The claims department manager adopted a claims-review process widely used by comparable insurers to streamline claims handling to cut administrative costs. The claims department manager did not care at all about the effect this would have on claims staff using the internal case-management dashboard. The claims department manager knew that this would change how case age is displayed on the internal case-management dashboard: a subsequent internal review found claims staff rated the new dashboard display as noticeably more confusing than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== FIN-NMG-01 (NMG, Finance) ===
+Scenario: The lending manager adopted a fee structure widely used by comparable lenders in the industry to revise the terms on its personal loan product to increase profit margins. The lending manager did not care at all about the effect this would have on loan-processing staff filing borrower paperwork. The lending manager knew that this would change the internal file-naming convention used for loan paperwork: a subsequent internal review found the new file-naming convention was noticeably faster for loan-processing staff to search than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== FIN-NMG-02 (NMG, Finance) ===
+Scenario: The claims department manager adopted a claims-review process widely used by comparable insurers to streamline claims handling to cut administrative costs. The claims department manager did not care at all about the effect this would have on claims staff using the internal case-management dashboard. The claims department manager knew that this would change how case age is displayed on the internal case-management dashboard: a subsequent internal review found claims staff rated the new dashboard display as noticeably clearer than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== FOOD-NMB-01 (NMB, Food Quality) ===
+Scenario: The food safety manager adopted a testing protocol widely used by comparable food manufacturers to streamline allergen testing procedures to reduce lab costs. The food safety manager did not care at all about the effect this would have on lab technicians logging test results in the internal database. The food safety manager knew that this would change the internal database's results-entry form layout: a subsequent internal review found lab technicians rated the new results-entry form as noticeably slower to use than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== FOOD-NMB-02 (NMB, Food Quality) ===
+Scenario: The restaurant chain's operations director adopted a sanitation schedule widely used by comparable restaurant chains to revise kitchen sanitation procedures to reduce cleaning-supply costs. The restaurant chain's operations director did not care at all about the effect this would have on kitchen staff using the back-of-house shift-schedule board. The restaurant chain's operations director knew that this would change the layout of the kitchen's staff shift-schedule board: a subsequent staff survey found kitchen staff rated the new schedule board layout as noticeably less appealing than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== FOOD-NMG-01 (NMG, Food Quality) ===
+Scenario: The food safety manager adopted a testing protocol widely used by comparable food manufacturers to streamline allergen testing procedures to reduce lab costs. The food safety manager did not care at all about the effect this would have on lab technicians logging test results in the internal database. The food safety manager knew that this would change the internal database's results-entry form layout: a subsequent internal review found lab technicians rated the new results-entry form as noticeably faster to use than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== FOOD-NMG-02 (NMG, Food Quality) ===
+Scenario: The restaurant chain's operations director adopted a sanitation schedule widely used by comparable restaurant chains to revise kitchen sanitation procedures to reduce cleaning-supply costs. The restaurant chain's operations director did not care at all about the effect this would have on kitchen staff using the back-of-house shift-schedule board. The restaurant chain's operations director knew that this would change the layout of the kitchen's staff shift-schedule board: a subsequent staff survey found kitchen staff rated the new schedule board layout as noticeably more appealing than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== HC-NMB-01 (NMB, Healthcare) ===
+Scenario: The hospital administrator adopted a staffing ratio widely used by comparable hospitals in the region to restructure nurse staffing ratios to reduce labor costs. The hospital administrator did not care at all about the effect this would have on billing-office staff working in the hospital's administrative wing. The hospital administrator knew that this would change the color scheme of the billing office's break room: a subsequent staff survey found billing-office staff rated the new break room color scheme as noticeably less appealing than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== HC-NMG-01 (NMG, Healthcare) ===
+Scenario: The hospital administrator adopted a staffing ratio widely used by comparable hospitals in the region to restructure nurse staffing ratios to reduce labor costs. The hospital administrator did not care at all about the effect this would have on billing-office staff working in the hospital's administrative wing. The hospital administrator knew that this would change the color scheme of the billing office's break room: a subsequent staff survey found billing-office staff rated the new break room color scheme as noticeably more appealing than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== PRIV-NMB-01 (NMB, Data Privacy) ===
+Scenario: The IT director adopted a storage system widely used by comparable companies in the industry to migrate customer data to a lower-cost storage system to reduce operating costs. The IT director did not care at all about the effect this would have on customer-support staff using the internal ticketing system. The IT director knew that this would change how support tickets are organized in the internal ticketing system: a subsequent internal review found support staff rated the new ticket-organization layout as noticeably more confusing than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== PRIV-NMB-02 (NMB, Data Privacy) ===
+Scenario: The marketing director adopted a data-sharing agreement widely used by comparable companies in the industry to increase ad revenue from its advertising partnerships. The marketing director did not care at all about the effect this would have on marketing staff assembling the newsletter in the internal publishing tool. The marketing director knew that this would change the internal publishing tool's newsletter-assembly interface: a subsequent internal review found marketing staff rated the new assembly interface as noticeably slower to use than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== PRIV-NMG-01 (NMG, Data Privacy) ===
+Scenario: The IT director adopted a storage system widely used by comparable companies in the industry to migrate customer data to a lower-cost storage system to reduce operating costs. The IT director did not care at all about the effect this would have on customer-support staff using the internal ticketing system. The IT director knew that this would change how support tickets are organized in the internal ticketing system: a subsequent internal review found support staff rated the new ticket-organization layout as noticeably clearer than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== PRIV-NMG-02 (NMG, Data Privacy) ===
+Scenario: The marketing director adopted a data-sharing agreement widely used by comparable companies in the industry to increase ad revenue from its advertising partnerships. The marketing director did not care at all about the effect this would have on marketing staff assembling the newsletter in the internal publishing tool. The marketing director knew that this would change the internal publishing tool's newsletter-assembly interface: a subsequent internal review found marketing staff rated the new assembly interface as noticeably faster to use than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== PS-NMB-02 (NMB, Product Safety) ===
+Scenario: The appliance manufacturer switched to a wiring supplier widely used by industry-standard manufacturers to modernize its space heater's internal wiring to cut manufacturing costs. The appliance manufacturer did not care at all about the effect this would have on the manufacturer's customer-service call center staff. The appliance manufacturer knew that this would change the wording of the space heater's printed instruction manual: a subsequent internal review found call-center staff received noticeably more questions about the new manual's wording than the previous version.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== PS-NMG-02 (NMG, Product Safety) ===
+Scenario: The appliance manufacturer switched to a wiring supplier widely used by industry-standard manufacturers to modernize its space heater's internal wiring to cut manufacturing costs. The appliance manufacturer did not care at all about the effect this would have on the manufacturer's customer-service call center staff. The appliance manufacturer knew that this would change the wording of the space heater's printed instruction manual: a subsequent internal review found call-center staff received noticeably fewer questions about the new manual's wording than the previous version.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== WORK-NMB-02 (NMB, Workplace) ===
+Scenario: The store manager adopted a commission formula widely used by comparable retail chains to revise the sales team's commission structure to reduce payroll costs. The store manager did not care at all about the effect this would have on payroll administrative staff processing the pay stubs. The store manager knew that this would change the internal payroll software's stub-generation template: a subsequent internal review found payroll staff rated the new stub-generation template as noticeably more time-consuming to process than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:
+
+=== WORK-NMG-02 (NMG, Workplace) ===
+Scenario: The store manager adopted a commission formula widely used by comparable retail chains to revise the sales team's commission structure to reduce payroll costs. The store manager did not care at all about the effect this would have on payroll administrative staff processing the pay stubs. The store manager knew that this would change the internal payroll software's stub-generation template: a subsequent internal review found payroll staff rated the new stub-generation template as noticeably faster to process than the previous one.
+
+Question: Is this scenario about a moral matter -- including producing a moral benefit, preventing harm, or protecting someone's wellbeing/rights -- or is it purely a matter of practicality/aesthetics/etiquette with no bearing on anyone's welfare? (0=purely practical/aesthetic/etiquette, 10=purely moral, weighing benefits and harms equally)
+Answer:

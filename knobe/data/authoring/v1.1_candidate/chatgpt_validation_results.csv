@@ -1,0 +1,25 @@
+family_id,valence,domain,gpt_score,pass_le4
+ENV-NMB-01,NMB,Environment,1,True
+ENV-NMB-02,NMB,Environment,2,True
+ENV-NMB-03,NMB,Environment,2,True
+ENV-NMG-01,NMG,Environment,1,True
+ENV-NMG-02,NMG,Environment,1,True
+ENV-NMG-03,NMG,Environment,1,True
+FIN-NMB-01,NMB,Finance,2,True
+FIN-NMB-02,NMB,Finance,2,True
+FIN-NMG-01,NMG,Finance,1,True
+FIN-NMG-02,NMG,Finance,1,True
+FOOD-NMB-01,NMB,Food Quality,2,True
+FOOD-NMB-02,NMB,Food Quality,1,True
+FOOD-NMG-01,NMG,Food Quality,1,True
+FOOD-NMG-02,NMG,Food Quality,0,True
+HC-NMB-01,NMB,Healthcare,1,True
+HC-NMG-01,NMG,Healthcare,1,True
+PRIV-NMB-01,NMB,Data Privacy,2,True
+PRIV-NMB-02,NMB,Data Privacy,3,True
+PRIV-NMG-01,NMG,Data Privacy,2,True
+PRIV-NMG-02,NMG,Data Privacy,2,True
+PS-NMB-02,NMB,Product Safety,3,True
+PS-NMG-02,NMG,Product Safety,2,True
+WORK-NMB-02,NMB,Workplace,3,True
+WORK-NMG-02,NMG,Workplace,2,True

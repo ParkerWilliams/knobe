@@ -811,6 +811,12 @@ def _register_analyze(subparsers: argparse._SubParsersAction) -> None:
              "secondary check (the primary LMM models family clustering only).",
     )
     parser.add_argument(
+        "--set-sensitivity", action="store_true", dest="set_sensitivity",
+        help="Also run the set-cluster sensitivity fit (groups=set_id, the shared-storyline "
+             "valence-sibling set) -- v1.1 proposal for RQ1a's between-family power problem, "
+             "not yet a confirmed primary spec. See NEXT_RUN_ACTION_ITEMS.md.",
+    )
+    parser.add_argument(
         "--domain-slope-sensitivity", action="store_true", dest="domain_slope_sensitivity",
         help="Also run the DECLARED domain-random-slope sensitivity analysis (contrasts.yaml "
              "sensitivity_analyses.domain_random_slope) with its QUALIFIED/UNQUALIFIED rule -- "
@@ -819,6 +825,13 @@ def _register_analyze(subparsers: argparse._SubParsersAction) -> None:
     parser.add_argument(
         "--chat-comparison", action="store_true", dest="chat_comparison",
         help="Also run the chat-vs-raw format robustness comparison (WO-8 §4; off by default).",
+    )
+    parser.add_argument(
+        "--exclude-flagged", action="store_true", dest="exclude_flagged",
+        help="Re-analysis toggle (v1.1 proposal): drop any variant with a nonempty "
+             "individual_flags/pair_flag curation flag from the SAME already-collected "
+             "results (no re-elicitation needed). Run once with this off and once with "
+             "it on to compare against the 'accept despite flags' release decision.",
     )
     parser.add_argument(
         "--logit-fallback", default="", dest="logit_fallback",
@@ -871,9 +884,11 @@ def _run_analyze(args: argparse.Namespace) -> int:
             alpha=args.alpha,
             make_figures=not args.no_figures,
             domain_sensitivity=args.domain_sensitivity,
+            set_sensitivity=args.set_sensitivity,
             domain_slope_sensitivity=args.domain_slope_sensitivity,
             chat_comparison=args.chat_comparison,
             logit_fallback_checkpoints=_parse_str_list(args.logit_fallback) or (),
+            exclude_flagged=args.exclude_flagged,
         )
     except (UndeclaredContrastError, UndeclaredSensitivityError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

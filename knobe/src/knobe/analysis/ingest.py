@@ -125,6 +125,7 @@ def ingest(
     registry_path: str | Path | None = None,
     release: str = "unknown",
     logit_fallback_checkpoints: Sequence[str] = (),
+    exclude_flagged: bool = False,
 ) -> tuple[pd.DataFrame, ExclusionsLedger]:
     """Joins results + release vignettes (+ optional curated ratings) into a
     tidy response-level DataFrame (``ANALYSIS_COLUMNS``), returning it with
@@ -142,7 +143,20 @@ def ingest(
     "logit_ev"``) -- not just its parse failures, so the measurement is
     uniform within checkpoint -- and rows missing logprobs are excluded as
     ``logprobs_missing``. All other checkpoints keep the parsed rating
-    (``score_source == "parsed"``)."""
+    (``score_source == "parsed"``).
+
+    ``exclude_flagged`` (v1.1 proposal, requires ``curated_path``): additionally
+    drops any variant with a non-empty ``individual_flags`` or ``pair_flag``
+    (the moral_relevance/vividness/severity/typicality manipulation-check
+    flags) as ``variant_flagged_excluded``. This is a POST-HOC re-analysis
+    toggle over the SAME already-collected results -- it does not require a
+    second elicitation run. The intended use is to run this ingest twice on
+    one results set (default False, then True) and compare the two
+    contrast tables: if they agree, that's evidence the "accept despite
+    flags" release decision (v1.0 changelog, 2026-08-04) didn't materially
+    distort the findings; if they disagree, that's a quantified answer to
+    exactly how much the flagged items were affecting the result, which the
+    documented-limitation approach alone couldn't provide."""
     registry = load_registry(registry_path or _default_registry_path())
     key_index = build_model_key_index(registry)
 
@@ -195,6 +209,15 @@ def ingest(
         if accepted_ids is not None and variant_id not in accepted_ids:
             _drop("variant_not_accepted", r.job_id)
             continue
+
+        if exclude_flagged:
+            curated_row = curated_by_id.get(variant_id)
+            is_flagged = bool(
+                curated_row and (curated_row.individual_flags or curated_row.pair_flag)
+            )
+            if is_flagged:
+                _drop("variant_flagged_excluded", r.job_id)
+                continue
 
         if r.model_key in logit_fallback_checkpoints:
             if r.logprobs_0_10 is None:
