@@ -1,0 +1,18 @@
+# MAIN v1.1 run, part 1 of 2: intentionality + the new affect_salience
+# self-report question at the standard N (jobs built separately from the
+# blame/praise config and concatenated -- per-question n_samples is not a
+# RunConfig field, so the N=50 RQ1b boost lives in its own config).
+release: v1.1
+models:
+  - llama-3.1-8b-pretrained
+  - llama-3.1-8b-instruct
+  - mistral-7b-v0.1-pretrained
+  - mistral-7b-v0.1-instruct
+  - gemma-2-9b-pretrained
+  - gemma-2-9b-instruct
+formats:
+  - raw
+n_samples: 25
+questions:
+  - intentionality
+  - affect_salience

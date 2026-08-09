@@ -1,0 +1,18 @@
+# MAIN v1.1 run, part 2 of 2: blame/praise at doubled N (researcher punch
+# list item 5: the RQ1b errors-in-variables attenuation is measurement
+# noise in the item-level blame/praise means -- fix by raising
+# response-level N for these two questions only, no new stimuli).
+release: v1.1
+models:
+  - llama-3.1-8b-pretrained
+  - llama-3.1-8b-instruct
+  - mistral-7b-v0.1-pretrained
+  - mistral-7b-v0.1-instruct
+  - gemma-2-9b-pretrained
+  - gemma-2-9b-instruct
+formats:
+  - raw
+n_samples: 50
+questions:
+  - blame
+  - praise
