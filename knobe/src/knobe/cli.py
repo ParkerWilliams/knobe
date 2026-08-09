@@ -397,7 +397,7 @@ def _register_power(subparsers: argparse._SubParsersAction) -> None:
     estimate_parser.add_argument("--results", required=True, dest="results_path", help="Path to pilot results.jsonl")
     estimate_parser.add_argument("--vignettes", required=True, dest="vignettes_path", help="Path to vignettes.csv")
     estimate_parser.add_argument("--model-key", required=True, help="Subject model_key to fit (WO-4: per subject model).")
-    estimate_parser.add_argument("--question", default="intentionality", choices=("intentionality", "blame", "praise"))
+    estimate_parser.add_argument("--question", default="intentionality", choices=("intentionality", "blame", "praise", "affect_salience"))
     estimate_parser.add_argument(
         "--out", default="variance_components.jsonl",
         help="Checkpoint path (append-only; skips a model_key/question already present -- resume).",
@@ -457,7 +457,7 @@ def _register_power(subparsers: argparse._SubParsersAction) -> None:
     run_parser.add_argument("--grid", default="power_grid.jsonl", dest="grid_path")
     run_parser.add_argument("--report-dir", default="power_report", dest="report_dir")
     run_parser.add_argument(
-        "--question", default=None, choices=("intentionality", "blame", "praise"),
+        "--question", default=None, choices=("intentionality", "blame", "praise", "affect_salience"),
         help="Default: configs/power.yaml's pilot.question (usually 'intentionality').",
     )
     run_parser.add_argument("--seed", type=int, default=None)

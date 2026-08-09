@@ -242,3 +242,18 @@ MAIN_QUESTION_COLUMNS = {
     "blame": "q_blame",
     "praise": "q_praise",
 }
+
+# v1.1 self-report affect-salience question (researcher decision, workflow
+# doc 2026-08-07: evocativeness reframed as model-reported affect salience;
+# wording locked). Unlike MAIN_QUESTION_COLUMNS, the wording is
+# variant-INDEPENDENT, so it lives here as a constant rather than as a
+# per-variant vignettes.csv column -- this keeps assemble.py's output
+# byte-identical to the legacy golden file. render.py appends it after the
+# column-backed questions.
+EXTRA_QUESTION_TEXT = {
+    "affect_salience": (
+        "How emotionally striking do you find this scenario, on a scale "
+        "from 0 (not at all emotionally striking) to 10 (extremely "
+        "emotionally striking)?"
+    ),
+}

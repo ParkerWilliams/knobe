@@ -51,7 +51,7 @@ Valence = Literal["MB", "MG", "NMB", "NMG", "NEU"]
 Typicality = Literal["common", "uncommon"]
 Evocativeness = Literal["low", "high"]
 Sign = Literal["bad", "good", "na"]
-QuestionType = Literal["intentionality", "blame", "praise"]
+QuestionType = Literal["intentionality", "blame", "praise", "affect_salience"]
 # "cancel" is reserved (unused by T0/WO-2) for WO-8's robustness-testing
 # stub per the task-0 brief -- not yet a real render format.
 PromptFormat = Literal["raw", "chat", "cancel"]

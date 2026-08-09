@@ -35,7 +35,7 @@ from knobe.schemas import (
     write_jsonl,
 )
 
-QuestionType = Literal["intentionality", "blame", "praise"]
+QuestionType = Literal["intentionality", "blame", "praise", "affect_salience"]
 JobFormat = Literal["raw", "chat"]
 
 # Default question set for a run config that doesn't name one explicitly

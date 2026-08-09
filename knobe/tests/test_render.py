@@ -98,7 +98,7 @@ class TestRenderPromptsForVariant:
     def test_six_records_default_formats(self):
         row = _toy_vignette_rows()[0]
         records = render.render_prompts_for_variant(row)
-        assert len(records) == 6  # 3 questions x 2 formats
+        assert len(records) == 8  # (3 column-backed + 1 extra) questions x 2 formats
 
     def test_ordering_question_then_format(self):
         row = _toy_vignette_rows()[0]
@@ -110,6 +110,8 @@ class TestRenderPromptsForVariant:
             (row.variant_id, "blame", "chat"),
             (row.variant_id, "praise", "raw"),
             (row.variant_id, "praise", "chat"),
+            (row.variant_id, "affect_salience", "raw"),
+            (row.variant_id, "affect_salience", "chat"),
         ]
         actual = [(r.variant_id, r.question_type, r.format) for r in records]
         assert actual == expected
@@ -180,14 +182,14 @@ class TestRenderAllToyMatrix:
         records = render.render_all(rows)
         raw = [r for r in records if r.format == "raw"]
         chat = [r for r in records if r.format == "chat"]
-        assert len(raw) == 24  # 8 variants x 3 questions
-        assert len(chat) == 24
-        assert len(records) == 48
+        assert len(raw) == 32  # 8 variants x 4 questions
+        assert len(chat) == 32
+        assert len(records) == 64
 
     def test_formats_filter_raw_only(self):
         rows = _toy_vignette_rows()
         records = render.render_all(rows, formats=("raw",))
-        assert len(records) == 24
+        assert len(records) == 32
         assert all(r.format == "raw" for r in records)
 
     def test_output_ordering_independent_of_input_row_order(self):
@@ -203,7 +205,7 @@ class TestRenderAllToyMatrix:
         expected_keys = [
             (vid, qtype, fmt)
             for vid in expected_variant_order
-            for qtype in ("intentionality", "blame", "praise")
+            for qtype in ("intentionality", "blame", "praise", "affect_salience")
             for fmt in ("raw", "chat")
         ]
         actual_keys = [(r.variant_id, r.question_type, r.format) for r in records]
@@ -244,7 +246,10 @@ class TestBannedWordProperty:
     stripped before checking, not just the scenario."""
 
     def _remainder(self, rec: PromptRecord, row: VignetteRow) -> str:
-        question_text = getattr(row, constants.MAIN_QUESTION_COLUMNS[rec.question_type])
+        if rec.question_type in constants.MAIN_QUESTION_COLUMNS:
+            question_text = getattr(row, constants.MAIN_QUESTION_COLUMNS[rec.question_type])
+        else:
+            question_text = constants.EXTRA_QUESTION_TEXT[rec.question_type]
         remainder = rec.text.replace(row.scenario, "", 1)
         remainder = remainder.replace(question_text, "", 1)
         return remainder
@@ -356,7 +361,7 @@ class TestCLI:
         assert rc == 0
         assert out.exists()
         lines = out.read_text(encoding="utf-8").splitlines()
-        assert len(lines) == 48
+        assert len(lines) == 64
 
     def test_cli_render_respects_formats_flag(self, tmp_path):
         vignettes_csv = tmp_path / "vignettes.csv"
@@ -367,7 +372,7 @@ class TestCLI:
 
         assert rc == 0
         lines = out.read_text(encoding="utf-8").splitlines()
-        assert len(lines) == 24
+        assert len(lines) == 32
         assert all(json.loads(line)["format"] == "raw" for line in lines)
 
     def test_cli_double_build_byte_equal(self, tmp_path):

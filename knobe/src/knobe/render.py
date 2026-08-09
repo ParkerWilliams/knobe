@@ -82,8 +82,13 @@ def render_prompts_for_variant(
         raise ValueError(f"render.py only emits {sorted(_KNOWN_FORMATS)}, got unknown format(s): {unknown}")
 
     records: list[PromptRecord] = []
-    for question_type, column in constants.MAIN_QUESTION_COLUMNS.items():
-        question_text = getattr(row, column)
+    # Column-backed questions first (legacy order), then the constant-worded
+    # extra questions (v1.1 affect_salience) -- same per-question rendering.
+    question_sources = [
+        (question_type, getattr(row, column))
+        for question_type, column in constants.MAIN_QUESTION_COLUMNS.items()
+    ] + list(constants.EXTRA_QUESTION_TEXT.items())
+    for question_type, question_text in question_sources:
         text = render_prompt_text(row.scenario, question_text)
         for fmt in formats:
             prompt_id = f"{row.variant_id}::{question_type}::{fmt}"

@@ -1,0 +1,9 @@
+=== Curation pair-check distributions ===
+
+Matched pairs with parseable severity+vividness ratings: 187
+severity |delta|: mean=0.78 median=1.0 max=6 (threshold: <= 2)
+vividness gap: mean=0.42 median=0.0 min=-2 (threshold: >= 2)
+
+moral_relevance by group (category check: MB/MG >= 6, NMB/NMG/NEU <= 4):
+  MB/MG: n=164 mean=7.72
+  NMB/NMG/NEU: n=247 mean=1.87

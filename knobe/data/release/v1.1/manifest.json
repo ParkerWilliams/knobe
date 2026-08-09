@@ -1,0 +1,85 @@
+{
+  "release": "v1.1",
+  "created": "2026-08-09T21:23:15Z",
+  "git_commit": "4bb813cd59076ab92a58c1e78ff0106e44bfdc1a",
+  "files": {
+    "vignettes.csv": {
+      "sha256": "9234e4bd23fe63042505616ff5af49742d1907ee3b0f4e8bdc15b66283f3eac0",
+      "rows": 420
+    }
+  },
+  "counts": {
+    "families": 105,
+    "variants": 420,
+    "by_valence": {
+      "MB": {
+        "families": 21,
+        "variants": 84
+      },
+      "MG": {
+        "families": 21,
+        "variants": 84
+      },
+      "NMB": {
+        "families": 21,
+        "variants": 84
+      },
+      "NMG": {
+        "families": 21,
+        "variants": 84
+      },
+      "NEU": {
+        "families": 21,
+        "variants": 84
+      }
+    },
+    "by_domain": {
+      "Environment": {
+        "families": 15,
+        "variants": 60
+      },
+      "Product Safety": {
+        "families": 10,
+        "variants": 40
+      },
+      "Workplace": {
+        "families": 10,
+        "variants": 40
+      },
+      "Finance": {
+        "families": 10,
+        "variants": 40
+      },
+      "Healthcare": {
+        "families": 10,
+        "variants": 40
+      },
+      "Data Privacy": {
+        "families": 10,
+        "variants": 40
+      },
+      "Food Quality": {
+        "families": 10,
+        "variants": 40
+      },
+      "Academic": {
+        "families": 10,
+        "variants": 40
+      },
+      "Animal Welfare": {
+        "families": 10,
+        "variants": 40
+      },
+      "Community": {
+        "families": 10,
+        "variants": 40
+      }
+    }
+  },
+  "gates_passed": [
+    "G0",
+    "G1",
+    "G2"
+  ],
+  "changelog": "v1.1 (2026-08-09): Type-2 moral-bleed content fixes for 24 NMB/NMG families (dimensional-independence rule; 22 clean after one PRIV burden-free rewrite pass, decision trees applied per V1_1_CURATION_DECISION_TREES.md). HC-NMB-01/HC-NMG-01 accepted as documented goal-bleed limitation (shared storyline goal is morally loaded; deferred to v1.2). Reviewer-calibration finding logged: 4 families where production reviewer failed content ChatGPT cross-validation passed. New affect_salience self-report question added to elicitation (evocativeness reframed as model-reported affect salience; vividness pair flags retained as documented limitation). Type-1 MG instrument asymmetry unchanged, separate validation cycle."
+}
