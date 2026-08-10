@@ -629,10 +629,11 @@ class TestReleaseMode:
         OTHER entries and never touch a frozen release's contents."""
         real_release_dir = REPO_ROOT / "data" / "release"
         entries = sorted(p.name for p in real_release_dir.iterdir())
-        assert entries == [".gitkeep", "README.md", "v1.0"]
-        assert sorted(p.name for p in (real_release_dir / "v1.0").iterdir()) == [
-            "manifest.json", "vignettes.csv",
-        ]
+        assert entries == [".gitkeep", "README.md", "v1.0", "v1.1"]
+        for rel in ("v1.0", "v1.1"):
+            assert sorted(p.name for p in (real_release_dir / rel).iterdir()) == [
+                "manifest.json", "vignettes.csv",
+            ]
 
 
 # ---------------------------------------------------------------------------

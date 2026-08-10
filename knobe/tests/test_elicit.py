@@ -539,6 +539,35 @@ class TestReadResultsTolerantOfTornTail:
     def test_missing_file_returns_empty(self, tmp_path):
         assert elicit_vllm.read_results_tolerating_torn_tail(tmp_path / "does_not_exist.jsonl") == []
 
+    def test_candidate_tail_ids_survives_sentencepiece_boundary(self):
+        """Regression (Mistral flat-logprobs bug, main runs v1.0/v1.1,
+        found 2026-08-09): SentencePiece-family tokenizers encode a bare
+        candidate ("7") as a word-boundary piece with a DIFFERENT id than
+        the same digit realized in-context after "Answer:". Candidate ids
+        must therefore come from the in-context diff of encode(forced) vs
+        encode(prompt), never from a standalone encode(candidate)."""
+
+        class SentencePieceLike:
+            BOUNDARY_SEVEN = 901   # id of "_7" (standalone, word-initial)
+            PLAIN_SEVEN = 55       # id of "7" realized mid-word after ":"
+
+            def encode(self, text, add_special_tokens=True):
+                ids = [1] if add_special_tokens else []  # BOS
+                if text == "7":
+                    return ids + [self.BOUNDARY_SEVEN]
+                if text.endswith("Answer:7"):
+                    return ids + [10, 11, self.PLAIN_SEVEN]
+                if text.endswith("Answer:"):
+                    return ids + [10, 11]
+                raise AssertionError(f"unexpected: {text!r}")
+
+        tok = SentencePieceLike()
+        prompt = "Scenario...\nAnswer:"
+        tail = elicit_vllm.candidate_tail_ids(tok, prompt, prompt + "7")
+        assert tail == [SentencePieceLike.PLAIN_SEVEN]
+        # The old (buggy) approach would have produced the boundary id:
+        assert tok.encode("7", add_special_tokens=False) == [SentencePieceLike.BOUNDARY_SEVEN]
+
     def test_unicode_line_separator_in_raw_response_is_not_misread_as_corruption(self, tmp_path):
         """Regression (main-run job 42, 2026-08-05): pydantic serializes
         non-ASCII raw, so a completion containing U+2028/U+0085 puts a

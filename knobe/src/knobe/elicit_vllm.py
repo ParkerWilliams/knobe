@@ -324,6 +324,25 @@ def _resolve_hf_revision(model_id: str, revision: str) -> str:
 RATING_TOKENS: tuple[str, ...] = tuple(str(i) for i in range(11))  # "0".."10"
 
 
+
+def candidate_tail_ids(tokenizer, prompt: str, forced: str) -> list[int]:
+    """Token ids the tokenizer ACTUALLY realizes for the candidate span of
+    ``forced`` (= ``prompt + candidate_text``), computed as the tail of
+    ``encode(forced)`` past its longest common prefix with
+    ``encode(prompt)``. Exact for any tokenizer, including SentencePiece
+    families whose standalone ``encode(candidate)`` differs from the
+    in-context tokenization (the Mistral flat-logprobs bug, 2026-08-09).
+    Special tokens included, matching what vLLM scores in prompt_logprobs."""
+    base = tokenizer.encode(prompt, add_special_tokens=True)
+    full = tokenizer.encode(forced, add_special_tokens=True)
+    lcp = 0
+    for a, b in zip(base, full):
+        if a != b:
+            break
+        lcp += 1
+    return full[lcp:]
+
+
 class VllmEngine:
     """Real vLLM-backed engine (guarded import; WO-5's H200 production
     backend). NOT exercised by this repo's test suite -- vllm is a heavy
@@ -471,10 +490,17 @@ class VllmEngine:
         model's own continuation), but not a universally guaranteed BPE
         property; see the equivalent caveat in ``HfEngine``'s forced call.
         """
-        candidate_ids = self._tokenizer.encode(candidate_text, add_special_tokens=False)
-        if not candidate_ids:
-            return [None] * len(prompts)  # pragma: no cover -- no real tokenizer maps "0".."10" to zero tokens
-        n = len(candidate_ids)
+        # Candidate token ids must be derived IN CONTEXT, per prompt: a
+        # standalone encode(candidate) is WRONG for SentencePiece-family
+        # tokenizers (Mistral), which map a bare "7" to a word-boundary
+        # piece ("_7") while the token actually realized after "Answer:"
+        # in the forced prompt is the boundary-free "7" -- a different id.
+        # That mismatch made every candidate lookup miss and silently
+        # produced flat logprobs_0_10 for every Mistral row in the v1.0
+        # and v1.1 main runs (EV constant 5.0; found 2026-08-09). The
+        # in-context diff below is exact for ANY tokenizer: whatever ids
+        # the forced prompt actually tokenizes to past the shared prefix
+        # ARE the candidate span, by construction.
         forced_prompts = [p + candidate_text for p in prompts]
         # max_tokens=1 (not 0): vLLM >=0.10 rejects max_tokens=0 outright
         # ("max_tokens must be at least 1", G1 pilot run-19 lesson). We only
@@ -484,15 +510,16 @@ class VllmEngine:
         outputs = self._llm.generate(forced_prompts, sp)
 
         results: list[float | None] = []
-        for out in outputs:
+        for prompt, forced, out in zip(prompts, forced_prompts, outputs):
+            tail_ids = candidate_tail_ids(self._tokenizer, prompt, forced)
             plps = out.prompt_logprobs
-            if not plps or len(plps) < n:
+            if not tail_ids or not plps or len(plps) < len(tail_ids):
                 results.append(None)
                 continue
-            tail = plps[-n:]
+            tail = plps[-len(tail_ids):]
             total = 0.0
             ok = True
-            for pos, token_id in zip(tail, candidate_ids):
+            for pos, token_id in zip(tail, tail_ids):
                 if pos is None or token_id not in pos:
                     ok = False
                     break
