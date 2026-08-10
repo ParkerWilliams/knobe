@@ -89,6 +89,25 @@ knobe elicit --jobs build/remaining.jsonl --prompts build/prompts.jsonl \
     --skip-manifest-check
 ```
 
+## Study results (compressed)
+
+The per-response study results for both releases ship as gzipped JSONL in
+`results_dist/` (one row per variant x question x model x sample; raw
+response text, parsed rating, forced-scoring logprobs, seed/temperature/
+revision). The analysis pipeline expects them under `results/<release>/`
+(gitignored). To unpack into the right place, from this directory:
+
+```
+mkdir -p results/v1.0 results/v1.1
+gunzip -c results_dist/results_v1.0_all.jsonl.gz > results/v1.0/results_all.jsonl
+gunzip -c results_dist/results_v1.1_all.jsonl.gz > results/v1.1/results_all.jsonl
+```
+
+v1.0 caveat: all Mistral `logprobs_0_10` vectors in the v1.0 file are flat
+(the retracted measurement artifact -- see `docs/MAIN_RUN_WRITEUP_v1.0.md`);
+v1.1 contains the corrected re-elicitation. Analysis commands and fallback
+lists are documented in the writeups.
+
 ## Result custody: everything comes home
 
 Standing process (2026-07-29): **every cluster artifact is harvested to the
