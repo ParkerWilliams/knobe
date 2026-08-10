@@ -1,5 +1,16 @@
 # Decomposed Knobe-Effect Study in LLMs — Main Run Writeup (Release v1.0)
 
+> **CORRECTION (2026-08-09):** a tokenizer bug made every Mistral
+> logprobs_0_10 vector flat (EV ≡ 5.0) in this run, so all EV-scored Mistral
+> results below — in particular the "mistral reversal" (rq1_base_sign_x_tuning
+> −0.14, presented as this run's most consequential new datum) — rested on a
+> constant pretrained baseline and are **retracted as measurement artifacts**.
+> With corrected measurement (release v1.1, re-elicited Mistral checkpoints),
+> mistral's sign×tuning interaction is a null, not a reversal. gemma and llama
+> results were unaffected and replicate in v1.1. See
+> `MAIN_RUN_WRITEUP_v1.1.md` (Methods) for the full mechanism.
+
+
 **Status:** published draft for researcher review. Raw per-response results remain
 local-only per the data agreement; every aggregate below traces to the local
 `results/v1.0/paper/` artifacts.
