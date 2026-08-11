@@ -34,6 +34,10 @@ the line at the time of the run, not after the fact.
 2026-08-10 | `analysis/rq1_v1_1_robustness/17_severity_vs_label.py` | LMM (set_id) + set-FE WCB, 3 same-DF models | AIC favors the categorical label over severity alone in all 3 families (mistral: 3232 vs 5212); neither term survives in the combined model in any family (near-collinearity signature) | 672ec17
 2026-08-10 | `docs/SEVERITY_PILOT_PLAN.md` (plan doc, no script) | scoped for 2026-08-11 | curation-only pilot: 3-5 prudential families x 3 severity rungs, read moral_relevance-vs-severity slope, second-reviewer check before trusting a "flat" result | cca125a
 
+## Planned, scripted, blocked on external resource
+
+2026-08-10 | `analysis/severity_wording_check/run_reworded_severity.py` | reworded magnitude-only severity question, ~420 reviewer calls | **not yet run** — needs `ANTHROPIC_API_KEY` this environment doesn't have. Script verified to import/compile clean (`2a062c2`). See `docs/SEVERITY_PILOT_PLAN.md` Phase 0. | 2a062c2 (script only, no results yet)
+
 ## Known gaps (not yet scripted, numbers already in a doc)
 
 These predate the `analysis/rq1_v1_1_robustness/` scripts and were run as
