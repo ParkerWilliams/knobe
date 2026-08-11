@@ -111,6 +111,70 @@ gemma's and mistral's severity-adjusted effects are mostly noise, while
 llama's might be a real, just under-sampled, effect. Full derivation:
 `docs/RQ1_STATISTICAL_METHODS_v1.1.md` §9.
 
+**Why this confound may not be fixable by more data alone.** Reviewer-rated
+severity correlates with sign at **r=.885 within moral items** and only
+**r=.473 within nonmoral items** (`16_valence_split_severity_covariate.py`)
+— severity is close to a proxy for sign specifically within the moral
+category. `docs/SEVERITY_MORALIZATION_BACKGROUND.md` connects this to why:
+this project's own taxonomy defines "moral" as harm/welfare-affecting
+(`constants.py`'s `GENERATION_SYSTEM_PROMPT` explicitly excludes
+purity/loyalty/authority content), which is the same criterion Turiel's
+moral/conventional distinction and Gray & Schein's Theory of Dyadic
+Morality use to define moral cognition itself — on those accounts, severity
+isn't sitting on top of an independent moral dimension, it's close to
+*constitutive* of it, at least for this harm-based slice of morality. Rozin's
+moralization research adds the mechanism: rising perceived consequences are
+what pull a nonmoral matter across the moral/conventional line in the first
+place, which predicts that hand-writing "severity-matched nonmoral" content
+will fight the same moral-bleed problem `data/curation/FLAGGED_VARIABLES_README.md`
+already documents (20-26% of nonmoral items in high-real-stakes domains get
+reviewer-judged moral anyway).
+
+**Re-running the severity-adjusted direct split (rather than the pooled
+interaction) within each valence type gives a more textured, partly
+unanticipated picture** (`16_valence_split_severity_covariate.py`,
+`family_id`-clustered, G=42 — no OLS-vs-GLS divergence here, checked and
+confirmed clean, unlike the set_id-clustered pooled models above):
+
+| family | moral-only, +severity | nonmoral-only, +severity |
+|---|---|---|
+| gemma | fails (p=.543; severity ate the signal, as expected given r=.885) | not significant, but sign flips negative (p=.22) |
+| llama | fails at α=.05 but closer (p=.134); point estimate grows to 2.22 | not significant (p=.57) |
+| mistral | stays null (p=.72, was already null) | **flips to strongly significant negative** (p_wcb=.000, 0/1999 draws exceeded it) |
+
+Mistral's nonmoral result is a genuine, unanticipated finding, not noise:
+once severity is held constant, mistral rates *bad* nonmoral outcomes as
+*less* intentional than same-severity good ones — severity was suppressing
+this relationship in the raw (unadjusted) data. Worth investigating on its
+own terms in a future pass, independent of the RQ1a moral-specificity
+question.
+
+**Does severity alone predict the sign asymmetry as well as the categorical
+moral/nonmoral label?** (`17_severity_vs_label.py`, three same-DF models —
+label-alone, severity-alone, combined — compared via AIC and set-FE WCB.)
+**AIC decisively favors the categorical label over continuous severity as a
+predictor of intentionality overall, in all three families** (gemma: label
+AIC 16776 vs. severity AIC 17423; llama: 24664 vs. 24769; mistral: 3232 vs.
+5212 — an overwhelming margin for mistral specifically). That's evidence
+*against* the strong "severity does all the work" reading: the categorical
+label carries predictive information a raw severity score doesn't fully
+capture. **Caveat this needs before leaning on it**: AIC compares overall
+model fit (main effect + interaction together), not specifically the
+sign-dependent asymmetry term — the label's advantage could be a general
+moral-vs-nonmoral level difference in ratings unrelated to the Knobe
+asymmetry per se, not evidence the label specifically drives the
+asymmetry. Consistent with that caveat: in the combined model, **neither
+the label's nor severity's own interaction with sign survives in any
+family** — both wash out together (gemma: p=.71/.97; llama: p=.54/.20;
+mistral: p=.45/.52), which the moralization-literature reading predicts
+directly (if severity and moral status are close to the same underlying
+signal for this harm-based taxonomy, a model can't cleanly credit either
+one once both are in the same equation — that's what near-collinearity
+looks like, not a null result for both). This is exactly the ambiguity
+`docs/SEVERITY_PILOT_PLAN.md`'s escalated-severity pilot is designed to
+resolve empirically, by trying to break the collinearity at the stimulus
+level rather than the statistical level.
+
 **Reconciling the two results:** a split-sample test (fit the sign effect
 twice, once per subset) and a pooled-interaction test (fit one model with an
 interaction term) are related but not identical questions, especially at
@@ -332,8 +396,15 @@ sized inference) that this taxonomy and this re-analysis made visible.
 - Wild-cluster-bootstrap and random-slope-test the affect-decoupling result
   (§4) before citing it with the same confidence as the rest of this
   document.
-- Severity-adjust the direct moral/nonmoral split test (§1's surviving
-  result) the same way the pooled interaction was adjusted.
+- ~~Severity-adjust the direct moral/nonmoral split test~~ — done (§1
+  above): moral-only loses significance for gemma, doesn't reach it for
+  llama (p=.134, but a growing point estimate); nonmoral-only produces an
+  unanticipated significant reversal for mistral, worth its own follow-up.
+- **Active next step**: `docs/SEVERITY_PILOT_PLAN.md` — draft and curate
+  (not yet elicit) severity-escalated prudential-subdomain nonmoral pilot
+  items, to test empirically whether severity and moral status are
+  separable in this taxonomy at all, per
+  `docs/SEVERITY_MORALIZATION_BACKGROUND.md`'s prediction.
 - Resolve the RQ1_base mistral sign×tuning ordinal-vs-LMM/WCB disagreement
   (both LMM and WCB agree on a clean null; only the ordinal check, which
   can't model random effects, disagrees).
