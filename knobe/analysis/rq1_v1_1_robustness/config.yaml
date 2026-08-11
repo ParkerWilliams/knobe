@@ -1,0 +1,54 @@
+# Parameters for the v1.1 RQ1 small-cluster-robustness re-analysis
+# (docs/RQ1_STATISTICAL_METHODS_v1.1.md §8-§11, docs/RQ1_MECHANISM_ANALYSIS_v1.1.md).
+#
+# These scripts are exploratory research code, not part of the `knobe analyze`
+# pipeline (see docs/RQ1_STATISTICAL_METHODS_v1.1.md §13 item 6 -- promoting
+# wild-cluster-bootstrap / random-slope checks to first-class pipeline
+# sensitivity analyses is an open follow-up, not done yet).
+
+data:
+  results_jsonl: "results/v1.1/results_all.jsonl"   # unpack first: see knobe/README.md "Study results (compressed)"
+  vignettes_csv: "data/release/v1.1/vignettes.csv"
+  curated_csv: "data/curation/curated_v1.1.csv"      # source of family-level severity for the RQ1a covariate check
+
+wild_cluster_bootstrap:
+  method: "Cameron-Gelbach-Miller (2008), Rademacher weights, restricted (null-imposed) residual DGP"
+  n_boot: 1999
+  # One fixed seed per script, not per contrast -- np.random.default_rng(seed) is
+  # reseeded once per script and consumed sequentially across that script's
+  # contrasts/families, so results are deterministic given the script but not
+  # independently reproducible contrast-by-contrast the way the pipeline's own
+  # sha256(base_seed, contrast, model_family, boot_idx) scheme is (see
+  # models.py's _boot_seed) -- a gap worth closing if these scripts get promoted
+  # into the pipeline (§13 item 6).
+  seeds:
+    01_rq1_base_and_rq1c_wcb: 2   # rq1_base uses seed 2, rq1c typ uses seed 3, rq1c evoc uses seed 4 internally
+    02_rq1d_wcb: 5                # offset uses seed 5, typicality-within-neu uses seed 6 internally
+    03_rq1a_baseline_wcb: 1
+    04_rq1a_severity_covariate: 1
+    05_valence_split_wcb: 11
+    07_rq1b_family_fe_wcb: 9
+
+minimum_detectable_effect:
+  alpha: 0.05
+  power: 0.80
+  dof_adjustment: 2   # df = n_clusters - 2 (conservative, standard for a single-coefficient two-group-style contrast)
+
+clustering:
+  rq1_base: {column: family_id, note: "G=84 (both tuning states pooled)"}
+  rq1a: {column: set_id, note: "G=21 -- set_id recovers the 5-valence-sibling matched structure; sign/valence_type don't vary within family_id"}
+  rq1b: {column: family_id, note: "G=42 per valence_type (21 MB+21 MG, or 21 NMB+21 NMG); refit MUST use family fixed effects, not plain pooled OLS -- see 06_rq1b_hausman_diagnostic.py"}
+  rq1c: {column: family_id, note: "G=84"}
+  rq1d: {column: family_id, note: "G=21 (NEU only)"}
+
+family_model_keys:
+  gemma: {pretrained: gemma-2-9b-pretrained, instruct: gemma-2-9b-instruct}
+  llama: {pretrained: llama-3.1-8b-pretrained, instruct: llama-3.1-8b-instruct}
+  mistral: {pretrained: mistral-7b-v0.1-pretrained, instruct: mistral-7b-v0.1-instruct}
+
+effect_coding:
+  sign_c: {bad: 0.5, good: -0.5}
+  tuning_c: {finetuned: 0.5, pretrained: -0.5}
+  vt_c: {moral: 0.5, nonmoral: -0.5}
+  typ_c: {uncommon: 0.5, common: -0.5}
+  evoc_c: {high: 0.5, low: -0.5}
