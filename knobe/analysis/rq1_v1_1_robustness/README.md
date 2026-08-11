@@ -52,6 +52,7 @@ cd analysis/rq1_v1_1_robustness
 ../../.venv/bin/python 16_valence_split_severity_covariate.py
 ../../.venv/bin/python 17_severity_vs_label.py
 ../../.venv/bin/python 18_rq1c_typicality_severity_covariate.py
+../../.venv/bin/python 19_severity_dose_response.py   # run after 01 for the printed rq1c comparison
 ```
 
 Every script writes one small CSV to `outputs/` and prints it to stdout.
@@ -84,6 +85,7 @@ coding exactly).
 | `16_valence_split_severity_covariate.py` | `outputs/16_valence_split_severity_covariate.csv` | MECHANISM_ANALYSIS §1 (severity-adjusted direct split; no OLS-vs-GLS divergence here, checked and confirmed clean) |
 | `17_severity_vs_label.py` | `outputs/17_severity_vs_label.csv` | MECHANISM_ANALYSIS §1; SEVERITY_MORALIZATION_BACKGROUND.md; SEVERITY_PILOT_PLAN.md |
 | `18_rq1c_typicality_severity_covariate.py` | `outputs/18_rq1c_typicality_severity_covariate.csv` | MECHANISM_ANALYSIS §3 — does typicality's effect ride on severity? No: coefficients unchanged to 6 decimal places in all 3 families |
+| `19_severity_dose_response.py` | `outputs/19_severity_dose_response.csv` | MECHANISM_ANALYSIS §1 — direct severity_c:sign_c dose-response test at rq1c's own clustering/power; not significant in any family, weaker than typicality or evocativeness |
 
 ## A second instance of the pooled-OLS bias, found while finishing the MDE table
 

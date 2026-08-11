@@ -175,6 +175,36 @@ looks like, not a null result for both). This is exactly the ambiguity
 resolve empirically, by trying to break the collinearity at the stimulus
 level rather than the statistical level.
 
+**A direct dose-response test resolves this ambiguity, and updates the
+read.** Fit `severity_c * sign_c` at the exact same clustering/subset
+`rq1c_typicality_x_sign`/`evocativeness_x_sign` use (family_id, G=84, full
+power, no collinearity with a categorical label in the equation —
+`19_severity_dose_response.py`):
+
+| predictor | gemma | llama | mistral |
+|---|---|---|---|
+| `severity_c:sign_c` | p=.544 | p=.698 | p=.364 |
+| `typ_c:sign_c` (for comparison) | p<.0001 | p=.403 | p<.0001 |
+| `evoc_c:sign_c` (for comparison) | p=.030 | p=.374 | p=.170 |
+
+**Severity shows no significant dose-response interaction with sign in any
+family — the weakest of every continuous/categorical predictor tested,
+including evocativeness.** This resolves the ambiguity above: severity's
+power-eating effect on RQ1a's `vt_c:sign_c` term was collinearity-driven
+suppression (severity correlates strongly enough with the moral label to
+steal its identifying variance when both are in one equation), not evidence
+that severity itself carries an independent asymmetry-driving signal —
+those are different claims, and this test cleanly separates them. It also
+tempers the strongest reading of the Theory-of-Dyadic-Morality background
+note (`docs/SEVERITY_MORALIZATION_BACKGROUND.md`): if severity/harm-magnitude
+really were the moral signal itself, this is exactly the test that should
+have shown a strong effect, at least as strong as the categorical label's.
+It shows the opposite — these models' intentionality asymmetry looks more
+tied to categorical moral status than to graded harm magnitude per se, at
+least as severity is currently measured (Phase 0's wording check, still
+open, bears on whether "as currently measured" is doing real work in that
+caveat).
+
 **Reconciling the two results:** a split-sample test (fit the sign effect
 twice, once per subset) and a pooled-interaction test (fit one model with an
 interaction term) are related but not identical questions, especially at

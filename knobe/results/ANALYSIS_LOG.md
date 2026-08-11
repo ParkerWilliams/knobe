@@ -35,6 +35,8 @@ the line at the time of the run, not after the fact.
 2026-08-10 | `docs/SEVERITY_PILOT_PLAN.md` (plan doc, no script) | scoped for 2026-08-11 | curation-only pilot: 3-5 prudential families x 3 severity rungs, read moral_relevance-vs-severity slope, second-reviewer check before trusting a "flat" result | cca125a
 2026-08-10 | `analysis/rq1_v1_1_robustness/18_rq1c_typicality_severity_covariate.py` | B=1999, cluster=family_id (G=84), severity_c covariate | typicality/severity correlation is weak (r=.07-.15, vs RQ1a's r=.885); typ_c:sign_c coefficient UNCHANGED to 6 decimal places with severity added, all 3 families — RQ1c's typicality finding does not ride on severity | bec34a3
 
+2026-08-10 | `analysis/rq1_v1_1_robustness/19_severity_dose_response.py` | B=1999, cluster=family_id (G=84), severity_c*sign_c | not significant in any family (p=.54/.70/.36) — weaker than typicality (p<.0001 in 2/3) and evocativeness (p=.03 in 1/3); resolves script 17's ambiguity: severity's RQ1a power-eating effect was collinearity suppression, not an independent dose-response signal | 5c38c6a
+
 ## Planned, scripted, blocked on external resource
 
 2026-08-10 | `analysis/severity_wording_check/run_reworded_severity.py` | reworded magnitude-only severity question, ~420 reviewer calls | **not yet run** — needs `ANTHROPIC_API_KEY` this environment doesn't have. Script verified to import/compile clean (`2a062c2`). See `docs/SEVERITY_PILOT_PLAN.md` Phase 0. | 2a062c2 (script only, no results yet)
