@@ -1,19 +1,108 @@
-# Escalated-Severity Nonmoral Pilot — Plan of Action (drafted 2026-08-10, for execution starting 2026-08-11)
+# Severity De-Mystification and Escalated-Severity Pilot — Plan of Action (drafted 2026-08-10, updated 2026-08-10; execution starting 2026-08-11)
 
-**Goal:** find out whether nonmoral-bad (NMB) severity can be raised toward
-moral-bad (MB) levels (~7/10) while staying reviewer-classified nonmoral, or
-whether it hits a moralization ceiling — and if there's a ceiling, locate it
-empirically rather than assume a number. This is the direct empirical
-follow-up to `docs/SEVERITY_MORALIZATION_BACKGROUND.md`'s prediction
-(procedural/aesthetic moralize fast; prudential is the best candidate to
-resist it) and to `RQ1_MECHANISM_ANALYSIS_v1.1.md` §1 / script `17`'s
-finding that the categorical moral/nonmoral label still out-predicts raw
-continuous severity on overall model fit (AIC), even though severity and
-the label are highly correlated (r=.885 within moral items) — i.e., the
-label may be carrying information a severity score alone doesn't, which is
-exactly what a clean severity-matched design would let you test properly.
+**Two phases, in order.** Phase 0 asks whether the severity/moral
+entanglement (r=.885 within moral items) is partly a **measurement
+artifact** — the curation question conflates two things — before assuming
+it's a fact about the stimuli. Phase 1 (the original plan, now demoted to
+second because it's more expensive) is the escalated-severity nonmoral
+vignette pilot, which only makes full sense once Phase 0's answer is known.
+Phase 0 is cheaper, faster, and needs zero new vignette authoring — it
+should run first, and could change how much of Phase 1 is even necessary.
 
-## Why this is worth doing before spending more compute on RQ1a
+## Phase 0: is "severity" measuring one thing or two?
+
+**The trigger.** The curation severity question reads: *"How severe or
+significant is this outcome, on a scale from 0 to 10?"* (`CURATION_QUESTIONS`,
+`constants.py`). That disjunction is worth taking seriously as a validity
+problem in its own right, independent of anything about the stimuli:
+"severe" naturally reads as *magnitude of material consequence* (cost,
+scale, harm), while "significant" naturally reads closer to *how much this
+matters/how important it is* — a term that, in ordinary usage, leans on the
+same intuition that makes something read as a moral issue in the first
+place ("that's a significant issue" ≈ "that's a moral issue"). Two readings
+of why the question is worded this way, both worth stating rather than
+picking one:
+
+1. **Benign**: "significant" may just be there as valence-symmetric cover,
+   since "severe" sounds odd applied to a *good* outcome — i.e., it's
+   solving the good/bad wording-symmetry problem, not smuggling in moral
+   weight.
+2. **Leaky**: regardless of why it was added, "significant" is close enough
+   to "morally/socially important" that a reviewer answering this question
+   could be rating "how much does this matter" rather than "how large is
+   the material consequence" — which would mean part of the r=.885
+   correlation is an artifact of the instrument, not a fact about the
+   underlying scenarios.
+
+**If reading 2 has real weight, this is good news, not bad news** — it
+means part of RQ1a's difficulty might be fixable by a cleaner *question*,
+which is far cheaper than a cleaner *stimulus set* (Phase 1).
+
+### The test: reword the question, re-run curation on the EXISTING 420 variants — no new vignettes needed
+
+1. **Candidate reworded question (magnitude-only, valence-symmetric,
+   explicitly excludes "significant"):**
+   > "Setting aside whether this outcome is good or bad, how large is its
+   > practical impact — in cost, scale, or people/systems affected — on a
+   > scale from 0 (negligible) to 10 (massive)?"
+2. Run this against the same 420 v1.1 `scenario` texts already in
+   `data/release/v1.1/vignettes.csv` — a single new curation question, not
+   the full four-question battery, so ~420 reviewer calls, not ~1,680
+   (`docs/V1_1_WORKFLOW.md`'s full-pass cost estimate was "minutes not
+   hours" for 4x this many calls).
+3. **Do not edit `constants.py`'s `CURATION_QUESTIONS`.** That's a frozen
+   instrument (master spec §7, restated in `knobe/README.md`'s "Conventions
+   and invariants") — question wording changes go through the project's own
+   established reword-validation track (`docs/V1_1_WORKFLOW.md`'s "Type-1
+   curation-question reword": test on a subsample, validate, adopt only if
+   it clears checks, as a new versioned question, never a silent in-place
+   edit). This experiment is exploratory and writes to its own output file,
+   never touching `curated_v1.1.csv` or the frozen release.
+4. **Compare, per family and pooled:**
+   - `corr(new_magnitude_score, sign)` within moral items — does it drop
+     well below .885? Within nonmoral items — does it move at all from .473?
+   - `corr(new_magnitude_score, original_severity_score)` — convergent
+     validity: if these are highly correlated (say r>.9), the original
+     question was mostly already measuring magnitude, and the "significant"
+     framing wasn't doing much independent work (points back toward Phase
+     1's stimulus-level story being the dominant explanation). If they
+     diverge substantially, that's direct evidence the original score was
+     conflating two things.
+   - Refit the RQ1a severity-adjusted interaction (`14_rq1a_severity_set_fe_wcb.py`'s
+     spec) substituting the new magnitude score for `severity_c`. Does the
+     SE shrink meaningfully (i.e., does the collinearity problem
+     documented in `docs/RQ1_STATISTICAL_METHODS_v1.1.md` §11.2 ease)? Does
+     the interaction become resolvable at G=21, or still not?
+5. **Three possible outcomes, each with a clear next step:**
+   - **Correlation drops substantially, RQ1a's SE shrinks**: the original
+     severity measure was partly a wording artifact. Adopt the reworded
+     question for future analysis (through the proper reword-validation
+     track, not silently), and RQ1a may become resolvable without any new
+     vignette writing at all — Phase 1 becomes lower priority, not
+     abandoned (a stimulus-level confound could still exist underneath a
+     now-cleaner measurement).
+   - **Correlation barely moves**: the entanglement is a fact about the
+     stimuli, not the instrument — proceed straight to Phase 1 with more
+     confidence it's the right lever to pull.
+   - **Correlation drops somewhat but not enough to resolve RQ1a's power
+     problem**: both explanations have some truth to them — report both,
+     and Phase 1 is still worth doing but the expectation for how much it
+     alone can fix should be tempered.
+
+**Cost/logistics**: no new authoring, ~420 reviewer calls (cheap), needs
+`ANTHROPIC_API_KEY` access this environment doesn't have — same "needs
+Parker's API key" split as every other curation-reviewer step in this
+project's existing workflow docs. A ready-to-run script skeleton is at
+`analysis/severity_wording_check/run_reworded_severity.py` — reuses
+`curate.AnthropicReviewer` and `constants.CURATION_PROMPT_TEMPLATE`'s shape
+without touching the frozen `CURATION_QUESTIONS` dict, writes to its own
+output file. Analysis script (correlation comparison + RQ1a refit) is
+`analysis/severity_wording_check/analyze_reworded_severity.py`, runnable as
+soon as the reviewer-call output exists.
+
+## Phase 1: Escalated-Severity Nonmoral Pilot
+
+### Why this is worth doing before spending more compute on RQ1a
 
 The severity-adjusted RQ1a interaction is underpowered by a lot at current
 sample sizes (`docs/RQ1_STATISTICAL_METHODS_v1.1.md` §11.2: gemma/mistral
@@ -26,7 +115,7 @@ only thing that needs to run for this pilot. Only if the pilot succeeds
 (finds severity-matched nonmoral content that survives moral-relevance
 review) does it justify a real elicitation run.
 
-## Scope: small, curation-only, cheap
+### Scope: small, curation-only, cheap
 
 1. **3–5 pilot families**, prudential subdomain only for the first pass
    (per the moralization background note, prudential is the best-motivated
@@ -57,7 +146,7 @@ review) does it justify a real elicitation run.
    the actually informative number — even sub-threshold movement tells you
    how close to the ceiling you are.
 
-## Method: write, curate, read the slope, stop or escalate
+### Method: write, curate, read the slope, stop or escalate
 
 For each pilot family:
 
@@ -103,7 +192,7 @@ For each pilot family:
    severity and moral status are separable here. A single-reviewer "flat"
    result is not sufficient given how consequential this finding would be.
 
-## Optional extension, only if the curation-only pilot succeeds
+### Optional extension, only if the curation-only pilot succeeds
 
 If (and only if) some rung/family combination produces genuinely
 severity-matched, reviewer-confirmed-nonmoral content: elicit
@@ -116,7 +205,7 @@ high-severity nonmoral content even when the human-modeled reviewer
 doesn't? A "yes" here would be a new finding in its own right, independent
 of whatever RQ1a's fate ends up being.
 
-## What this plan deliberately does NOT do yet
+### What this plan deliberately does NOT do yet
 
 - Does not touch the full v1.1 release or `data/authoring/ALL_DOMAINS_master_matrix.csv`
   — pilot items are pilot-only files (e.g.
@@ -129,7 +218,7 @@ of whatever RQ1a's fate ends up being.
   phase actually succeeds — avoids spending H200/API budget on a design
   that might not clear curation.
 
-## Rough time/cost estimate
+### Rough time/cost estimate
 
 Writing 3-5 families x 3 rungs (12-20 variants): an afternoon of careful
 authoring (this is the part most likely to need iteration — getting a
