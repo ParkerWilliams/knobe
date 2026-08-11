@@ -413,6 +413,150 @@ granularities (G=42 family-clustered vs. G=21 set-clustered) and the split
 test hasn't itself been adjusted for severity. Read §12 for how these two
 pieces of evidence are reconciled in the current write-up.
 
+### 9.1 Does severity alone predict the sign asymmetry as well as the categorical label?
+
+`17_severity_vs_label.py` fits three same-degrees-of-freedom models — each
+an intercept + 2 main effects + 1 interaction, so directly comparable by
+AIC — via LMM (`groups=set_id`, matching RQ1a's own convention) and a
+set-fixed-effects WCB (checked first via an RE-vs-pooled-OLS comparison;
+`severity_c` diverges the same way it did in §9's main model, e.g. gemma's
+RE estimate −0.086 vs. pooled-OLS −0.190, so this uses set-FE from the
+start):
+
+- **A (label alone):** `ev_rating ~ sign_c * vt_c`
+- **B (severity alone):** `ev_rating ~ sign_c * severity_c`
+- **C (combined):** `ev_rating ~ sign_c * vt_c + sign_c * severity_c`
+
+| family | A: label AIC | B: severity AIC | C: `sign_c:vt_c` p | C: `sign_c:severity_c` p |
+|---|---|---|---|---|
+| gemma | 16776.4 | 17423.0 | .712 | .971 |
+| llama | 24664.4 | 24768.8 | .543 | .200 |
+| mistral | 3231.8 | 5212.4 | .452 | .525 |
+
+**AIC decisively favors the categorical label over continuous severity as a
+predictor of intentionality overall, in all three families** — an
+overwhelming margin for mistral specifically. That's evidence *against* the
+strong "severity does all the work" reading on its face: the categorical
+label carries predictive information a raw severity score doesn't fully
+capture. **But this needs a caveat before leaning on it**: AIC compares
+overall model fit (main effect + interaction together), not specifically
+the sign-dependent asymmetry term — the label's AIC advantage could be a
+general moral-vs-nonmoral level difference in mean ratings, unrelated to
+the sign asymmetry per se. Consistent with that caveat: in the combined
+model C, **neither the label's nor severity's own interaction with sign
+survives in any family** — both wash out together. At the time this was
+run, that was read as "near-collinearity, genuinely ambiguous which one is
+doing the work" — §9.4 below resolves this ambiguity directly rather than
+statistically.
+
+### 9.2 A direct dose-response test, and a power correction to how its null was first read
+
+`19_severity_dose_response.py` fits `severity_c * sign_c` at the *exact*
+clustering and subset `rq1c_typicality_x_sign`/`evocativeness_x_sign` use
+(`family_id`, G=84, full power, no categorical label competing for
+variance in the same equation — checked for the OLS-vs-GLS divergence
+first: none, family_id clustering matches severity_c's level exactly):
+
+| predictor | gemma | llama | mistral |
+|---|---|---|---|
+| `severity_c:sign_c` | β=−0.190, p=.544 | β=+0.311, p=.698 | β=−0.096, p=.364 |
+| `typ_c:sign_c` (for comparison) | β=−0.415, p<.0001 | β=−0.177, p=.403 | β=−0.195, p<.0001 |
+| `evoc_c:sign_c` (for comparison) | β=−0.173, p=.030 | β=+0.102, p=.374 | β=+0.060, p=.170 |
+
+**This was first read as "severity shows no significant dose-response
+interaction with sign — weaker than every other predictor tested — which
+tempers the Theory-of-Dyadic-Morality reading."** That overstated what a
+non-significant p-value at this width licenses, on two counts flagged in
+review:
+
+1. **A non-significant interaction isn't evidence of absence unless the
+   test had power to detect an effect of the theoretically relevant size.**
+   Computing 95% CIs for `severity_c:sign_c` and checking whether they
+   exclude an effect as large as typicality's own (clean, significant)
+   magnitude:
+
+   | family | severity β | 95% CI | typicality's magnitude | CI excludes it? |
+   |---|---|---|---|---|
+   | gemma | −0.190 | [−0.723, +0.343] | −0.415 | **No** |
+   | llama | +0.311 | [−0.346, +0.968] | −0.177 | **No** |
+   | mistral | −0.096 | [−0.279, +0.087] | −0.195 | **No** |
+
+   In all three families, severity's CI comfortably contains an effect as
+   large as typicality's. **The correct statement is an equivalence-test
+   failure, not a confirmed null**: this test cannot distinguish "severity
+   matters as much as typicality" from "severity doesn't matter at all." Do
+   not cite this table as evidence severity's effect is smaller than
+   typicality's — only as evidence this particular test isn't informative
+   about that comparison.
+2. **The "severity ranks weakest" framing used llama's numbers as
+   supporting evidence, which they aren't.** Severity is numerically the
+   largest p-value within each family individually (gemma: typ≈0 <
+   evoc=.030 < severity=.544; llama: evoc=.374 < typ=.403 < severity=.698;
+   mistral: typ≈0 < evoc=.170 < severity=.364) — that ordering itself isn't
+   an artifact of pooling. But **llama is non-significant on all three
+   predictors**, so its internal ranking is ordering noise against noise,
+   not evidence about relative predictor strength. The only families where
+   a real modifying effect exists at all to compare severity *against* are
+   gemma and mistral.
+
+**Multiplicity note**: this section alone reports 9+ p-values with no
+correction applied. It doesn't touch the headline (severity's nulls get
+more null under any correction), but gemma's evocativeness p=.030 above is
+exactly the kind of borderline value that shouldn't be treated as
+load-bearing given how many tests this severity investigation ran.
+
+### 9.3 Why no functional form (linear or otherwise) could have resolved this from the existing data
+
+Before trying a higher-order fix (e.g. a quadratic or tercile-split
+severity term to test a saturating-severity version of TDM), the item
+distribution itself rules it out. Item-level severity is not a continuum:
+
+```
+severity:  0    1    2    3   4   5   6    7    8    9   10
+count:    57  133  106  11   5   2  26   24   21    7    2
+```
+
+and family-level mean severity by valence occupies almost completely
+disjoint ranges: **MB 5.7–9.0** (21 families, none below 5.7), **MG
+0.2–4.5**, **NMB 0.3–3.0** (21 families, none above 3.0), **NMG 0.0–1.8** —
+with exactly **1 family out of 105** in the 4–5.5 gap between the
+MB cluster and everything else. A linear severity term across this gap is
+functionally a two-cluster mean difference wearing a continuous-variable
+costume (explaining §9.2's wide CIs); a quadratic or spline term would be
+*worse*, not better — curvature estimation needs actual observations
+spanning the transition zone, and there's essentially one data point there.
+Any nonlinear dose-response test on the existing v1.1 data would produce
+another wide, uninformative fit, for the same underlying reason, not a new
+one. This is a property of the stimulus set, not of which model gets fit to
+it.
+
+### 9.4 The decisive check: are the RQ1a pairs actually severity-matched? (they aren't, for bad items specifically)
+
+`20_rq1a_severity_matched_pairs_check.py` runs the manipulation check that
+should have happened at norming and didn't: `curate.py`'s severity-match
+check (`check_pairs`) only ever compares *within* a family across the
+low/high-evocativeness swap — never *across* valence categories. Pulling
+the actual matched pairs (same `set_id`, same underlying storyline, only
+valence category differs):
+
+| pair | mean severity gap | sets matched (within 1.0 point) |
+|---|---|---|
+| MB vs. NMB (bad) | **5.42** | **0 of 21** |
+| MG vs. NMG (good) | 1.00 | 11 of 20 |
+
+**Bad pairs are unmatched in every single one of 21 storylines, with zero
+exceptions (gap range 3.5–7.0). Good pairs are reasonably close.** This
+supersedes §9.1–9.3's statistical approaches: it's a direct,
+assumption-free check of the stimulus design, not a model fit to noisy
+data, and it explains *why* those statistical approaches struggled
+(§9.3's disjoint clusters, §9.1's AIC/collinearity ambiguity, §9.2's
+uninformative CI) rather than needing to be reconciled with them. **RQ1a's
+moral-vs-severity question is a stimulus-design confound specific to the
+bad-valence pairs, not resolvable by any further regression on the existing
+data.** The fix is re-norming/re-matching nonmoral-*bad* content
+specifically (`docs/SEVERITY_PILOT_PLAN.md`) — nonmoral-good doesn't need
+it, per the good-pairs numbers above.
+
 ## 10. The RQ1b pooled-OLS bug: diagnosis and fix
 
 ### 10.1 The diagnostic: RE vs. pooled OLS vs. fixed effects

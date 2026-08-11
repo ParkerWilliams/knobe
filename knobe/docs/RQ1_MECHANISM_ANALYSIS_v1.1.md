@@ -67,6 +67,11 @@ is unreliable at only 21 clusters). Baseline WCB survives for llama/mistral
 (p=.0045/.001) but not gemma (p=.640); with severity added as a covariate,
 none survive (p=.655/.222/.564) — full numbers and the set-FE bootstrap-bias
 correction behind them in `docs/RQ1_STATISTICAL_METHODS_v1.1.md` §9.
+**The full trail this section summarizes — the label-vs-severity AIC
+comparison, the direct dose-response test and the equivalence-CI correction
+to how its null was first read, and why the item distribution itself rules
+out a higher-order fix — is preserved in full in that doc's §9.1–9.3, not
+just this shorter version.**
 
 **The direct manipulation check this warranted from the start, and didn't
 get at norming time: are moral and nonmoral items actually matched on
@@ -117,7 +122,8 @@ more modeling on the existing v1.1 data can resolve.** Until nonmoral-bad
 severity is deliberately raised into the 5–7 range and re-checked against
 moral_relevance, RQ1a's moral-vs-severity question should be reported as a
 design limitation, not a statistically-adjudicated finding in either
-direction.
+direction. (Full matched-pair table: `docs/RQ1_STATISTICAL_METHODS_v1.1.md`
+§9.4.)
 
 **What still stands on its own:** the direct split-sample test (fit the
 sign effect separately within moral-only and nonmoral-only items, not as a
