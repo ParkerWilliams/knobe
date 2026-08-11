@@ -358,19 +358,37 @@ were computed on (script `04_rq1a_severity_covariate.py` vs.
 
 | family | baseline β (LMM) | baseline WCB p (severity-complete subsample) | +severity β (LMM) | +severity WCB p |
 |---|---|---|---|---|
-| gemma | +0.065 | .640 | +0.280 | **.316** |
-| llama | +0.650 | **.0045** | +1.640 | **.459** |
-| mistral | +0.250 | **.001** | **−0.064** (sign flip) | **.203** |
+| gemma | +0.065 | .640 | +0.280 | **.655** |
+| llama | +0.650 | **.0045** | +1.640 | **.222** |
+| mistral | +0.250 | **.001** | **−0.062** (sign flip) | **.564** |
+
+**Correction (found while building the MDE table, §11.1): the first-pass
++severity WCB p-values above (.316/.459/.203) were themselves biased,
+for exactly the reason §10 diagnoses for RQ1b.** `severity_c` is a
+continuous, family-level covariate, not a balanced ±0.5 design factor like
+`sign_c`/`vt_c`; adding it broke the plain-pooled-OLS-refit WCB the same way
+`pred_c` broke RQ1b's, and the point estimates showed it (gemma's
+pooled-OLS estimate was −0.976 against an LMM estimate of +0.280 — a sign
+flip, not noise). `13_rq1a_severity_set_fe_diagnostic.py` reruns the
+RE/pooled-OLS/fixed-effects comparison for this model: unlike RQ1b,
+`sign_c` and `vt_c` both vary *within* a `set_id` (a set's four non-NEU
+members span MB/MG/NMB/NMG), so a **set**-fixed-effects specification is
+well-identified here too, with no term needing to be dropped. Set-FE agrees
+closely with the LMM in all three families (gemma 0.285 vs. 0.280, llama
+1.646 vs. 1.640, mistral −0.062 vs. −0.064) — confirming the LMM estimates
+were right all along; it was only the WCB's refit engine that was wrong.
+`14_rq1a_severity_set_fe_wcb.py` reruns WCB with the set-FE refit; the table
+above now reflects the corrected numbers.
 
 **None of the three families' RQ1a interaction survives both a properly-sized
-small-G test and severity adjustment simultaneously.** Llama and mistral
-survive the baseline WCB alone; none survive once severity is in the model.
-Mistral's coefficient actually reverses sign once severity is controlled for
-(and is not significant either way at that point). This directly weakens
-RQ1a's headline: what looked like "moral badness specifically, not just any
-negative valence" is at least partly attributable to moral items being more
-severe, and the interaction that would isolate the "purely moral" component
-doesn't clear a properly-sized bar once you try to isolate it.
+small-G test and severity adjustment simultaneously — and it isn't close.**
+Llama and mistral survive the baseline WCB alone; none survive once severity
+is in the model, now by a wider margin than the (biased) first pass
+suggested. This directly weakens RQ1a's headline: what looked like "moral
+badness specifically, not just any negative valence" is at least partly
+attributable to moral items being more severe, and the interaction that
+would isolate the "purely moral" component doesn't clear a properly-sized
+bar once you try to isolate it.
 
 **This does not fully overturn the separate, direct moral-vs-nonmoral split
 test** in `docs/RQ1_MECHANISM_ANALYSIS_v1.1.md` §1 (fitting the sign effect
@@ -558,13 +576,63 @@ related but not the same statistic (MDE answers "what effect size would this
 design reliably detect," the WCB p-value answers "is this particular observed
 effect surprising under the null"), so occasional near-boundary disagreements
 like this are expected, not a contradiction. The useful reading is the
-*non-significant* cells: gemma's `rq1c_typicality_x_sign`... [not applicable,
-gemma survives] — rather, `rq1c_typicality_x_sign` for llama (observed 0.177
+*non-significant* cells: `rq1c_typicality_x_sign` for llama (observed 0.177
 vs. MDE 0.591) and every `rq1c_evocativeness_x_sign` cell are consistent with
 this design simply not being powered to detect effects that size at these
 cluster counts, which is a different, more actionable conclusion than "no
 effect exists" — it argues for more families/sets in a future release
 specifically for these contrasts, not for abandoning the underlying question.
+
+### 11.2 Severity-adjusted RQ1a: MDE and how many more sets would fix it
+
+Redone with the corrected set-FE SE (§9): does the RQ1a severity-adjusted
+model's non-significance reflect a genuine null, or an underpowered design?
+And if it's underpowered, how much bigger would a follow-up release need to
+be — using `MDE = SE × (t_{1−α/2,df} + t_{power,df})` and, for the sample-size
+question, the standard cluster-planning approximation `SE(G_new) = SE(G_current)
+× √(G_current / G_new)` (holding the observed effect size and each set's
+variance contribution fixed — see the caveats below the table;
+`15_rq1a_severity_mde_and_power_planning.py`):
+
+| model | family | observed β | SE (G=21) | MDE | observed ≥ MDE? | sets needed for 80% power | additional sets needed |
+|---|---|---|---|---|---|---|---|
+| baseline | gemma | 0.092 | 0.134 | 0.397 | No | 355 | +334 |
+| baseline | llama | 0.629 | 0.245 | 0.723 | No | 27 | +6 |
+| baseline | mistral | 0.263 | 0.068 | 0.200 | **Yes** | 22 | +1 |
+| +severity_c (set-FE) | gemma | 0.285 | 0.452 | 1.335 | No | 418 | +397 |
+| +severity_c (set-FE) | llama | 1.646 | 1.055 | 3.117 | No | 70 | +49 |
+| +severity_c (set-FE) | mistral | −0.062 | 0.106 | 0.312 | No | 484 | +463 |
+
+**This directly answers the "underpowered vs. null" question the mechanism
+doc's severity finding leaves open: all three families are in the
+underpowered bucket, not the confirmed-null bucket, once severity is in the
+model.** Every severity-adjusted observed effect sits well under its own
+MDE — mistral's (the smallest, −0.062) is a fifth of its MDE (0.312), and
+even llama's much larger point estimate (1.646) is only about half of what
+this design could reliably detect (3.117). The honest statement is **"RQ1a
+is uninterpretable post-severity-control at this cluster count for all
+three families — underpowered, not null"** — not "the effect disappeared."
+
+The sample-size answers differ sharply by family, which is itself
+informative: llama would need a plausible-sized expansion (21→70 sets, +49)
+to have a shot at confirming its severity-adjusted point estimate, while
+gemma and mistral would need 400+ additional sets — a release roughly 20x
+the current size — because their point estimates are so small relative to
+their SEs that the arithmetic simply doesn't converge on anything feasible.
+That pattern (llama borderline-recoverable, gemma/mistral not) is more
+informative than a single pooled "needs more data" verdict.
+
+**Caveats on the sample-size number specifically (beyond the general MDE
+caveats above):** (1) the `√(G_current/G_new)` scaling assumes each
+additional set contributes the same variance structure as the current 21 —
+real additional storylines could be more or less noisy; (2) it treats the
+*observed* point estimate as if it were the true effect, which is
+circular for the families whose observed effect is mostly noise (gemma,
+mistral) — a more defensible framing is "this is how big a study would need
+to be to distinguish an effect of this size from zero," not "this is how
+big a study needs to be to find the true effect," since we don't know the
+true effect; (3) it does not account for the same severity confound
+potentially scaling with more families rather than averaging out.
 
 ## 12. Summary: what to trust, per contrast family (revised)
 
@@ -610,12 +678,16 @@ specifically for these contrasts, not for abandoning the underlying question.
    `--domain-slope-sensitivity`) rather than one-off exploratory scripts —
    everything in §8–§11 was run outside `knobe analyze` and should be
    reproducible via the CLI before being cited in any future writeup.
-7. **MDE for the severity-adjusted RQ1a model, not just the baseline.**
-   §11.1's MDE table uses the baseline (no-severity) WCB SE at G=21; the
-   severity-adjusted model's SE is 5-6x larger (`04_rq1a_severity_covariate.py`),
-   so its MDE would be substantially larger too — worth computing explicitly
-   to show the post-severity design is underpowered, not just
-   non-significant, alongside the significance result in §9.
+7. ~~MDE for the severity-adjusted RQ1a model, not just the baseline~~ —
+   **done, §11.2**: all three families are underpowered, not confirmed-null,
+   post-severity-control. Finishing this surfaced a second instance of the
+   pooled-OLS bias (§9's correction). ~~Worth checking whether any other WCB
+   script uses a continuous, cluster-correlated covariate~~ — **checked**
+   (`analysis/rq1_v1_1_robustness/README.md`'s audit note): every other
+   `wild_cluster_bootstrap` call uses only balanced ±0.5 factors or a bare
+   intercept — RQ1b's `pred_c` and RQ1a's `severity_c` were the only two
+   continuous, cluster-correlated covariates in the whole directory, and
+   both are now fixed. Recheck this if a future script adds another one.
 8. **Three numbers already cited in a doc still have no committed script**
    (reviewer severity by valence category, the curation flag-distribution
    check, and early parse-rate/EV-rating EDA) — flagged as "Known gaps" in

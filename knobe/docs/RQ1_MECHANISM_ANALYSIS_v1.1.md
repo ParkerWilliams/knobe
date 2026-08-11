@@ -70,9 +70,9 @@ as a wild cluster bootstrap:
 
 | family | baseline WCB p (no severity, severity-complete subsample) | +severity-covariate WCB p |
 |---|---|---|
-| gemma | .640 | .316 |
-| llama | **.0045** | .459 |
-| mistral | **.001** | .203 (sign flips negative) |
+| gemma | .640 | .655 |
+| llama | **.0045** | .222 |
+| mistral | **.001** | .564 (point estimate flips sign negative) |
 
 (One family, WORK-MG-02, has no curation severity record and is dropped from
 both columns here for an apples-to-apples comparison; the standalone
@@ -80,14 +80,35 @@ full-84-family baseline WCB — no severity model in play — gives very
 slightly different numbers with the identical qualitative pattern: gemma
 .512, llama .003, mistral <.0001. See
 `analysis/rq1_v1_1_robustness/03_rq1a_baseline_wcb.py` vs.
-`04_rq1a_severity_covariate.py`.)
+`04_rq1a_severity_covariate.py`. The +severity numbers here are also
+corrected from an earlier pass: `severity_c` is a continuous, family-level
+covariate, so a plain-pooled-OLS bootstrap refit is biased for the same
+reason RQ1b's was — a set-fixed-effects refit fixes it, per
+`docs/RQ1_STATISTICAL_METHODS_v1.1.md` §9.)
 
 Adding reviewer-rated severity as a covariate (MB averages 7.0/10 severity,
 NMB averages 1.6 — moral and nonmoral items are not intensity-matched in this
 stimulus set) kills the interaction in all three families, including the two
-that survived the baseline small-G test. **The formal "moral-specific
+that survived the baseline small-G test — and by a wider margin than the
+first-pass (biased) numbers suggested. **The formal "moral-specific
 interaction" claim does not survive small-cluster-robust inference once
-intensity is controlled for, in any family.** Full derivation:
+intensity is controlled for, in any family.**
+
+**Underpowered, not null.** A minimum-detectable-effect calculation
+(`docs/RQ1_STATISTICAL_METHODS_v1.1.md` §11.2) resolves which of these two
+this actually is: every severity-adjusted observed effect sits well under
+what this design could reliably detect at G=21 — mistral's (−0.062) is a
+fifth of its own MDE (0.312); even llama's much larger estimate (1.646) is
+only about half its MDE (3.117). **The honest statement is "RQ1a is
+uninterpretable post-severity-control at this cluster count for all three
+families," not "the moral-specific effect disappeared."** How much more data
+would fix this differs sharply by family: llama would need roughly 3x the
+current 21 sets (to 70) to have a shot at confirming its point estimate;
+gemma and mistral would need a ~20x larger release (400+ sets), because
+their point estimates are small enough relative to their SEs that the
+arithmetic doesn't converge on anything feasible — itself suggestive that
+gemma's and mistral's severity-adjusted effects are mostly noise, while
+llama's might be a real, just under-sampled, effect. Full derivation:
 `docs/RQ1_STATISTICAL_METHODS_v1.1.md` §9.
 
 **Reconciling the two results:** a split-sample test (fit the sign effect
@@ -319,11 +340,15 @@ sized inference) that this taxonomy and this re-analysis made visible.
 - Domain-random-slope sensitivity fits for the cross-domain generalization
   claims underlying §1 and §3, given how much family-level heterogeneity the
   random-slope check surfaced.
-- Minimum-detectable-effect for the severity-adjusted RQ1a model (§1) — only
-  the baseline (no-severity) MDE has been computed so far
-  (`docs/RQ1_STATISTICAL_METHODS_v1.1.md` §11.1); the severity-adjusted SE is
-  5-6x larger, so its MDE needs stating explicitly to show that model is
-  underpowered, not just non-significant.
+- ~~Minimum-detectable-effect for the severity-adjusted RQ1a model~~ — done
+  (§1 above, `docs/RQ1_STATISTICAL_METHODS_v1.1.md` §11.2): all three
+  families are underpowered, not confirmed-null. Doing this surfaced a
+  second case of the pooled-OLS bias (fixed via set fixed effects, same fix
+  family as RQ1b's) — ~~worth a systematic check of every other WCB script~~
+  now checked: every other `wild_cluster_bootstrap` call in
+  `analysis/rq1_v1_1_robustness/` uses only balanced ±0.5 factors or a bare
+  intercept; `pred_c` (RQ1b) and `severity_c` (RQ1a) were the only two
+  continuous, cluster-correlated covariates, and both are fixed now.
 - Three numbers in §1 (the severity-by-valence table) and elsewhere in this
   session are still not backed by a committed script — recorded as "Known
   gaps" in `results/ANALYSIS_LOG.md` rather than silently left untraced.

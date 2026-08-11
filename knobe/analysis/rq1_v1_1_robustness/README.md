@@ -46,6 +46,9 @@ cd analysis/rq1_v1_1_robustness
 ../../.venv/bin/python 10_typicality_evocativeness_gap_tables.py
 ../../.venv/bin/python 11_affect_evocativeness_construct_check.py
 ../../.venv/bin/python 12_affect_decoupling.py
+../../.venv/bin/python 13_rq1a_severity_set_fe_diagnostic.py
+../../.venv/bin/python 14_rq1a_severity_set_fe_wcb.py
+../../.venv/bin/python 15_rq1a_severity_mde_and_power_planning.py   # run after 03 and 14
 ```
 
 Every script writes one small CSV to `outputs/` and prints it to stdout.
@@ -72,6 +75,30 @@ coding exactly).
 | `10_typicality_evocativeness_gap_tables.py` | `outputs/10_typicality_gap.csv`, `outputs/10_evocativeness_gap.csv` | MECHANISM_ANALYSIS §3 (typicality gap quoted; evocativeness gap explored, not quoted) |
 | `11_affect_evocativeness_construct_check.py` | `outputs/11_affect_evocativeness_construct_check.csv` | MECHANISM_ANALYSIS §4 (first table) |
 | `12_affect_decoupling.py` | `outputs/12_affect_decoupling.csv` | MECHANISM_ANALYSIS §4 (second table) — flagged there as a lead, not yet WCB/random-slope tested |
+| `13_rq1a_severity_set_fe_diagnostic.py` | `outputs/13_rq1a_severity_set_fe_diagnostic.csv` | STATISTICAL_METHODS §9 (diagnostic note) |
+| `14_rq1a_severity_set_fe_wcb.py` | `outputs/14_rq1a_severity_set_fe_wcb.csv` | STATISTICAL_METHODS §9 (corrected +severity WCB p-values); MECHANISM_ANALYSIS §1 |
+| `15_rq1a_severity_mde_and_power_planning.py` | `outputs/15_rq1a_severity_mde_and_power_planning.csv` | STATISTICAL_METHODS §11.2; MECHANISM_ANALYSIS §1 |
+
+## A second instance of the pooled-OLS bias, found while finishing the MDE table
+
+Same root cause as the RQ1b bug (see `06_rq1b_hausman_diagnostic.py` /
+`docs/RQ1_STATISTICAL_METHODS_v1.1.md` §10.1), different contrast: RQ1a's
+severity-adjusted model (`04_rq1a_severity_covariate.py`'s `+severity_c`
+rows) also used a plain-pooled-OLS WCB refit, and `severity_c` — a
+continuous, family-level covariate — broke it the same way `pred_c` broke
+RQ1b's (gemma's pooled-OLS point estimate was −0.976 against an LMM estimate
+of +0.280 — a sign flip). `13`/`14` diagnose and fix it with a
+**set**-fixed-effects refit (not family-FE — unlike RQ1b, `sign_c`/`vt_c`
+vary within a `set_id`, so this is the correctly-scoped fix here). **Only
+two of these have been caught, both by hand.** Audited every other
+`wild_cluster_bootstrap(...)` call in `01`-`12` (`grep -n
+"wild_cluster_bootstrap(" 0*.py`) to check: every other formula uses only
+the balanced ±0.5 effect-coded factors (`sign_c`, `tuning_c`, `typ_c`,
+`evoc_c`) or a bare intercept — `pred_c` (RQ1b) and `severity_c` (RQ1a) were
+the only two continuous, cluster-correlated covariates in this directory,
+and both are now fixed. No other instance of this bug exists here as of
+this audit; recheck this if a future script adds another continuous
+covariate to a WCB call.
 
 ## Known loose end
 
