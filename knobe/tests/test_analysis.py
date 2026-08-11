@@ -12,6 +12,8 @@ from __future__ import annotations
 import warnings
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
 import pytest
 
 from fixtures.analysis_fixture import (
@@ -19,7 +21,8 @@ from fixtures.analysis_fixture import (
 )
 from knobe.analysis import figures, ingest, models
 from knobe.analysis.models import (
-    UndeclaredContrastError, UndeclaredSensitivityError, _fit_domain_slope, _fit_lmm,
+    UndeclaredContrastError, UndeclaredSensitivityError, _bootstrap_ci, _bootstrap_formula,
+    _fit_domain_slope, _fit_lmm,
 )
 from knobe.analysis.report import DEVIATION_NOTE, run_analyze
 from knobe.schemas import ResultRecord, write_jsonl
@@ -653,3 +656,95 @@ def test_1b_frame_uses_item_level_pairing(tmp_path):
     assert set(frame["question_type"]) == {"intentionality"}
     assert "pred_c" in frame.columns and "sg_c" in frame.columns
     assert len(frame) > len(frame["variant_id"].unique())  # response-level, not item-level
+
+
+def _make_1b_family_confound_frame(seed: int = 0, n_fam_per_sign: int = 15, n_variants: int = 6) -> pd.DataFrame:
+    """A ``prepared``-shaped frame where an item's blame/praise mean (the 1b
+    predictor) is driven mostly by a FAMILY-level confound that also shifts
+    that family's sign (mirrors the real v1.1 finding: pred_c correlates
+    0.77-0.96 with its own family mean, plausibly via the same severity/
+    valence-intensity confound documented for RQ1a). A smaller, independent
+    WITHIN-family component drives the true pred_c:sg_c effect. Plain pooled
+    OLS conflates the two; family fixed effects (or the family-RI LMM)
+    don't."""
+    rng = np.random.default_rng(seed)
+    rows: list[dict] = []
+    for sign, sg_c, level_mean in (("bad", 0.5, 2.0), ("good", -0.5, -2.0)):
+        for i in range(n_fam_per_sign):
+            family_id = f"{sign}-{i:03d}"
+            family_level = rng.normal(level_mean, 1.0)  # confound, correlated with sg_c
+            for v in range(n_variants):
+                variant_id = f"{family_id}-{v}"
+                variant_within = rng.normal(0.0, 1.0)  # true within-family driver
+                pred_raw = family_level + variant_within + rng.normal(0.0, 0.2)
+                rating = 5.0 + 1.5 * family_level + 2.0 * sg_c * variant_within + rng.normal(0.0, 0.5)
+                channel = "blame" if sign == "bad" else "praise"
+                rows.append(dict(
+                    model_family="test", tuning_status="finetuned", format="raw",
+                    valence_type="moral", sign=sign, question_type=channel,
+                    variant_id=variant_id, family_id=family_id, rating=float(pred_raw),
+                ))
+                rows.append(dict(
+                    model_family="test", tuning_status="finetuned", format="raw",
+                    valence_type="moral", sign=sign, question_type="intentionality",
+                    variant_id=variant_id, family_id=family_id, rating=float(rating),
+                ))
+    return pd.DataFrame(rows)
+
+
+def test_1b_bootstrap_ci_biased_by_pooled_ols_under_family_confound():
+    """Documents the bug this fixture exists to catch: refitting the 1b
+    bootstrap with plain pooled OLS (pred_c's family-confound in play) gives a
+    CI that does NOT bracket the primary LMM's own point estimate -- exactly
+    the pathology found on real v1.1 data for rq1b_moral/llama and
+    rq1b_nonmoral/mistral (docs/RQ1_STATISTICAL_METHODS_v1.1.md §4)."""
+    prepared = _make_1b_family_confound_frame()
+    spec = next(s for s in models.load_prereg().contrasts if s.name == "rq1b_moral")
+    frame = models.prepare_1b_frame(prepared[prepared["tuning_status"] == "finetuned"], "moral")
+    fit = _fit_lmm(frame, spec.formula, spec.term)
+
+    old_ci = _bootstrap_ci(
+        frame, "rating ~ pred_c * sg_c", spec.term,
+        base_seed=0, contrast="test", model_family="test", n_boot=300,
+    )
+    assert old_ci[0] is not None
+    assert not (old_ci[0] <= fit.estimate <= old_ci[1]), (
+        "expected the unfixed pooled-OLS bootstrap to fail to bracket the LMM "
+        "estimate under this family confound -- if this now passes, the "
+        "synthetic confound needs strengthening, not the assertion removing."
+    )
+
+
+def test_1b_bootstrap_ci_family_fe_fix_brackets_estimate():
+    """The actual regression test for the fix: fit_contrast's family-FE
+    bootstrap formula (_bootstrap_formula) gives a CI that DOES bracket the
+    primary LMM's point estimate under the same family confound that breaks
+    plain pooled OLS above."""
+    prepared = _make_1b_family_confound_frame()
+    spec = next(s for s in models.load_prereg().contrasts if s.name == "rq1b_moral")
+    frame = models.prepare_1b_frame(prepared[prepared["tuning_status"] == "finetuned"], "moral")
+    fit = _fit_lmm(frame, spec.formula, spec.term)
+
+    new_ci = _bootstrap_ci(
+        frame, _bootstrap_formula(spec), spec.term,
+        base_seed=0, contrast="test", model_family="test", n_boot=300,
+    )
+    assert new_ci[0] is not None
+    assert new_ci[0] <= fit.estimate <= new_ci[1]
+
+    # and the full fit_contrast path agrees end to end
+    record, _ = models.fit_contrast(prepared, spec, "test", base_seed=0, n_boot=300)
+    assert record is not None
+    assert record.ci_low <= record.estimate <= record.ci_high
+
+
+def test_bootstrap_formula_rejects_unexpected_1b_shape():
+    """_bootstrap_formula's family-FE string rewrite is a targeted patch on
+    the exact 'pred_c * sg_c' shape every lmm_1b contrast uses today; if that
+    ever changes, this should hard-error rather than silently skip the fix."""
+    import dataclasses
+
+    spec = next(s for s in models.load_prereg().contrasts if s.name == "rq1b_moral")
+    bad_spec = dataclasses.replace(spec, formula="rating ~ pred_c + sg_c")  # no "*" shape
+    with pytest.raises(ValueError):
+        _bootstrap_formula(bad_spec)

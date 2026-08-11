@@ -537,6 +537,53 @@ def _subset_for_fit(
     return sub
 
 
+def _bootstrap_formula(spec: ContrastSpec) -> str:
+    """The formula ``_bootstrap_ci`` should refit on each family-resample.
+
+    For every ``kind`` except ``lmm_1b``, this is just ``spec.formula``: the
+    fixed effects (sign/tuning/valence-type/typicality/evocativeness) are
+    balanced, effect-coded design factors, so plain OLS and the primary
+    mixedlm agree closely on the point estimate (confirmed empirically:
+    family-RI vs. set_id-cluster vs. family-FE point estimates are identical
+    to 6 decimal places for RQ1_base/RQ1a/RQ1c/RQ1d) and a pooled-OLS
+    bootstrap refit is unbiased.
+
+    ``lmm_1b`` is different and needs family fixed effects instead. Its
+    predictor ``pred_c`` (an item's blame/praise mean) is a continuous,
+    per-item covariate, NOT a balanced design factor, and it is strongly
+    correlated with family identity (measured on v1.1: corr(pred_c, its own
+    family mean) = 0.77-0.96 across all six family x valence_type cells) --
+    an unmeasured family-level driver (plausibly the same severity/valence
+    intensity confound documented for RQ1a) shifts both an item's judged
+    blameworthiness and its intentionality rating together. Plain pooled OLS
+    treats that between-family covariation as if it were the within-family
+    slope of interest, biasing the estimate (verified: pooled-OLS vs.
+    family-fixed-effects point estimates disagreed by 0.4-3.7 rating points
+    across the six real cells, occasionally flipping sign, while the
+    family-fixed-effects and the primary mixedlm/RE point estimates agreed
+    to within ~0.1 in every cell -- see docs/RQ1_STATISTICAL_METHODS_v1.1.md).
+    This is exactly why the reported ``ci_low``/``ci_high`` for RQ1b
+    contrasts used to fail to bracket their own point estimate.
+
+    The fix: add family fixed effects (``C(family_id)``) to the bootstrap
+    refit for ``lmm_1b`` contrasts, and drop the now-collinear bare ``sg_c``
+    main effect (sign is constant within a family/valence, so once family
+    dummies are in the model ``sg_c`` is perfectly explained by them --
+    leaving it in produces a rank-deficient design and degenerate SEs).
+    ``pred_c:sg_c`` stays identified: it's each family's fixed sg_c value
+    times that family's OWN within-family ``pred_c`` variation, and
+    families differ in which sg_c value they carry."""
+    if spec.kind != "lmm_1b":
+        return spec.formula
+    if "pred_c * sg_c" not in spec.formula:
+        raise ValueError(
+            f"contrast {spec.name!r} is kind=lmm_1b but its formula "
+            f"{spec.formula!r} doesn't match the expected 'pred_c * sg_c' "
+            "shape -- _bootstrap_formula's family-FE rewrite needs updating."
+        )
+    return spec.formula.replace("pred_c * sg_c", "pred_c + pred_c:sg_c") + " + C(family_id)"
+
+
 def fit_contrast(
     prepared: pd.DataFrame, spec: ContrastSpec, model_family: str, *,
     base_seed: int, n_boot: int, ordinal: bool = True, fmt: str = "raw",
@@ -552,7 +599,7 @@ def fit_contrast(
 
     fit = _fit_lmm(df, spec.formula, spec.term)
     ci_low, ci_high = _bootstrap_ci(
-        df, spec.formula, spec.term, base_seed=base_seed, contrast=spec.name,
+        df, _bootstrap_formula(spec), spec.term, base_seed=base_seed, contrast=spec.name,
         model_family=model_family, n_boot=n_boot,
     )
     ci_method = "cluster_bootstrap_ols" if (n_boot > 0 and ci_low is not None) else "none"
