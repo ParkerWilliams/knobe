@@ -43,6 +43,9 @@ cd analysis/rq1_v1_1_robustness
 ../../.venv/bin/python 07_rq1b_family_fe_wcb.py
 ../../.venv/bin/python 08_family_random_slopes.py
 ../../.venv/bin/python 09_minimum_detectable_effect.py   # run after 01/02/03/07 -- reads their outputs
+../../.venv/bin/python 10_typicality_evocativeness_gap_tables.py
+../../.venv/bin/python 11_affect_evocativeness_construct_check.py
+../../.venv/bin/python 12_affect_decoupling.py
 ```
 
 Every script writes one small CSV to `outputs/` and prints it to stdout.
@@ -66,6 +69,9 @@ coding exactly).
 | `07_rq1b_family_fe_wcb.py` | `outputs/07_rq1b_family_fe_wcb.csv` | STATISTICAL_METHODS §8, §10.3; MECHANISM_ANALYSIS §2 |
 | `08_family_random_slopes.py` | `outputs/08_family_random_slopes.csv` | STATISTICAL_METHODS §11 |
 | `09_minimum_detectable_effect.py` | `outputs/09_minimum_detectable_effect.csv` | STATISTICAL_METHODS §11.1 |
+| `10_typicality_evocativeness_gap_tables.py` | `outputs/10_typicality_gap.csv`, `outputs/10_evocativeness_gap.csv` | MECHANISM_ANALYSIS §3 (typicality gap quoted; evocativeness gap explored, not quoted) |
+| `11_affect_evocativeness_construct_check.py` | `outputs/11_affect_evocativeness_construct_check.csv` | MECHANISM_ANALYSIS §4 (first table) |
+| `12_affect_decoupling.py` | `outputs/12_affect_decoupling.csv` | MECHANISM_ANALYSIS §4 (second table) — flagged there as a lead, not yet WCB/random-slope tested |
 
 ## Known loose end
 
