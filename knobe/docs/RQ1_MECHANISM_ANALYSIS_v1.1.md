@@ -272,6 +272,19 @@ in the entire release" (first-pass framing) should be narrowed to "robust in
 2 of 3 families" — still the strongest surviving effect after RQ1d, but not
 universal.
 
+**Not a severity story in disguise.** Given RQ1a's severity confound
+(§1), the natural next question is whether typicality itself correlates
+with severity — uncommon actions do read as slightly more severe than
+common ones, consistently across every valence category (`curated_v1.1.csv`:
+MB 6.6→7.5, MG 1.8→2.0, NMB 1.6→1.7, NMG 0.7→1.1), but the correlation is
+weak (r=.07–.15, vs. RQ1a's r=.885 within moral items) and typicality is a
+factorially-crossed, balanced design factor here, not a family-constant
+category like sign/valence-type. Controlling for severity leaves
+`typ_c:sign_c` **unchanged to 6 decimal places** in all three families
+(`18_rq1c_typicality_severity_covariate.py`) — the opposite result from
+RQ1a, where severity ate nearly the entire signal. This finding doesn't
+ride on severity at all.
+
 ---
 
 ## 4. Does affective response carry the same exacerbating role?

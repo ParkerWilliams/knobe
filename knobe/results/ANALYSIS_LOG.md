@@ -33,6 +33,7 @@ the line at the time of the run, not after the fact.
 2026-08-10 | `docs/SEVERITY_MORALIZATION_BACKGROUND.md` (theory note, no script) | Turiel/Rozin/Gray-Schein/Haidt synthesis | connects the r=.885 severity-sign correlation to this project's harm-based "moral" definition (constants.py excludes purity/loyalty/authority) — severity may be constitutive of, not just correlated with, moral status here | b7c0cb6
 2026-08-10 | `analysis/rq1_v1_1_robustness/17_severity_vs_label.py` | LMM (set_id) + set-FE WCB, 3 same-DF models | AIC favors the categorical label over severity alone in all 3 families (mistral: 3232 vs 5212); neither term survives in the combined model in any family (near-collinearity signature) | 672ec17
 2026-08-10 | `docs/SEVERITY_PILOT_PLAN.md` (plan doc, no script) | scoped for 2026-08-11 | curation-only pilot: 3-5 prudential families x 3 severity rungs, read moral_relevance-vs-severity slope, second-reviewer check before trusting a "flat" result | cca125a
+2026-08-10 | `analysis/rq1_v1_1_robustness/18_rq1c_typicality_severity_covariate.py` | B=1999, cluster=family_id (G=84), severity_c covariate | typicality/severity correlation is weak (r=.07-.15, vs RQ1a's r=.885); typ_c:sign_c coefficient UNCHANGED to 6 decimal places with severity added, all 3 families — RQ1c's typicality finding does not ride on severity | bec34a3
 
 ## Planned, scripted, blocked on external resource
 
