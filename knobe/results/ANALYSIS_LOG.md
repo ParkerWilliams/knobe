@@ -29,6 +29,11 @@ the line at the time of the run, not after the fact.
 2026-08-10 | `analysis/rq1_v1_1_robustness/14_rq1a_severity_set_fe_wcb.py` | B=1999, cluster=set_id (G=21), set-FE refit | corrected +severity_c WCB p-values: gemma .655, llama .222, mistral .564 (previous, biased numbers: .316/.459/.203) — same qualitative conclusion, wider margin | f0e50a9
 2026-08-10 | `analysis/rq1_v1_1_robustness/15_rq1a_severity_mde_and_power_planning.py` | α=.05, power=.80, df=G-2, SE-scaling sample-size approximation | all 3 families underpowered (not confirmed-null) post-severity-control; llama needs ~70 sets for 80% power (+49), gemma/mistral need 400+ (+397/+463) — consistent with gemma/mistral's effects being mostly noise | 74fd855
 
+2026-08-10 | `analysis/rq1_v1_1_robustness/16_valence_split_severity_covariate.py` | B=1999, cluster=family_id (G=42), severity_c covariate | moral-only: gemma fails (p=.543), llama close but not sig (p=.134), mistral null; nonmoral-only: mistral flips to strongly significant negative (p=.000) — unanticipated, severity was suppressing it | d094283
+2026-08-10 | `docs/SEVERITY_MORALIZATION_BACKGROUND.md` (theory note, no script) | Turiel/Rozin/Gray-Schein/Haidt synthesis | connects the r=.885 severity-sign correlation to this project's harm-based "moral" definition (constants.py excludes purity/loyalty/authority) — severity may be constitutive of, not just correlated with, moral status here | b7c0cb6
+2026-08-10 | `analysis/rq1_v1_1_robustness/17_severity_vs_label.py` | LMM (set_id) + set-FE WCB, 3 same-DF models | AIC favors the categorical label over severity alone in all 3 families (mistral: 3232 vs 5212); neither term survives in the combined model in any family (near-collinearity signature) | 672ec17
+2026-08-10 | `docs/SEVERITY_PILOT_PLAN.md` (plan doc, no script) | scoped for 2026-08-11 | curation-only pilot: 3-5 prudential families x 3 severity rungs, read moral_relevance-vs-severity slope, second-reviewer check before trusting a "flat" result | cca125a
+
 ## Known gaps (not yet scripted, numbers already in a doc)
 
 These predate the `analysis/rq1_v1_1_robustness/` scripts and were run as
