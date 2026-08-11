@@ -53,6 +53,7 @@ cd analysis/rq1_v1_1_robustness
 ../../.venv/bin/python 17_severity_vs_label.py
 ../../.venv/bin/python 18_rq1c_typicality_severity_covariate.py
 ../../.venv/bin/python 19_severity_dose_response.py   # run after 01 for the printed rq1c comparison
+../../.venv/bin/python 20_rq1a_severity_matched_pairs_check.py
 ```
 
 Every script writes one small CSV to `outputs/` and prints it to stdout.
@@ -85,7 +86,8 @@ coding exactly).
 | `16_valence_split_severity_covariate.py` | `outputs/16_valence_split_severity_covariate.csv` | MECHANISM_ANALYSIS §1 (severity-adjusted direct split; no OLS-vs-GLS divergence here, checked and confirmed clean) |
 | `17_severity_vs_label.py` | `outputs/17_severity_vs_label.csv` | MECHANISM_ANALYSIS §1; SEVERITY_MORALIZATION_BACKGROUND.md; SEVERITY_PILOT_PLAN.md |
 | `18_rq1c_typicality_severity_covariate.py` | `outputs/18_rq1c_typicality_severity_covariate.csv` | MECHANISM_ANALYSIS §3 — does typicality's effect ride on severity? No: coefficients unchanged to 6 decimal places in all 3 families |
-| `19_severity_dose_response.py` | `outputs/19_severity_dose_response.csv` | MECHANISM_ANALYSIS §1 — direct severity_c:sign_c dose-response test at rq1c's own clustering/power; not significant in any family, weaker than typicality or evocativeness |
+| `19_severity_dose_response.py` | `outputs/19_severity_dose_response.csv` | MECHANISM_ANALYSIS §1 — direct severity_c:sign_c dose-response test at rq1c's own clustering/power; not significant in any family, weaker than typicality or evocativeness, but its own CI is too wide to be disconfirming (see script 20 for the decisive check) |
+| `20_rq1a_severity_matched_pairs_check.py` | `outputs/20_severity_matched_pairs_{bad,good}.csv` | MECHANISM_ANALYSIS §1 — **the decisive finding**: within-storyline manipulation check shows MB/NMB (bad pairs) catastrophically severity-unmatched (0/21 sets within 1.0 point); MG/NMG (good pairs) reasonably matched (11/20). Stimulus-design confound, not a statistical-power problem |
 
 ## A second instance of the pooled-OLS bias, found while finishing the MDE table
 
