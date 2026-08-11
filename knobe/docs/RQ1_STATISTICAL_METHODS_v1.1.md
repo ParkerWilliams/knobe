@@ -610,6 +610,19 @@ specifically for these contrasts, not for abandoning the underlying question.
    `--domain-slope-sensitivity`) rather than one-off exploratory scripts —
    everything in §8–§11 was run outside `knobe analyze` and should be
    reproducible via the CLI before being cited in any future writeup.
+7. **MDE for the severity-adjusted RQ1a model, not just the baseline.**
+   §11.1's MDE table uses the baseline (no-severity) WCB SE at G=21; the
+   severity-adjusted model's SE is 5-6x larger (`04_rq1a_severity_covariate.py`),
+   so its MDE would be substantially larger too — worth computing explicitly
+   to show the post-severity design is underpowered, not just
+   non-significant, alongside the significance result in §9.
+8. **Three numbers already cited in a doc still have no committed script**
+   (reviewer severity by valence category, the curation flag-distribution
+   check, and early parse-rate/EV-rating EDA) — flagged as "Known gaps" in
+   `results/ANALYSIS_LOG.md` rather than silently left untraced. Lower
+   priority than items 1-7 (they reproduce already-published numbers or are
+   one-line groupbys, not novel findings), but should be formalized before
+   any of this is cited outside this repo.
 
 — §1–§7 generated 2026-08-10 from `knobe analyze`
 (`--contrast-names rq1_base_sign_finetuned,rq1_base_sign_x_tuning,rq1a_sign_x_valence_type,rq1b_moral,rq1b_nonmoral,rq1c_typicality_x_sign,rq1c_evocativeness_x_sign,rq1d_neu_offset,rq1d_typicality_within_neu --set-sensitivity --logit-fallback <all 6 model_keys> --no-figures`),

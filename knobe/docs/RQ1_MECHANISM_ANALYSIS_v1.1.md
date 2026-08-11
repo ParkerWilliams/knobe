@@ -319,6 +319,14 @@ sized inference) that this taxonomy and this re-analysis made visible.
 - Domain-random-slope sensitivity fits for the cross-domain generalization
   claims underlying §1 and §3, given how much family-level heterogeneity the
   random-slope check surfaced.
+- Minimum-detectable-effect for the severity-adjusted RQ1a model (§1) — only
+  the baseline (no-severity) MDE has been computed so far
+  (`docs/RQ1_STATISTICAL_METHODS_v1.1.md` §11.1); the severity-adjusted SE is
+  5-6x larger, so its MDE needs stating explicitly to show that model is
+  underpowered, not just non-significant.
+- Three numbers in §1 (the severity-by-valence table) and elsewhere in this
+  session are still not backed by a committed script — recorded as "Known
+  gaps" in `results/ANALYSIS_LOG.md` rather than silently left untraced.
 
 — Analysis run 2026-08-10 against `results/v1.1/results_all.jsonl` (378,000
 rows), `data/release/v1.1/vignettes.csv`, and `data/curation/curated_v1.1.csv`
