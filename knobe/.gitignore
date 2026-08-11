@@ -10,8 +10,11 @@ __pycache__/
 
 # results/ contents are gitignored except for a placeholder so the
 # directory itself is tracked; H200 outputs land here and are large.
+# ANALYSIS_LOG.md is also excepted (knobe/CLAUDE.md section 5): it's a small,
+# append-only provenance log, not a data artifact.
 results/*
 !results/.gitkeep
+!results/ANALYSIS_LOG.md
 orca/
 
 # Cluster-internal details — local-only, never push
