@@ -10,6 +10,50 @@ Backfilled entries below are reconstructed from the 2026-08-10 session
 history rather than logged live as each run happened — going forward, add
 the line at the time of the run, not after the fact.
 
+## Session summary — 2026-08-10
+
+Per `CLAUDE.md` section 6 (end-of-session file-change summary). 27 commits,
+`ed6e031..a087185`, all pushed to `origin/main`.
+
+**Modified** (3 files): `src/knobe/analysis/models.py` (the `_bootstrap_formula`
+fix — RQ1b's bootstrap CI used a biased pooled-OLS refit), `tests/test_analysis.py`
+(regression tests for that fix), `.gitignore` (excepted `results/ANALYSIS_LOG.md`
+from the blanket `results/*` rule).
+
+**Created** (55 files): `CLAUDE.md` (moved from the outer repo root into
+`knobe/`); 5 docs (`RQ1_MECHANISM_ANALYSIS_v1.1.md` and
+`RQ1_STATISTICAL_METHODS_v1.1.md` — both full revisions, not first drafts;
+`SEVERITY_MORALIZATION_BACKGROUND.md`; `SEVERITY_PILOT_PLAN.md`;
+`OUTSTANDING_STATISTICAL_ANALYSIS.md`); this log itself; and 48 files under
+`analysis/` — 20 numbered scripts plus `lib.py`/`config.yaml`/`README.md` in
+`analysis/rq1_v1_1_robustness/`, and 3 files (2 scripts + README, not yet
+run — needs API access this environment doesn't have) in
+`analysis/severity_wording_check/`.
+
+**Narrative arc**: started from a full v1.1 pull and RQ1a-1d analysis, then
+a small-cluster-robustness re-analysis (wild cluster bootstrap, family
+random slopes, minimum-detectable-effect/power planning) that overturned
+several first-pass headline claims and caught the same pooled-OLS bootstrap
+bias independently twice (RQ1b's `pred_c`, RQ1a's `severity_c`). The
+session's last thread — severity vs. moral category for RQ1a — initially
+proceeded through several statistical routes (severity-covariate refit, a
+label-vs-severity AIC comparison, a direct dose-response test) that each
+produced ambiguous or overstated results; review caught two real
+overclaims (an equivalence-test problem dressed as a null, and an
+uninformative internal ranking from a family with no effect on any
+predictor) before the actual resolution arrived from a direct manipulation
+check, not a model: moral-bad and nonmoral-bad items were never
+severity-matched at norming (0 of 21 storylines within 1 severity point of
+each other), while moral-good/nonmoral-good pairs are fine. That reframes
+RQ1a as a stimulus-design confound specific to the bad-valence pairs, not a
+statistically-resolvable question on the existing data — motivating the
+two-phase severity pilot (`SEVERITY_PILOT_PLAN.md`) scoped for the next
+session.
+
+**Known gaps carried forward**: see "Known gaps" and "Planned, scripted,
+blocked on external resource" below, and `OUTSTANDING_STATISTICAL_ANALYSIS.md`
+for the fuller status check against the original 12-item statistical review.
+
 2026-08-10 | `knobe analyze` (RQ1a-1d contrast set) | `--contrast-names rq1_base_sign_finetuned,rq1_base_sign_x_tuning,rq1a_sign_x_valence_type,rq1b_moral,rq1b_nonmoral,rq1c_typicality_x_sign,rq1c_evocativeness_x_sign,rq1d_neu_offset,rq1d_typicality_within_neu --logit-fallback <all 6 model_keys> --no-figures` | primary family-RI LMM fits for RQ1a-1d, reproduced the `MAIN_RUN_WRITEUP_v1.1.md` numbers | ed6e031 (pre-existing pipeline, no local changes yet)
 2026-08-10 | `knobe analyze` (same, + `--set-sensitivity`) | adds `set_id`-clustered refit | RQ1a "significant in all 3 families under set-clustering" headline reproduced from the asymptotic Wald p-values (later found in the WCB re-analysis not to survive a properly-sized test) | ed6e031
 2026-08-10 | `knobe analyze` (regenerated, same flags) | rerun after the `_bootstrap_formula` fix | RQ1b bootstrap CIs now bracket their point estimate in all 6 cells (previously 3 of 6 failed to) | 8338f92
