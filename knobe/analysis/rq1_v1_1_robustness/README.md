@@ -54,6 +54,8 @@ cd analysis/rq1_v1_1_robustness
 ../../.venv/bin/python 18_rq1c_typicality_severity_covariate.py
 ../../.venv/bin/python 19_severity_dose_response.py   # run after 01 for the printed rq1c comparison
 ../../.venv/bin/python 20_rq1a_severity_matched_pairs_check.py
+../../.venv/bin/python 21_rq1c_typicality_reversal_cellmeans.py
+../../.venv/bin/python 22_rq1c_typicality_main_effect.py
 ```
 
 Every script writes one small CSV to `outputs/` and prints it to stdout.
@@ -88,6 +90,8 @@ coding exactly).
 | `18_rq1c_typicality_severity_covariate.py` | `outputs/18_rq1c_typicality_severity_covariate.csv` | MECHANISM_ANALYSIS §3 — does typicality's effect ride on severity? No: coefficients unchanged to 6 decimal places in all 3 families |
 | `19_severity_dose_response.py` | `outputs/19_severity_dose_response.csv` | MECHANISM_ANALYSIS §1 — direct severity_c:sign_c dose-response test at rq1c's own clustering/power; not significant in any family, weaker than typicality or evocativeness, but its own CI is too wide to be disconfirming (see script 20 for the decisive check) |
 | `20_rq1a_severity_matched_pairs_check.py` | `outputs/20_severity_matched_pairs_{bad,good}.csv` | MECHANISM_ANALYSIS §1 — **the decisive finding**: within-storyline manipulation check shows MB/NMB (bad pairs) catastrophically severity-unmatched (0/21 sets within 1.0 point); MG/NMG (good pairs) reasonably matched (11/20). Stimulus-design confound, not a statistical-power problem |
+| `21_rq1c_typicality_reversal_cellmeans.py` | `outputs/21_typicality_reversal_cellmeans.csv` | investigating why RQ1c's typicality×sign "reversal" happens — raw cell means (not just the gap) show choosing an uncommon method raises intentionality overall in all 3 families, landing unevenly on bad vs. good |
+| `22_rq1c_typicality_main_effect.py` | `outputs/22_rq1c_typicality_main_effect.csv` | same investigation — WCB-tests the `typ_c` main effect alongside `typ_c:sign_c`: llama's typicality effect is huge (p<.0001) but symmetric (interaction null); gemma's main effect doesn't survive WCB at all (p=.126, interaction-only story); mistral has both a reliable main effect and a reliable interaction |
 
 ## A second instance of the pooled-OLS bias, found while finishing the MDE table
 

@@ -104,3 +104,5 @@ unaddressed:
   tracks sign) that reproduced already-published `MAIN_RUN_WRITEUP_v1.1.md`
   numbers as a sanity check rather than producing a new cited result — lower
   priority to formalize since nothing in a writeup depends on it uniquely.
+2026-08-11 | `analysis/rq1_v1_1_robustness/21_rq1c_typicality_reversal_cellmeans.py` | intentionality, finetuned, family x typicality x sign cell means | raw cell means (not just the gap) show uncommon-method items rate higher on intentionality overall in all 3 families, rising more for good than bad items | (uncommitted)
+2026-08-11 | `analysis/rq1_v1_1_robustness/22_rq1c_typicality_main_effect.py` | B=1999, cluster=family_id (G=84), seed=13, WCB on typ_c and typ_c:sign_c in `ev_rating ~ typ_c * sign_c` | llama: typ_c main effect huge and survives (p<.0001), interaction null (p=.40) -- symmetric shift; gemma: typ_c main effect does NOT survive (p=.126), interaction survives (p=.0005) -- interaction-only; mistral: both survive (p<.0001 / p<.0001) | (uncommitted)

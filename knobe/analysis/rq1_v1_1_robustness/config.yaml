@@ -28,6 +28,7 @@ wild_cluster_bootstrap:
     04_rq1a_severity_covariate: 1
     05_valence_split_wcb: 11
     07_rq1b_family_fe_wcb: 9
+    22_rq1c_typicality_main_effect: 13
 
 minimum_detectable_effect:
   alpha: 0.05
