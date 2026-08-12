@@ -362,6 +362,24 @@ sized inference) that this taxonomy and this re-analysis made visible.
 
 ## Open follow-ups
 
+- **New, not yet folded into §3's prose above**: the typicality×sign
+  "reversal" decomposes very differently by family once the `typ_c` MAIN
+  EFFECT is tested alongside the `typ_c:sign_c` interaction, not just the
+  interaction alone (`21_rq1c_typicality_reversal_cellmeans.py`,
+  `22_rq1c_typicality_main_effect.py`). Raw cell means show choosing an
+  uncommon *method* raises intentionality overall in all three families —
+  it's not only a shrinking bad-good gap. WCB-testing the main effect
+  directly: gemma has **no reliable main effect at all** (p=.126) — its
+  story is interaction-only; llama has **by far the largest main effect of
+  the three** (β=1.18, p<.0001) but it lands almost symmetrically on bad and
+  good, which is *why* its interaction is null (p=.40) — llama isn't
+  "missing" a typicality effect, it has the biggest one, just not a
+  sign-asymmetric one; mistral shows both a reliable main effect (p<.0001)
+  and a reliable interaction (p<.0001). §3's current text still reports this
+  as one shared "robust in 2/3 families, absent in llama" effect — that
+  framing should be rewritten once the still-pending domain-breakdown and
+  blame/praise generalization checks (next steps in this thread) are in, so
+  it isn't rewritten twice.
 - Resolve the mistral RQ1b-nonmoral disagreement with a joint/latent-variable
   model rather than choosing between two second-best estimators.
 - Wild-cluster-bootstrap and random-slope-test the affect-decoupling result
