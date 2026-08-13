@@ -29,6 +29,8 @@ wild_cluster_bootstrap:
     05_valence_split_wcb: 11
     07_rq1b_family_fe_wcb: 9
     22_rq1c_typicality_main_effect: 13
+    28_rq1b_simex: 14              # SIMEX per-item measurement-error simulation draws
+    28_rq1b_simex_bootstrap: 15    # family-cluster bootstrap of the SIMEX procedure, mistral-nonmoral only
 
 minimum_detectable_effect:
   alpha: 0.05

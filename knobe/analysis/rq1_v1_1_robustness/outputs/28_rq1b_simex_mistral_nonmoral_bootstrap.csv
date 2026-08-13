@@ -1,0 +1,2 @@
+family,valence_type,simex_beta,boot_ci_lo,boot_ci_hi,boot_p_approx,n_boot_outer,n_boot_inner,n_valid_draws,secs
+mistral,nonmoral,-0.17618058868719766,-0.5684176177254285,0.05353228840656485,0.14,200,20,200,242.60844802856445
