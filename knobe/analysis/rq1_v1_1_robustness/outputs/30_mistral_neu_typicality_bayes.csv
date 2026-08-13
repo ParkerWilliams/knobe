@@ -1,0 +1,2 @@
+label,term,n,secs,mean,sd,hdi_3,hdi_97,r_hat,ess_bulk,excludes_0
+mistral_rq1d_typicality_within_neu,typ_c,2100,27.851243019104004,6.005,0.878,4.515,7.673,1.0,5016.0,True
