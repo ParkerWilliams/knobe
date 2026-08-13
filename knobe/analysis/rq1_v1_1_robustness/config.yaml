@@ -31,6 +31,8 @@ wild_cluster_bootstrap:
     22_rq1c_typicality_main_effect: 13
     28_rq1b_simex: 14              # SIMEX per-item measurement-error simulation draws
     28_rq1b_simex_bootstrap: 15    # family-cluster bootstrap of the SIMEX procedure, mistral-nonmoral only
+    29_rq1_ordinal_mixed_bambi: 16       # MCMC random_seed, llama rq1c and mistral rq1_base fits
+    30_mistral_neu_typicality_bayes: 17  # MCMC random_seed, weakly-informative-prior ordinal fit
 
 minimum_detectable_effect:
   alpha: 0.05
