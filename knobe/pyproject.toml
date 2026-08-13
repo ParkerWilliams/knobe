@@ -23,6 +23,21 @@ dependencies = [
 # artifacts, and also declared in `mech` (their production home).
 dev = ["pytest", "pytest-cov", "safetensors", "pyarrow", "matplotlib"]
 stats = ["statsmodels", "matplotlib", "scipy", "scikit-learn"]
+# pymc/bambi: Bayesian mixed cumulative-link ordinal models (MCMC) -- no
+# Python-native frequentist option exists (statsmodels' OrderedModel has no
+# random effects) and R+rpy2 is a heavier lift than a pip install. Used for
+# outstanding-review items 3 (RQ1c/RQ1_base LMM-vs-ordinal disagreements) and
+# 4 (mistral NEU-typicality quasi-separation), analysis/rq1_v1_1_robustness/.
+# Note: pymc's `arviz` dependency unconditionally imports `arviz_plots` at
+# import time for a cosmetic FutureWarning, and arviz_plots has a bug against
+# this project's matplotlib (`matplotlib.style.core` doesn't exist in 3.11+).
+# Downgrading matplotlib to dodge it broke 26 existing tests (a pyparsing
+# deprecation-as-error interaction) -- worse than the problem. Fixed instead
+# with a 2-line compat shim (`analysis/rq1_v1_1_robustness/_bayes_compat.py`,
+# imported before pymc/bambi) that aliases `matplotlib.style.core` to the
+# module itself, since `USER_LIBRARY_PATHS` (all arviz_plots actually needs)
+# already lives directly on `matplotlib.style`. No dependency version pinned.
+bayes = ["pymc", "bambi"]
 hf = ["torch", "transformers", "safetensors"]
 vllm = ["vllm"]
 # scikit-learn: per-layer probes (mech/probes.py); statsmodels: RQ3
