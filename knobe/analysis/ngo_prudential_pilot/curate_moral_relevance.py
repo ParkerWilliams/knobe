@@ -1,6 +1,8 @@
 """Curation-only manipulation check for the Ngo prudential pilot
-(`build_dataset.py`'s outputs/ngo_prudential_dataset.csv, 160 items: 80
-Ngo/Raimondi moral scenarios + 80 new nonmoral-prudential variants).
+(`build_dataset.py`'s outputs/ngo_prudential_dataset.csv, 240 items: 80
+Ngo/Raimondi moral scenarios + 80 new nonmoral-prudential variants + 80 new
+nonmoral-procedural variants, the latter a fallback framing in case
+prudential still reads as too morally loaded for some pairs).
 
 Per the pilot's scope, this asks exactly one question -- the project's own
 frozen `moral_relevance` curation question (`constants.CURATION_QUESTIONS`,
@@ -12,7 +14,7 @@ call machinery (`knobe.curate.AnthropicClient`/`MockClient`,
 reimplementing the API-calling/retry/parsing logic -- NOT reusing
 `curate.run()`'s full orchestration, because that expects a `Family`
 registry and the production `CuratedRow` schema (typicality/evocativeness/
-severity/domain), which this pilot's 160 plain items don't have and don't
+severity/domain), which this pilot's plain items don't have and don't
 need. `check_category_manipulation`'s thresholds (`configs/curation.yaml`:
 moral_min=6, nonmoral_max=4) are reused directly for the pass/fail check
 in `--check` mode, rather than redefining new numbers.
@@ -135,6 +137,7 @@ def check_manipulation() -> None:
     for category, threshold, comparator in [
         ("moral", moral_min, lambda v: v >= moral_min),
         ("nonmoral_prudential", nonmoral_max, lambda v: v <= nonmoral_max),
+        ("nonmoral_procedural", nonmoral_max, lambda v: v <= nonmoral_max),
     ]:
         sub = df[df["category"] == category]
         passed = sub["moral_relevance"].apply(comparator)

@@ -1,11 +1,13 @@
 """Merges Ngo et al. (2015)'s original 80 moral scenarios
 (`ngo_2015_original_80.txt`, the same stimuli Raimondi et al.
 arXiv:2510.12229 used) with this pilot's 40 new nonmoral-prudential pairs
-(`prudential_variants.py`) into one dataset, ready for curation
-(`curate_moral_relevance.py`) and, if that passes, elicitation.
+(`prudential_variants.py`) and 40 new nonmoral-procedural pairs
+(`procedural_variants.py`, a fallback framing in case prudential still
+reads as too morally loaded for some pairs) into one dataset, ready for
+curation (`curate_moral_relevance.py`) and, if that passes, elicitation.
 
-Output: outputs/ngo_prudential_dataset.csv, one row per item (160 total: 80
-original moral + 80 new nonmoral-prudential), columns:
+Output: outputs/ngo_prudential_dataset.csv, one row per item (240 total: 80
+original moral + 80 nonmoral-prudential + 80 nonmoral-procedural), columns:
     variant_id    -- e.g. "moral-01-bad", "prudential-01-bad"
     pair_id       -- 1-40, links a moral pair to its prudential counterpart
     category      -- "moral" | "nonmoral_prudential"
@@ -21,6 +23,7 @@ from pathlib import Path
 import pandas as pd
 
 from prudential_variants import PRUDENTIAL_PAIRS
+from procedural_variants import PROCEDURAL_PAIRS
 
 HERE = Path(__file__).parent
 SOURCE_TXT = HERE / "ngo_2015_original_80.txt"
@@ -90,11 +93,20 @@ def main() -> None:
                           category="nonmoral_prudential", sign="good",
                           scenario=p_good_scenario, question=p_good_question))
 
+        c_bad_scenario, c_bad_question = PROCEDURAL_PAIRS[pair_id]["bad"]
+        c_good_scenario, c_good_question = PROCEDURAL_PAIRS[pair_id]["good"]
+        rows.append(dict(variant_id=f"procedural-{pair_id:02d}-bad", pair_id=pair_id,
+                          category="nonmoral_procedural", sign="bad",
+                          scenario=c_bad_scenario, question=c_bad_question))
+        rows.append(dict(variant_id=f"procedural-{pair_id:02d}-good", pair_id=pair_id,
+                          category="nonmoral_procedural", sign="good",
+                          scenario=c_good_scenario, question=c_good_question))
+
     out = pd.DataFrame(rows)
-    assert len(out) == 160
+    assert len(out) == 240
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(OUT_PATH, index=False)
-    print(f"wrote {OUT_PATH} ({len(out)} rows: 80 moral + 80 nonmoral_prudential)")
+    print(f"wrote {OUT_PATH} ({len(out)} rows: 80 moral + 80 nonmoral_prudential + 80 nonmoral_procedural)")
 
 
 if __name__ == "__main__":
