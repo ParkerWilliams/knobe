@@ -7,17 +7,21 @@ writeup, every number needs to be traceable back to the exact script, params,
 and commit that produced it — not just handed back in chat. Follow these
 conventions on every analysis task, without being asked each time.
 
-## 1. Branch per task
+## 1. Work directly on main; commits are the record
 
-Create a new branch per distinct analysis task, named after the task, e.g.:
+Single-contributor project — commit directly to `main` rather than opening a
+new branch per analysis task. There's no review-before-merge step to protect,
+so a branch's isolated diff isn't buying anything a good commit message
+doesn't already give: section 2's incremental-commit discipline plus
+section 5's analysis log are the audit trail. Each commit and the log line it
+produces should be enough on their own to trace any number back to the exact
+script, params, and commit that produced it — that's the same traceability
+goal the old branch-per-task rule was serving, just without the branch
+overhead.
 
-    rq1a-mde
-    wcb-inference
-    flag-exclusion-check
-
-Don't accumulate multiple unrelated analyses on one running branch. This lets
-the user review a task's full diff before merging rather than reconstructing
-what happened from a description after the fact.
+(Earlier work in this repo used a branch-per-task convention — visible in the
+commit history as merged branches. That's no longer the policy; don't create
+new task branches going forward.)
 
 ## 2. Commit incrementally, not in one lump at the end
 
