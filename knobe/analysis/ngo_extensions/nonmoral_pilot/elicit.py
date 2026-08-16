@@ -1,5 +1,11 @@
-"""Elicitation for the Ngo nonmoral pilot: 240 items x 3 questions
-(q_intentionality, q_blame, q_praise) x 6 subject models x N samples.
+"""Elicitation for the Ngo nonmoral pilot: reads
+outputs/ngo_prudential_dataset_selected.csv (built by
+``curate_moral_relevance.py --select``, NOT the full unfiltered
+outputs/ngo_prudential_dataset.csv) x 3 questions (q_intentionality,
+q_blame, q_praise) x 6 subject models x N samples. Run
+``curate_moral_relevance.py --select`` first -- this script exits with an
+error if the selected file doesn't exist yet, rather than silently
+falling back to the unfiltered 240-item set.
 
 Reuses this project's core inference machinery directly, not a
 reimplementation:
@@ -103,7 +109,7 @@ from knobe.registry import load_registry, model_key_for  # noqa: E402
 from knobe.schemas import ResultRecord, append_jsonl, read_jsonl  # noqa: E402
 
 HERE = Path(__file__).parent
-DATASET_PATH = HERE / "outputs" / "ngo_prudential_dataset.csv"
+DATASET_PATH = HERE / "outputs" / "ngo_prudential_dataset_selected.csv"
 OUT_PATH = HERE / "outputs" / "elicit_results.jsonl"
 
 RUNNER_VERSION = "ngo_extensions_nonmoral_pilot_elicit-0.1"
@@ -151,6 +157,10 @@ def main() -> None:
     p.add_argument("--batch-size", type=int, default=32)
     args = p.parse_args()
 
+    if not DATASET_PATH.exists():
+        print(f"{DATASET_PATH} doesn't exist yet -- run "
+              f"`curate_moral_relevance.py --select` first (needs curation results).", file=sys.stderr)
+        sys.exit(1)
     df = pd.read_csv(DATASET_PATH)
     prompts = build_prompts(df)
     prompt_ids = sorted(prompts)

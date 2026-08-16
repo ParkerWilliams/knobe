@@ -82,14 +82,29 @@ first, then elicitation:
     --reviewer-model claude-sonnet-5
 ```
 (240 calls, one question each — a rounding error against the existing
-curation cost profile). Then:
+curation cost profile). Then build the filtered dataset elicitation
+actually reads:
 ```
-.venv/bin/python analysis/ngo_extensions/nonmoral_pilot/curate_moral_relevance.py --check
+.venv/bin/python analysis/ngo_extensions/nonmoral_pilot/curate_moral_relevance.py --select
 ```
+Selection rule: every item that independently clears its own threshold is
+kept (moral items need `moral_relevance >= moral_min`; either nonmoral
+framing needs `<= nonmoral_max`) — no preference between
+`nonmoral_prudential`/`nonmoral_procedural` when both pass for the same
+`pair_id` (an earlier draft of this rule wrongly picked one; see the
+script's docstring). Writes `outputs/ngo_prudential_dataset_selected.csv`
+(what `elicit.py` reads) and `outputs/selection_report.md` (a by-`pair_id`
+breakdown, including which storylines end up with no usable nonmoral
+framing at all). This isn't a blocking checkpoint — `elicit.py` doesn't
+wait on anyone reviewing the report — but it's there to look at, before or
+after running elicitation, given the full run is estimated under an hour
+(below) and cheap to redo if the report shows something worth fixing.
+`--check` (no filtering, just prints the same pass/fail numbers) still
+works if you just want a quick look without building the selected file.
 
 **2. Elicitation** (needs a GPU + `uv pip install -e '.[vllm]'`), once
-curation passes for whichever `pair_id`s/framings clear the threshold
-(§"What success looks like" below):
+`--select` has produced `outputs/ngo_prudential_dataset_selected.csv`
+(`elicit.py` exits with an error if that file doesn't exist yet):
 ```
 .venv/bin/python analysis/ngo_extensions/nonmoral_pilot/elicit.py \
     --engine vllm --n-samples 25
@@ -124,27 +139,34 @@ doesn't have and doesn't need.
 `moral` items should score at or above `moral_min=6`; both
 `nonmoral_prudential` and `nonmoral_procedural` items at or below
 `nonmoral_max=4` — the same category-manipulation check production
-vignettes already have to pass. Outcomes, per `pair_id` rather than in the
-aggregate (a pair can pass on one nonmoral framing and not the other):
+vignettes already have to pass.
 
-- **A pair passes on `nonmoral_prudential`**: use that framing for the
-  pair — it's the more scientifically direct test (self-regarding harm vs.
-  no harm to anyone), so prefer it whenever it clears the threshold.
-- **A pair fails `nonmoral_prudential` but passes `nonmoral_procedural`**:
-  fall back to the procedural framing for that `pair_id` — evidence the
-  self-regarding-harm framing was still registering as morally loaded for
-  that particular storyline, consistent with harm-to-self sometimes still
-  reading as "significant" even with no other party involved.
-- **A pair fails both**: that storyline's domain doesn't have a clean
-  nonmoral analogue in either framing — worth reporting which `pair_id`s
-  these are and why, rather than silently dropping them (a finding in its
-  own right about the domain, per `docs/severity_confound/SEVERITY_MORALIZATION_BACKGROUND.md`'s
-  TDM discussion).
-- Also confirm the original 80 still read as clearly moral through this
+**Selection is per-item, not per-`pair_id`, and there's no preference
+between nonmoral framings** (see `curate_moral_relevance.py --select`'s
+docstring for why an earlier draft of this rule was wrong): every item
+that independently clears its own threshold is included, whether that
+means a `pair_id` contributes zero, one, or both nonmoral framings. Using
+both when both pass makes the pooled nonmoral result more generalizable,
+not redundant — the same reasoning
+`docs/moral_foundations_extension/MORAL_FOUNDATIONS_PILOT_PLAN.md` uses
+for pooling multiple foundations rather than picking one.
+
+`selection_report.md` (written by `--select`) still surfaces the things
+worth knowing about even though nothing is gated on them:
+- Which `pair_id`s end up with **no usable nonmoral framing at all** —
+  that storyline's domain doesn't have a clean nonmoral analogue in
+  either framing, worth reporting rather than silently dropping (a
+  finding in its own right about the domain, per
+  `docs/severity_confound/SEVERITY_MORALIZATION_BACKGROUND.md`'s TDM
+  discussion).
+- Which of Ngo's original 80 items failed to read as moral through this
   project's own reviewer pipeline — not guaranteed just because Raimondi
   used them.
+- The `category` column survives into the selected CSV, so a
+  prudential-vs-procedural breakdown is still possible later as a
+  secondary check, the same way aesthetic/procedural/prudential got
+  broken out in `analysis/rq1_v1_1_robustness/32_nonmoral_subdomain_sign_wcb.py`.
 
-Once each `pair_id` has at least one nonmoral framing that clears
-`nonmoral_max`, run `elicit.py` (above): does the sign effect appear
-within the surviving nonmoral set, matched pairwise against the
-`moral` sign effect on the same 40 storyline templates?
+Once `--select` has run, `elicit.py` (above) answers the actual question:
+does the sign effect appear within the selected nonmoral set, compared
+against the `moral` sign effect on the same 40 storyline templates?
