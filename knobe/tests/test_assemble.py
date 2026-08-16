@@ -362,7 +362,7 @@ class TestReleaseMode:
         assert manifest.counts.families == 2
         assert manifest.counts.variants == 8
         # by_valence/by_domain report BOTH levels, labeled (researcher
-        # decision d2, docs/DECISIONS_FOR_HUMANS.md item (d)): one family
+        # decision d2, docs/v1_1_release_process/DECISIONS_FOR_HUMANS.md item (d)): one family
         # each (MB, MG) -> 4 variants each.
         assert manifest.counts.by_valence == {
             "MB": LabeledCount(families=1, variants=4),

@@ -5,8 +5,8 @@
 `rq1-base-sign-main-effect-wcb` + `nonmoral-subdomain-sign-wcb`, full
 provenance in `results/ANALYSIS_LOG.md`) that was previously only recorded
 as raw log entries and conversation, not pulled into one place. Read
-alongside `docs/RAIMONDI_REPLICATION_GAPS.md` (the comparison to Raimondi
-et al. specifically) and `docs/RQ1_STATISTICAL_METHODS_v1.1.md` (the full
+alongside `docs/rq1_findings/RAIMONDI_REPLICATION_GAPS.md` (the comparison to Raimondi
+et al. specifically) and `docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md` (the full
 RQ1a-d methodology this sits on top of) — this document answers one
 narrower question: **stripped of the moral/nonmoral, typicality, and
 domain decomposition this project's own design adds, is the textbook
@@ -58,7 +58,7 @@ threshold.
 **This is not the same claim as "the effect is moral-specific."** That
 stronger claim requires the direct interaction test (RQ1a's
 `sign_c:vt_c`), which is a different, harder-to-clear bar — see
-`docs/RQ1_STATISTICAL_METHODS_v1.1.md` §9-11 for why that one doesn't
+`docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md` §9-11 for why that one doesn't
 survive severity adjustment in any family. What's established here is
 narrower and safe: **a bad>good asymmetry exists, robustly, for moral
 content in 2 of 3 families.** Whether it's larger than a matched nonmoral
@@ -81,9 +81,9 @@ a more homogeneous subset: it wasn't.
 Null in every family, in both subdomains large enough to test. Mistral's
 consistent (never-significant) reversed trend recurs across pooled
 nonmoral, aesthetic, and procedural alike — the same unresolved pattern as
-its RQ1b-nonmoral disagreement (`docs/OUTSTANDING_STATISTICAL_ANALYSIS.md`
+its RQ1b-nonmoral disagreement (`docs/rq1_findings/OUTSTANDING_STATISTICAL_ANALYSIS.md`
 item 2). Prudential — the subdomain the moralization literature
-(`docs/SEVERITY_MORALIZATION_BACKGROUND.md`) flags as the best candidate
+(`docs/severity_confound/SEVERITY_MORALIZATION_BACKGROUND.md`) flags as the best candidate
 for a genuine severity/moral-status dissociation — has only 2 families in
 this release and simply can't be tested here. That gap is what
 `analysis/ngo_prudential_pilot/` exists to fill.

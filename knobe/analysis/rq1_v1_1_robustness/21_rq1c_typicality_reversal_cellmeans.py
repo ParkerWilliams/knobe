@@ -1,5 +1,5 @@
 """Raw cell means (not just the bad-good gap) for the RQ1c typicality x sign
-reversal (docs/RQ1_MECHANISM_ANALYSIS_v1.1.md section 3).
+reversal (docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md section 3).
 
 10_typicality_evocativeness_gap_tables.py only ever reported the bad-good
 GAP by typicality. That table can't distinguish two very different stories:

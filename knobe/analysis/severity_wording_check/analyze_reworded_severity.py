@@ -5,7 +5,7 @@ this environment doesn't have -- see that script's docstring).
 Compares the reworded magnitude-only severity score against the original
 curation severity score:
   1. corr(new_score, sign) within moral and nonmoral items, vs. the
-     original r=.885 / r=.473 (docs/SEVERITY_MORALIZATION_BACKGROUND.md).
+     original r=.885 / r=.473 (docs/severity_confound/SEVERITY_MORALIZATION_BACKGROUND.md).
   2. corr(new_score, original_score) -- convergent validity.
   3. Refits the RQ1a severity-adjusted interaction
      (analysis/rq1_v1_1_robustness/14_rq1a_severity_set_fe_wcb.py's spec)
@@ -14,7 +14,7 @@ curation severity score:
      not reimplemented) to see whether the SE shrinks / the interaction
      becomes resolvable at G=21.
 
-See docs/SEVERITY_PILOT_PLAN.md Phase 0 for the three possible outcomes and
+See docs/severity_confound/SEVERITY_PILOT_PLAN.md Phase 0 for the three possible outcomes and
 what each implies for whether Phase 1 (the vignette-escalation pilot) is
 still needed.
 """

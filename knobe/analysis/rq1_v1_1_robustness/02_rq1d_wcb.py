@@ -1,6 +1,6 @@
 """Wild-cluster-bootstrap validation at G=21 (family_id, NEU only) for RQ1d
 neu_offset and typicality_within_neu -- see
-docs/RQ1_STATISTICAL_METHODS_v1.1.md section 8. This is the RQ that survives
+docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md section 8. This is the RQ that survives
 overwhelmingly (p_wcb=.000 in every cell) -- the strongest result in the
 release.
 """

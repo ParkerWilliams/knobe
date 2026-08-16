@@ -418,7 +418,7 @@ class TestProbeRecord:
 class TestReleaseManifest:
     def test_valid_manifest(self):
         # by_valence/by_domain report BOTH levels, labeled (researcher
-        # decision d2, docs/DECISIONS_FOR_HUMANS.md item (d)): e.g.
+        # decision d2, docs/v1_1_release_process/DECISIONS_FOR_HUMANS.md item (d)): e.g.
         # {"MB": {"families": 50, "variants": 200}, ...}.
         manifest = ReleaseManifest(
             release="v1.0",

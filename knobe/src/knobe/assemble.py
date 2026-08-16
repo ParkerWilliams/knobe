@@ -494,7 +494,7 @@ def _labeled_counts(
     validated_rows: list[VignetteRow], *, key: Callable[[VignetteRow], str]
 ) -> dict[str, LabeledCount]:
     """Groups ``validated_rows`` by ``key(row)`` (valence or domain) and
-    reports BOTH levels per group, per docs/DECISIONS_FOR_HUMANS.md item
+    reports BOTH levels per group, per docs/v1_1_release_process/DECISIONS_FOR_HUMANS.md item
     (d2) (researcher directive, 2026-07-28): variant count (every row in
     the group) and family count (the number of DISTINCT family_ids in the
     group -- valence/domain are family-level attributes inherited

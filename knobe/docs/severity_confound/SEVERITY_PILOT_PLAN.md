@@ -48,12 +48,12 @@ which is far cheaper than a cleaner *stimulus set* (Phase 1).
 2. Run this against the same 420 v1.1 `scenario` texts already in
    `data/release/v1.1/vignettes.csv` — a single new curation question, not
    the full four-question battery, so ~420 reviewer calls, not ~1,680
-   (`docs/V1_1_WORKFLOW.md`'s full-pass cost estimate was "minutes not
+   (`docs/v1_1_release_process/V1_1_WORKFLOW.md`'s full-pass cost estimate was "minutes not
    hours" for 4x this many calls).
 3. **Do not edit `constants.py`'s `CURATION_QUESTIONS`.** That's a frozen
    instrument (master spec §7, restated in `knobe/README.md`'s "Conventions
    and invariants") — question wording changes go through the project's own
-   established reword-validation track (`docs/V1_1_WORKFLOW.md`'s "Type-1
+   established reword-validation track (`docs/v1_1_release_process/V1_1_WORKFLOW.md`'s "Type-1
    curation-question reword": test on a subsample, validate, adopt only if
    it clears checks, as a new versioned question, never a silent in-place
    edit). This experiment is exploratory and writes to its own output file,
@@ -71,7 +71,7 @@ which is far cheaper than a cleaner *stimulus set* (Phase 1).
    - Refit the RQ1a severity-adjusted interaction (`14_rq1a_severity_set_fe_wcb.py`'s
      spec) substituting the new magnitude score for `severity_c`. Does the
      SE shrink meaningfully (i.e., does the collinearity problem
-     documented in `docs/RQ1_STATISTICAL_METHODS_v1.1.md` §11.2 ease)? Does
+     documented in `docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md` §11.2 ease)? Does
      the interaction become resolvable at G=21, or still not?
 5. **Three possible outcomes, each with a clear next step:**
    - **Correlation drops substantially, RQ1a's SE shrinks**: the original
@@ -105,7 +105,7 @@ soon as the reviewer-call output exists.
 ### Why this is worth doing before spending more compute on RQ1a
 
 The severity-adjusted RQ1a interaction is underpowered by a lot at current
-sample sizes (`docs/RQ1_STATISTICAL_METHODS_v1.1.md` §11.2: gemma/mistral
+sample sizes (`docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md` §11.2: gemma/mistral
 would need a ~20x larger release to resolve it under the existing
 confounded design). A severity-matched design doesn't just need less new
 data than a brute-force N increase — it needs **zero** new subject-model
@@ -136,7 +136,7 @@ review) does it justify a real elicitation run.
    `knobe curate run --mock` first (free, catches schema/invocation errors),
    then the real reviewer pass (`knobe curate run --reviewer-model
    <sonnet-string>`) — cheap, the full 420-variant v1.1 pass was "~1,680
-   calls, minutes not hours" per `docs/V1_1_WORKFLOW.md`; a 3-5 family x
+   calls, minutes not hours" per `docs/v1_1_release_process/V1_1_WORKFLOW.md`; a 3-5 family x
    3-rung pilot (roughly 12-20 variants x 4 curation questions) is a rounding
    error on that.
 4. **Track `moral_relevance` and `severity` together per rung**, not just
@@ -184,7 +184,7 @@ For each pilot family:
      procedural/aesthetic) are structurally capped, not just the ones
      already documented as concentrated in `FLAGGED_VARIABLES_README.md`.
 5. **Independent-judge check before trusting any "flat" result**: per
-   `docs/V1_1_REVISION_PLAN.md` Workstream B's precedent (the 24 revised
+   `docs/v1_1_release_process/V1_1_REVISION_PLAN.md` Workstream B's precedent (the 24 revised
    NMB/NMG families were cross-checked against ChatGPT, not just the
    production Sonnet reviewer, specifically to rule out one judge's
    idiosyncrasies), run any rung that reads "flat" through a second model

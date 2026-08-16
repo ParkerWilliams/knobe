@@ -1,6 +1,6 @@
 """Wild-cluster-bootstrap validation at G=84 (family_id) for RQ1_base
 sign_x_tuning and RQ1c typ_x_sign / evoc_x_sign -- see
-docs/RQ1_STATISTICAL_METHODS_v1.1.md section 8, Table (large-G comparison).
+docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md section 8, Table (large-G comparison).
 """
 from __future__ import annotations
 

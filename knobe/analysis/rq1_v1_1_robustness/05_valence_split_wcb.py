@@ -1,7 +1,7 @@
 """Direct split-sample test: fit the sign effect (bad vs good) separately
 within moral-only and nonmoral-only items, wild-cluster-bootstrapped at
 G=42 (family_id) -- the surviving piece of evidence for moral-specificity in
-docs/RQ1_MECHANISM_ANALYSIS_v1.1.md section 1 (distinct from, and more
+docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md section 1 (distinct from, and more
 robust than, the pooled sign_c:vt_c interaction in 03/04, which does not
 survive severity adjustment in any family).
 """

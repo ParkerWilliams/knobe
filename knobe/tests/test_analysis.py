@@ -697,7 +697,7 @@ def test_1b_bootstrap_ci_biased_by_pooled_ols_under_family_confound():
     bootstrap with plain pooled OLS (pred_c's family-confound in play) gives a
     CI that does NOT bracket the primary LMM's own point estimate -- exactly
     the pathology found on real v1.1 data for rq1b_moral/llama and
-    rq1b_nonmoral/mistral (docs/RQ1_STATISTICAL_METHODS_v1.1.md §4)."""
+    rq1b_nonmoral/mistral (docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md §4)."""
     prepared = _make_1b_family_confound_frame()
     spec = next(s for s in models.load_prereg().contrasts if s.name == "rq1b_moral")
     frame = models.prepare_1b_frame(prepared[prepared["tuning_status"] == "finetuned"], "moral")

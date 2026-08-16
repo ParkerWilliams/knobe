@@ -1,5 +1,5 @@
 """Severity-adjusted version of the direct moral-only/nonmoral-only sign
-split (05_valence_split_wcb.py), per docs/RQ1_MECHANISM_ANALYSIS_v1.1.md's
+split (05_valence_split_wcb.py), per docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md's
 open follow-up: does the surviving moral-specific sign effect (gemma/llama)
 hold up once severity is controlled for WITHIN each valence type?
 

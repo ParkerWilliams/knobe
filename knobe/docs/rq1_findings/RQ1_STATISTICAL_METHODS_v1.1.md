@@ -1,7 +1,7 @@
 # RQ1 Statistical Methods and Diagnostics — Release v1.1 (revised 2026-08-10)
 
-**Status:** technical companion to `docs/RQ1_MECHANISM_ANALYSIS_v1.1.md` (the
-research-interpretation writeup) and `docs/MAIN_RUN_WRITEUP_v1.1.md` (the
+**Status:** technical companion to `docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md` (the
+research-interpretation writeup) and `docs/rq1_findings/MAIN_RUN_WRITEUP_v1.1.md` (the
 headline results). **This is a full revision, not an addendum.** The first
 pass (§1–§7 below) documented the pipeline's own model specification and
 diagnostics and, on that basis, provisionally trusted RQ1a's set-cluster
@@ -26,7 +26,7 @@ against `results/v1.1/results_all.jsonl` + `data/release/v1.1/vignettes.csv`
 `exclusions.json`: of 378,000 result rows read, 378,000 included, 0 excluded
 (no curation-flag exclusion applied — `--exclude-flagged` was not passed, per
 the release decision to accept flagged variants into the frozen release
-rather than curate them out; see `docs/RQ1_MECHANISM_ANALYSIS_v1.1.md` and
+rather than curate them out; see `docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md` and
 `data/curation/FLAGGED_VARIABLES_README.md`). All six checkpoints were scored
 via `--logit-fallback` (softmax expected value over `logprobs_0_10`) rather
 than the regex-parsed rating, per the v1.1 decision to score uniformly across
@@ -336,7 +336,7 @@ undeniable result in the release.
 
 ## 9. Severity-covariate refit of RQ1a
 
-**Motivation.** `docs/RQ1_MECHANISM_ANALYSIS_v1.1.md` documents that
+**Motivation.** `docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md` documents that
 reviewer-rated `severity` differs sharply between moral and nonmoral items
 (MB mean 7.04 vs. NMB mean 1.62; MG 1.90 vs. NMG 0.86) — a confound baked
 into the stimulus set, not a sampling artifact. This tests whether RQ1a's
@@ -391,7 +391,7 @@ would isolate the "purely moral" component doesn't clear a properly-sized
 bar once you try to isolate it.
 
 **This does not fully overturn the separate, direct moral-vs-nonmoral split
-test** in `docs/RQ1_MECHANISM_ANALYSIS_v1.1.md` §1 (fitting the sign effect
+test** in `docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md` §1 (fitting the sign effect
 separately within the moral-only and nonmoral-only subsets, rather than as a
 pooled interaction). Re-run through WCB (`family_id` clustering, G=42, no
 severity adjustment yet):
@@ -554,7 +554,7 @@ uninformative CI) rather than needing to be reconciled with them. **RQ1a's
 moral-vs-severity question is a stimulus-design confound specific to the
 bad-valence pairs, not resolvable by any further regression on the existing
 data.** The fix is re-norming/re-matching nonmoral-*bad* content
-specifically (`docs/SEVERITY_PILOT_PLAN.md`) — nonmoral-good doesn't need
+specifically (`docs/severity_confound/SEVERITY_PILOT_PLAN.md`) — nonmoral-good doesn't need
 it, per the good-pairs numbers above.
 
 ## 10. The RQ1b pooled-OLS bug: diagnosis and fix

@@ -1,6 +1,6 @@
 """Shared data loading and the wild-cluster-bootstrap implementation for the
 v1.1 RQ1 small-cluster-robustness re-analysis (see config.yaml, README.md,
-and docs/RQ1_STATISTICAL_METHODS_v1.1.md sections 8-11).
+and docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md sections 8-11).
 
 Not part of the `knobe` package -- these are one-off research scripts, run
 from the repo root with the project's own .venv:
@@ -120,7 +120,7 @@ def wild_cluster_bootstrap(
     weights, restricted (null-imposed) residual DGP, OLS + cluster-robust SE
     as the refit estimator. Returns beta_obs (full-model OLS), t_obs
     (cluster-robust), p_wcb (two-sided fraction of |t*| >= |t_obs|), and
-    n_groups. See docs/RQ1_STATISTICAL_METHODS_v1.1.md section 8."""
+    n_groups. See docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md section 8."""
     full = smf.ols(formula, data=data)
     y = np.asarray(full.endog)
     X = np.asarray(full.exog)

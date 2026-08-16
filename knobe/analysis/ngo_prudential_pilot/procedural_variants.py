@@ -10,7 +10,7 @@ convention, etc. -- with no welfare, rights, or self-harm stake for anyone,
 matching this project's own "procedural" nonmoral_subdomain (Turiel's
 conventional pole: arbitrary, context-dependent norms, the polar opposite
 of the harm/welfare criterion that defines "moral" here -- see
-docs/SEVERITY_MORALIZATION_BACKGROUND.md section 3). Same template as
+docs/severity_confound/SEVERITY_MORALIZATION_BACKGROUND.md section 3). Same template as
 prudential_variants.py; same pair_id -> source item mapping (pair_id N ->
 source items 2N-1 [bad], 2N [good]).
 """

@@ -650,7 +650,7 @@ class ReleaseCounts(KnobeModel):
     release-wide totals (unchanged). ``by_valence``/``by_domain`` report
     BOTH levels, labeled, per key -- e.g.
     ``{"MB": {"families": 12, "variants": 48}, ...}`` -- per
-    docs/DECISIONS_FOR_HUMANS.md item (d2) (researcher directive,
+    docs/v1_1_release_process/DECISIONS_FOR_HUMANS.md item (d2) (researcher directive,
     2026-07-28): spec §3.10's own example doesn't disambiguate family- vs.
     variant-level grouping for these two fields, and a flat
     variant-only count (the pre-d2 shape: ``dict[str, int]``) silently

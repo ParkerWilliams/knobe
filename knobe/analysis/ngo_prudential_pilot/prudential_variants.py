@@ -9,7 +9,7 @@ this would have on [affected]. [Agent] knew [X] would [help/harm]:
 the affected party from another person/group to the acting agent's own
 self-interest (health, finances, reputation, safety, standing), so the
 outcome engages no other party's welfare or rights at all (Turiel's/TDM's
-harm-to-another criterion, per docs/SEVERITY_MORALIZATION_BACKGROUND.md,
+harm-to-another criterion, per docs/severity_confound/SEVERITY_MORALIZATION_BACKGROUND.md,
 is the thing this needs to avoid firing). A few source pairs (13-14, 67-68,
 73-74: wartime bombing, terrorism, mass suicide) have no plausible
 self-regarding analogue at comparable stakes -- those use a fresh mundane

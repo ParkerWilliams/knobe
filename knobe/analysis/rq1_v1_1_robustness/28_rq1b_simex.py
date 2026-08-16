@@ -18,7 +18,7 @@ estimate.
 Run on all 6 rq1b cells for the headline attenuation-correction numbers.
 For mistral-nonmoral specifically -- the cell with the named disagreement
 between the family-FE WCB (p=.255) and family-random-slope model (p=.0021,
-docs/RQ1_STATISTICAL_METHODS_v1.1.md section 10.2) -- additionally runs a
+docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md section 10.2) -- additionally runs a
 family-cluster bootstrap of the whole SIMEX procedure (resample families,
 redo naive+extrapolation each draw) to get a percentile CI/p-value on the
 corrected estimate, since that's the one place the report needs an answer

@@ -9,8 +9,8 @@ never checked ACROSS valence categories. This pulls the within-storyline
 matched-pair comparison (same underlying goal/actions, only the valence
 category differs).
 
-This is the decisive finding behind docs/RQ1_MECHANISM_ANALYSIS_v1.1.md
-section 1 and docs/SEVERITY_PILOT_PLAN.md's scoping to nonmoral-BAD content
+This is the decisive finding behind docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md
+section 1 and docs/severity_confound/SEVERITY_PILOT_PLAN.md's scoping to nonmoral-BAD content
 specifically: bad pairs are catastrophically unmatched (every single one of
 21 storylines), good pairs are reasonably close. No amount of statistical
 modeling of the existing data can substitute for this -- it's a stimulus-

@@ -79,9 +79,10 @@ Example:
     2026-08-14 | wcb_inference.py | B=1999, cluster=set_id | RQ1a fails post-severity in all 3 families | a3f9c1e
 
 This mirrors the provenance convention already used in
-`RQ1_STATISTICAL_METHODS_v1.1.md` ("Generated ... from a fresh `knobe
-analyze` run [exact command]") — the goal is that any number in a writeup can
-be traced back to exactly how it was produced, months later, without asking.
+`docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md` ("Generated ... from a
+fresh `knobe analyze` run [exact command]") — the goal is that any number in
+a writeup can be traced back to exactly how it was produced, months later,
+without asking.
 
 ## 6. End-of-session summary
 

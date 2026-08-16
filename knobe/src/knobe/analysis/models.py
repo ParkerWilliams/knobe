@@ -561,7 +561,7 @@ def _bootstrap_formula(spec: ContrastSpec) -> str:
     family-fixed-effects point estimates disagreed by 0.4-3.7 rating points
     across the six real cells, occasionally flipping sign, while the
     family-fixed-effects and the primary mixedlm/RE point estimates agreed
-    to within ~0.1 in every cell -- see docs/RQ1_STATISTICAL_METHODS_v1.1.md).
+    to within ~0.1 in every cell -- see docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md).
     This is exactly why the reported ``ci_low``/``ci_high`` for RQ1b
     contrasts used to fail to bracket their own point estimate.
 

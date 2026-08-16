@@ -1,8 +1,8 @@
 # Parameters for the v1.1 RQ1 small-cluster-robustness re-analysis
-# (docs/RQ1_STATISTICAL_METHODS_v1.1.md §8-§11, docs/RQ1_MECHANISM_ANALYSIS_v1.1.md).
+# (docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md §8-§11, docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md).
 #
 # These scripts are exploratory research code, not part of the `knobe analyze`
-# pipeline (see docs/RQ1_STATISTICAL_METHODS_v1.1.md §13 item 6 -- promoting
+# pipeline (see docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md §13 item 6 -- promoting
 # wild-cluster-bootstrap / random-slope checks to first-class pipeline
 # sensitivity analyses is an open follow-up, not done yet).
 

@@ -11,7 +11,7 @@ i.e. "how large would the true effect need to be for this design to detect
 it 80% of the time at alpha=.05, given the SE and cluster count it actually
 has." Reading this alongside the observed effect size tells you whether a
 non-significant result is a genuine null or just an underpowered design at
-this cluster count -- see docs/RQ1_STATISTICAL_METHODS_v1.1.md section 13
+this cluster count -- see docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md section 13
 item on formal power/precision analysis.
 
 Depends on 01_rq1_base_and_rq1c_wcb.py, 02_rq1d_wcb.py,

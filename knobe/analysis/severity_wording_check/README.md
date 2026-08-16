@@ -1,11 +1,11 @@
 # Severity question wording check (Phase 0 of the severity pilot)
 
-See `docs/SEVERITY_PILOT_PLAN.md` Phase 0 for the full rationale and
+See `docs/severity_confound/SEVERITY_PILOT_PLAN.md` Phase 0 for the full rationale and
 decision tree. Short version: the curation severity question asks *"How
 severe or **significant** is this outcome?"* — "significant" may be
 leaking moral/social importance into what's supposed to be a magnitude
 measure, which would mean part of the r=.885 severity/moral-sign
-correlation (`docs/SEVERITY_MORALIZATION_BACKGROUND.md`) is a measurement
+correlation (`docs/severity_confound/SEVERITY_MORALIZATION_BACKGROUND.md`) is a measurement
 artifact, not a fact about the stimuli.
 
 ## Status: scripts ready, not yet run
@@ -32,12 +32,12 @@ question lives only in `run_reworded_severity.py`; results go to their own
 `outputs/severity_reworded_raw.jsonl`, never `curated_v1.1.csv`. If this
 experiment finds the reworded question is meaningfully better, adopting it
 for real goes through the project's established reword-validation track
-(`docs/V1_1_WORKFLOW.md`'s "Type-1 curation-question reword"), as a new
+(`docs/v1_1_release_process/V1_1_WORKFLOW.md`'s "Type-1 curation-question reword"), as a new
 versioned question — not a silent in-place edit.
 
 ## What "success" looks like
 
-See `docs/SEVERITY_PILOT_PLAN.md` Phase 0's three-outcome decision tree.
+See `docs/severity_confound/SEVERITY_PILOT_PLAN.md` Phase 0's three-outcome decision tree.
 The one-line version: if `corr(reworded_severity, sign)` within moral items
 drops well below .885 and the RQ1a severity-adjusted interaction's SE
 shrinks meaningfully, the current severity measure was partly a wording

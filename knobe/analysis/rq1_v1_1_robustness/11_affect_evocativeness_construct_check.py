@@ -2,7 +2,7 @@
 subject models' own self-reported affect_salience actually differ between
 the high- and low-evocative renderings of the same underlying fact?
 
-Source of docs/RQ1_MECHANISM_ANALYSIS_v1.1.md section 4's first table
+Source of docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md section 4's first table
 ("affect, high-evocative" vs "affect, low-evocative"). Pooled across both
 tuning states (six model_keys) per family, matching the original
 exploratory run. Answer: no family shows a positive gap; if anything it

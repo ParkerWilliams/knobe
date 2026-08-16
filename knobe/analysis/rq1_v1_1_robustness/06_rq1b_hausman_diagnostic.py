@@ -3,7 +3,7 @@ pred_c:sg_c term -- the Hausman-style diagnostic that (a) explains why the
 first-pass wild-cluster-bootstrap for RQ1b gave nonsensical, sign-flipped
 results, and (b) motivated the actual pipeline fix in
 src/knobe/analysis/models.py (_bootstrap_formula). See
-docs/RQ1_STATISTICAL_METHODS_v1.1.md section 10.1.
+docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md section 10.1.
 
 FE and RE should agree closely (both correctly separate within-family
 covariation from the family-level confound); pooled OLS should diverge,

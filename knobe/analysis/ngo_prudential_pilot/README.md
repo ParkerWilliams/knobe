@@ -25,7 +25,7 @@ axis into this project's own decomposed factorial dataset
 Both stay inside Raimondi's original template (rather than this project's
 own typicality/evocativeness/domain-crossed design) to keep the comparison
 to their reported numbers clean, the same way
-`docs/RAIMONDI_REPLICATION_GAPS.md` depended on a directly comparable
+`docs/rq1_findings/RAIMONDI_REPLICATION_GAPS.md` depended on a directly comparable
 slice to diagnose the pretrained scoring artifact.
 
 Each new item keeps the original template exactly — *"[Agent] [did X] to
@@ -114,7 +114,7 @@ aggregate (a pair can pass on one nonmoral framing and not the other):
 - **A pair fails both**: that storyline's domain doesn't have a clean
   nonmoral analogue in either framing — worth reporting which `pair_id`s
   these are and why, rather than silently dropping them (a finding in its
-  own right about the domain, per `docs/SEVERITY_MORALIZATION_BACKGROUND.md`'s
+  own right about the domain, per `docs/severity_confound/SEVERITY_MORALIZATION_BACKGROUND.md`'s
   TDM discussion).
 - Also confirm the original 80 still read as clearly moral through this
   project's own reviewer pipeline — not guaranteed just because Raimondi

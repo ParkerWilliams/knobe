@@ -1,7 +1,7 @@
 """Wild-cluster-bootstrap the RQ1_base `sign_c` MAIN EFFECT (bad vs. good,
 moral+nonmoral pooled, finetuned models only) -- the literal "classic Knobe
 effect" contrast (`rq1_base_sign_finetuned` in
-docs/RQ1_STATISTICAL_METHODS_v1.1.md section 6's table), which script 01
+docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md section 6's table), which script 01
 never bootstrapped: 01 only tests the `sign_c:tuning_c` interaction, never
 the bare `sign_c` term. That contrast has so far only been reported as an
 asymptotic Wald p-value (gemma p=.091, llama p=.095, mistral p=.495) -- this

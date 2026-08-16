@@ -1,9 +1,9 @@
 # Severity and Moralization: Background for the RQ1a Confound (2026-08-10)
 
 **Status:** theory/context note motivating the severity-vs-moral-label
-analysis in `docs/RQ1_MECHANISM_ANALYSIS_v1.1.md` §1 and
+analysis in `docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md` §1 and
 `analysis/rq1_v1_1_robustness/17_severity_vs_label.py`, and the planned
-escalated-severity pilot (`docs/SEVERITY_PILOT_PLAN.md`). Not a literature
+escalated-severity pilot (`docs/severity_confound/SEVERITY_PILOT_PLAN.md`). Not a literature
 review in the formal sense — a working synthesis of the psychological
 literature most relevant to one specific question: **is severity a nuisance
 confound sitting on top of an independently-manipulable "moral" dimension,
@@ -123,7 +123,7 @@ artifact to be engineered away with better vignette-writing.
 ## 4. What this predicts for the escalated-severity pilot
 
 Putting 1–3 together, the falsifiable prediction for the planned pilot
-(`docs/SEVERITY_PILOT_PLAN.md`) is specific, not just "expect trouble":
+(`docs/severity_confound/SEVERITY_PILOT_PLAN.md`) is specific, not just "expect trouble":
 
 - **Procedural/aesthetic subdomains** should hit a moral-relevance ceiling
   at low-to-moderate severity — these subdomains are closest to Turiel's

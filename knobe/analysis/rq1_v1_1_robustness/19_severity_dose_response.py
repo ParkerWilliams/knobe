@@ -17,7 +17,7 @@ Checked for the OLS-vs-GLS divergence first (the recurring bug from
 06/13/17): none here -- family_id clustering matches severity_c's level
 exactly, same reason 16 and 18 needed no fix.
 
-If severity is the real engine (docs/SEVERITY_MORALIZATION_BACKGROUND.md's
+If severity is the real engine (docs/severity_confound/SEVERITY_MORALIZATION_BACKGROUND.md's
 "constitutive, not just correlated" reading), this interaction should be
 sizeable and reliable -- the gap should widen continuously with severity,
 not just jump at the moral/nonmoral category boundary.

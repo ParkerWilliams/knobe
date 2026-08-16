@@ -2,8 +2,8 @@
 
 **Status:** tracks the 12-item technical-audience review (Tier 1/2/3) given
 earlier in this project against everything actually done since. Read this
-alongside `docs/RQ1_STATISTICAL_METHODS_v1.1.md` (methodology + detailed
-per-contrast tables) and `docs/RQ1_MECHANISM_ANALYSIS_v1.1.md` (research
+alongside `docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md` (methodology + detailed
+per-contrast tables) and `docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md` (research
 interpretation) — this document's job is just the honest checklist: what
 got fixed, what got partially addressed, what's still open, and what new
 items the work itself surfaced.
@@ -108,8 +108,8 @@ severity-adjusted version of the *direct* moral/nonmoral split test with a
 genuine new finding (mistral's nonmoral reversal, `16`), a same-DF
 label-vs-severity model comparison (`17`), a theory note connecting the
 r=.885 severity/sign correlation to the moralization literature
-(`docs/SEVERITY_MORALIZATION_BACKGROUND.md`), and a concrete stimulus-level
-follow-up plan (`docs/SEVERITY_PILOT_PLAN.md`) rather than stopping at "does
+(`docs/severity_confound/SEVERITY_MORALIZATION_BACKGROUND.md`), and a concrete stimulus-level
+follow-up plan (`docs/severity_confound/SEVERITY_PILOT_PLAN.md`) rather than stopping at "does
 it survive statistically." This went further than "fit one model" because
 the first attempt at exactly that (item 5 as originally scoped) surfaced a
 second instance of the same pooled-OLS bug found in item 2 — worth knowing
@@ -220,12 +220,12 @@ chased further this session.
   script, not a retrospective check).
 - **Resolve the mistral RQ1b-nonmoral disagreement** between the family-FE
   WCB and the family-random-slope model (§13 item 1 above and
-  `docs/RQ1_STATISTICAL_METHODS_v1.1.md` §10.2) — this is the same
+  `docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md` §10.2) — this is the same
   underlying ask as Tier 1 item 2 (a proper joint/EIV model would settle
   both at once). **Update 2026-08-12: SIMEX (the other half of item 2) does
   not settle it** — see item 2 above. The joint/latent-variable model is
   now the only unattempted lever left for this specific disagreement.
-- **The escalated-severity pilot** (`docs/SEVERITY_PILOT_PLAN.md`) is a
+- **The escalated-severity pilot** (`docs/severity_confound/SEVERITY_PILOT_PLAN.md`) is a
   stimulus-design-level attempt at what Tier 1 item 5 and Tier 2 item 9
   can't reach statistically — if severity and moral status turn out to be
   genuinely inseparable in this taxonomy (the moralization-literature

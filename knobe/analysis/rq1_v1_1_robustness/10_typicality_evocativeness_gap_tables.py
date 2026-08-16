@@ -1,7 +1,7 @@
 """Descriptive bad-good intentionality gap, split by typicality condition and
 separately by evocativeness condition (finetuned/instruct checkpoints only).
 
-This is the source of docs/RQ1_MECHANISM_ANALYSIS_v1.1.md section 3's "gap,
+This is the source of docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md section 3's "gap,
 common/typical" vs "gap, uncommon/atypical" table -- the descriptive
 companion to the rq1c_typicality_x_sign / rq1c_evocativeness_x_sign LMM
 interaction coefficients (01_rq1_base_and_rq1c_wcb.py). The evocativeness

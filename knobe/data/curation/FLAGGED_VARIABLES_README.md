@@ -93,7 +93,7 @@ exact-zero-mean ties — which is not a data discrepancy, just a different
 unit of analysis. State which one you're using when citing either number.
 
 **Next steps:** this needs a v1.1 redesign, not per-item patching. See
-`docs/V1_1_REVISION_PLAN.md` Workstream B §3 for the current thinking:
+`docs/v1_1_release_process/V1_1_REVISION_PLAN.md` Workstream B §3 for the current thinking:
 external-lexicon scoring was considered and rejected (it encodes what human
 lexicographers tagged as emotionally loaded, not what's salient to the
 subject models being tested); personal-report wording framing ("residents

@@ -15,7 +15,7 @@ sign_c:severity_c estimate was -0.190 against the RE estimate of -0.086).
   B (severity alone):  ev_rating ~ sign_c * severity_c
   C (combined):        ev_rating ~ sign_c * vt_c + sign_c * severity_c
 
-Context: docs/SEVERITY_MORALIZATION_BACKGROUND.md -- this project's own
+Context: docs/severity_confound/SEVERITY_MORALIZATION_BACKGROUND.md -- this project's own
 taxonomy defines "moral" as harm/welfare-affecting (constants.py's
 GENERATION_SYSTEM_PROMPT explicitly excludes purity/loyalty/authority
 content), so severity and moral status may not be independently

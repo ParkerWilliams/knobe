@@ -1,12 +1,12 @@
-"""Phase 0 of docs/SEVERITY_PILOT_PLAN.md: re-run curation on the EXISTING
+"""Phase 0 of docs/severity_confound/SEVERITY_PILOT_PLAN.md: re-run curation on the EXISTING
 420 v1.1 variants with a reworded, magnitude-only severity question, to test
 whether the current question's "severe or significant" disjunction is
 partly a measurement artifact of the moral/severity confound (r=.885 within
-moral items -- docs/SEVERITY_MORALIZATION_BACKGROUND.md).
+moral items -- docs/severity_confound/SEVERITY_MORALIZATION_BACKGROUND.md).
 
 **NOT YET RUN.** This environment has no ANTHROPIC_API_KEY -- run this with
 whoever has the same curation-reviewer access already used for
-`knobe curate run` (docs/V1_1_WORKFLOW.md's "needs his API key" step).
+`knobe curate run` (docs/v1_1_release_process/V1_1_WORKFLOW.md's "needs his API key" step).
 
 Reuses the project's own curation call machinery (knobe.curate.AnthropicClient,
 _complete_with_retry, knobe.parsing.parse_rating) rather than reimplementing
@@ -42,7 +42,7 @@ from knobe.parsing import parse_rating  # noqa: E402
 
 import pandas as pd  # noqa: E402
 
-# The candidate reworded question -- see docs/SEVERITY_PILOT_PLAN.md Phase 0
+# The candidate reworded question -- see docs/severity_confound/SEVERITY_PILOT_PLAN.md Phase 0
 # for the rationale (drops "significant" entirely; forces a magnitude-only,
 # valence-symmetric frame so the same wording works for both good and bad
 # outcomes without leaning on a term that could read as "morally important").

@@ -4,7 +4,7 @@
 a full revision of the first pass**, after a small-cluster-robust
 re-analysis (wild cluster bootstrap, a severity-covariate refit, and a
 family-random-slope check — full methodology in
-`docs/RQ1_STATISTICAL_METHODS_v1.1.md` §8–§11) showed that several of the
+`docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md` §8–§11) showed that several of the
 first pass's headline findings were artifacts of trusting asymptotic
 standard errors at small cluster counts (as few as 21 family clusters) and a
 random-intercept-only model that assumes every effect is constant across
@@ -12,7 +12,7 @@ families. Where a finding survived rigorous re-testing, it's kept, usually
 with a smaller effect or narrower scope than first reported. Where it didn't
 survive, that's stated plainly, not hedged into ambiguity. The RQ1a/RQ1b/RQ1c
 contrasts are the frozen `configs/contrasts.yaml` fits (same numbers as
-`docs/MAIN_RUN_WRITEUP_v1.1.md`); the valence-type-split sign effect, the
+`docs/rq1_findings/MAIN_RUN_WRITEUP_v1.1.md`); the valence-type-split sign effect, the
 typicality/evocativeness gap tables, the severity/WCB/random-slope checks,
 and the affect-decoupling analysis are exploratory follow-ups, not yet
 pipeline artifacts.
@@ -66,7 +66,7 @@ Wald fit that first looked like it rescued all three families, p=.0014/.0000/.00
 is unreliable at only 21 clusters). Baseline WCB survives for llama/mistral
 (p=.0045/.001) but not gemma (p=.640); with severity added as a covariate,
 none survive (p=.655/.222/.564) — full numbers and the set-FE bootstrap-bias
-correction behind them in `docs/RQ1_STATISTICAL_METHODS_v1.1.md` §9.
+correction behind them in `docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md` §9.
 **The full trail this section summarizes — the label-vs-severity AIC
 comparison, the direct dose-response test and the equivalence-CI correction
 to how its null was first read, and why the item distribution itself rules
@@ -116,13 +116,13 @@ encoding being a cleaner version of nearly the same two-cluster signal, not
 independent evidence morality "beats" severity as a driver.
 
 **Bottom line: this is a manipulation failure to fix by re-norming and
-re-matching the stimuli (`docs/SEVERITY_PILOT_PLAN.md`, scoped specifically
+re-matching the stimuli (`docs/severity_confound/SEVERITY_PILOT_PLAN.md`, scoped specifically
 to nonmoral-*bad* content — the good pairs don't need it), not something
 more modeling on the existing v1.1 data can resolve.** Until nonmoral-bad
 severity is deliberately raised into the 5–7 range and re-checked against
 moral_relevance, RQ1a's moral-vs-severity question should be reported as a
 design limitation, not a statistically-adjudicated finding in either
-direction. (Full matched-pair table: `docs/RQ1_STATISTICAL_METHODS_v1.1.md`
+direction. (Full matched-pair table: `docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md`
 §9.4.)
 
 **What still stands on its own:** the direct split-sample test (fit the
@@ -172,7 +172,7 @@ survive a properly-specified small-cluster test and should be treated as
 unresolved, not confirmed in either direction** (a family-random-slope check
 gives it a significant negative estimate while the more defensible
 family-fixed-effects wild bootstrap does not; see
-`docs/RQ1_STATISTICAL_METHODS_v1.1.md` §10.2). Don't cite "mistral reverses
+`docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md` §10.2). Don't cite "mistral reverses
 the Hindriks asymmetry for nonmoral items" as an established finding.
 
 **A methodological note worth keeping, not just a caveat.** Diagnosing why
@@ -397,7 +397,7 @@ sized inference) that this taxonomy and this re-analysis made visible.
   manipulation failure specific to the bad-valence pairs, not a statistical
   power problem — motivates the pilot below directly, scoped to
   nonmoral-*bad* content specifically (nonmoral-good doesn't need it).
-- **Active next step**: `docs/SEVERITY_PILOT_PLAN.md` — draft and curate
+- **Active next step**: `docs/severity_confound/SEVERITY_PILOT_PLAN.md` — draft and curate
   (not yet elicit) severity-escalated prudential-subdomain nonmoral-**bad**
   pilot items specifically, to find out whether nonmoral-bad severity can
   be raised into MB's 5-7 range while staying reviewer-classified nonmoral.
@@ -408,7 +408,7 @@ sized inference) that this taxonomy and this re-analysis made visible.
   claims underlying §1 and §3, given how much family-level heterogeneity the
   random-slope check surfaced.
 - ~~Minimum-detectable-effect for the severity-adjusted RQ1a model~~ — done
-  (§1 above, `docs/RQ1_STATISTICAL_METHODS_v1.1.md` §11.2): all three
+  (§1 above, `docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md` §11.2): all three
   families are underpowered, not confirmed-null. Doing this surfaced a
   second case of the pooled-OLS bias (fixed via set fixed effects, same fix
   family as RQ1b's) — ~~worth a systematic check of every other WCB script~~
@@ -423,11 +423,11 @@ sized inference) that this taxonomy and this re-analysis made visible.
 — Analysis run 2026-08-10 against `results/v1.1/results_all.jsonl` (378,000
 rows), `data/release/v1.1/vignettes.csv`, and `data/curation/curated_v1.1.csv`
 (severity). Full statistical methodology, diagnostics, and the code fix are
-in `docs/RQ1_STATISTICAL_METHODS_v1.1.md` §8–§13. Preregistered contrast
+in `docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md` §8–§13. Preregistered contrast
 numbers trace to `results/v1.1/paper/contrast_table.csv` (regenerated after
 the RQ1b bootstrap fix), `set_sensitivity.csv`, `ordinal_sensitivity.csv`.
 Wild-cluster-bootstrap, severity, RE/OLS/FE, and random-slope numbers are
 not yet `knobe analyze` pipeline artifacts, but are fully reproducible from
 the committed scripts in `analysis/rq1_v1_1_robustness/` (see that
-directory's README.md and `docs/RQ1_STATISTICAL_METHODS_v1.1.md` §8–§13 for
+directory's README.md and `docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md` §8–§13 for
 which script produces which table).

@@ -3,7 +3,7 @@ WITHIN family (tuning_c for RQ1_base; typ_c, evoc_c for RQ1c; pred_c for
 RQ1b) with a random intercept AND slope per family_id
 (re_formula="~<term>"), comparing the focal interaction's SE to the
 random-intercept-only primary model. sign_c and vt_c do not vary within
-family (RQ1a has no equivalent check -- see docs/RQ1_STATISTICAL_METHODS_v1.1.md
+family (RQ1a has no equivalent check -- see docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md
 section 11).
 
 This independently reproduces the wild-cluster-bootstrap p-values in

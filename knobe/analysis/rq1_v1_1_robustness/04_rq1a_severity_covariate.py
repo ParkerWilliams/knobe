@@ -1,9 +1,9 @@
 """RQ1a with reviewer-rated severity as a covariate, refit at G=21 (set_id)
 with wild-cluster-bootstrap p-values for both the baseline and
-severity-adjusted models -- see docs/RQ1_STATISTICAL_METHODS_v1.1.md section
+severity-adjusted models -- see docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md section
 9. Tests whether the moral-specific sign_c:vt_c interaction survives
 controlling for the MB/NMB, MG/NMG severity confound documented in
-docs/RQ1_MECHANISM_ANALYSIS_v1.1.md section 1.
+docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md section 1.
 
 One family (WORK-MG-02) has no curation severity record and is dropped from
 BOTH the baseline and severity-adjusted fits here, so the two are compared

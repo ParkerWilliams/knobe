@@ -12,6 +12,9 @@ architecture and data-contract reference. `src/knobe/constants.py` is the
 single source of truth for the taxonomy, banned-word lists, question wording,
 and template text — never duplicate or hand-edit those values elsewhere.
 
+Research docs (results, methodology, process history) live under `docs/`,
+organized by subfolder — see [`docs/README.md`](docs/README.md) for the index.
+
 ## Pipeline stage map
 
 Each stage reads and writes JSONL/CSV/parquet artifacts validated against
@@ -104,7 +107,7 @@ gunzip -c results_dist/results_v1.1_all.jsonl.gz > results/v1.1/results_all.json
 ```
 
 v1.0 caveat: all Mistral `logprobs_0_10` vectors in the v1.0 file are flat
-(the retracted measurement artifact -- see `docs/MAIN_RUN_WRITEUP_v1.0.md`);
+(the retracted measurement artifact -- see `docs/rq1_findings/MAIN_RUN_WRITEUP_v1.0.md`);
 v1.1 contains the corrected re-elicitation. Analysis commands and fallback
 lists are documented in the writeups.
 
@@ -282,4 +285,4 @@ with `pytest -m gpu` / `pytest -m slow`.
 Several scientific and modeling choices in this implementation follow the spec
 but warrant a researcher sign-off before pre-registration freeze and before any
 RQ claims. They are catalogued, with context and implementation pointers, in
-[`docs/DECISIONS_FOR_HUMANS.md`](docs/DECISIONS_FOR_HUMANS.md).
+[`docs/v1_1_release_process/DECISIONS_FOR_HUMANS.md`](docs/v1_1_release_process/DECISIONS_FOR_HUMANS.md).

@@ -1,7 +1,7 @@
 """Within-family self-reported-affect-to-intentionality coupling, and
 whether instruction-tuning changes it.
 
-Source of docs/RQ1_MECHANISM_ANALYSIS_v1.1.md section 4's second table
+Source of docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md section 4's second table
 (the "affect decoupling" finding): for each subject family x sign, demean
 both self-reported affect_salience and intentionality within
 (model_key, family_id, sign) -- stripping the family-level confound (more
@@ -10,7 +10,7 @@ typicality/evocativeness manipulation) -- then fit
 `intentionality_demeaned ~ affect_demeaned * instruct` and read off the
 pretrained-checkpoint slope and the instruct-checkpoint shift.
 
-NOTE (per docs/RQ1_MECHANISM_ANALYSIS_v1.1.md section 4): this result has
+NOTE (per docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md section 4): this result has
 NOT been put through the same wild-cluster-bootstrap / family-random-slope
 rigor as everything else in this directory (it's a plain OLS Wald p-value on
 a small within-family sample, 4 variants x ~21 families per sign). Given how

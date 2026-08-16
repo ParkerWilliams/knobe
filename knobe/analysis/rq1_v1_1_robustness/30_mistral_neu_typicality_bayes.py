@@ -1,6 +1,6 @@
 """Outstanding-review item 4: Bayesian-regularized ordinal fit for mistral's
 NEU-typicality quasi-separation cell (fixed-effects OrderedModel MLE
-diverges to a degenerate estimate=13.3, docs/RQ1_STATISTICAL_METHODS_v1.1.md
+diverges to a degenerate estimate=13.3, docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md
 section 7.2 -- small N=2100/G=21 subset where typ_c likely near-perfectly
 predicts category membership).
 

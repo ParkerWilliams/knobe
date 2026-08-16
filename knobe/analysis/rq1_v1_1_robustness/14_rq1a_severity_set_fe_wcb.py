@@ -4,7 +4,7 @@ for why that matters), at G=21 (set_id). Supersedes the "+severity_c" rows
 in 04_rq1a_severity_covariate.py's output for any purpose that needs a
 trustworthy point estimate/SE (the baseline, no-severity rows in that file
 are unaffected -- sign_c/vt_c alone are a balanced categorical design where
-pooled OLS ~= GLS, confirmed in docs/RQ1_STATISTICAL_METHODS_v1.1.md section
+pooled OLS ~= GLS, confirmed in docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md section
 7.1).
 """
 from __future__ import annotations

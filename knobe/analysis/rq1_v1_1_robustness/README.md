@@ -1,9 +1,9 @@
 # RQ1 v1.1 small-cluster-robustness re-analysis
 
-Exploratory research scripts behind `docs/RQ1_STATISTICAL_METHODS_v1.1.md`
-§8–§11 and `docs/RQ1_MECHANISM_ANALYSIS_v1.1.md`. Not part of the `knobe`
+Exploratory research scripts behind `docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md`
+§8–§11 and `docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md`. Not part of the `knobe`
 package or the `knobe analyze` CLI — see
-`docs/RQ1_STATISTICAL_METHODS_v1.1.md` §13 item 6 for why these haven't been
+`docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md` §13 item 6 for why these haven't been
 promoted into the pipeline yet (mainly: the bootstrap seeding here is
 per-script, not per-contrast like `models.py`'s
 `sha256(base_seed, contrast, model_family, boot_idx)` scheme).
@@ -19,7 +19,7 @@ control for RQ1a's moral/nonmoral intensity confound, a Hausman-style
 RE/pooled-OLS/fixed-effects diagnostic for RQ1b (which found and fixed an
 actual bug in `models.py`'s bootstrap CI), a family-random-slope check, and
 a minimum-detectable-effect calculation. Results and their effect on both
-docs' conclusions are summarized in `docs/RQ1_MECHANISM_ANALYSIS_v1.1.md`'s
+docs' conclusions are summarized in `docs/rq1_findings/RQ1_MECHANISM_ANALYSIS_v1.1.md`'s
 "What changed from the first pass" table.
 
 ## Running
@@ -96,7 +96,7 @@ coding exactly).
 ## A second instance of the pooled-OLS bias, found while finishing the MDE table
 
 Same root cause as the RQ1b bug (see `06_rq1b_hausman_diagnostic.py` /
-`docs/RQ1_STATISTICAL_METHODS_v1.1.md` §10.1), different contrast: RQ1a's
+`docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md` §10.1), different contrast: RQ1a's
 severity-adjusted model (`04_rq1a_severity_covariate.py`'s `+severity_c`
 rows) also used a plain-pooled-OLS WCB refit, and `severity_c` — a
 continuous, family-level covariate — broke it the same way `pred_c` broke
@@ -124,4 +124,4 @@ nominal contrast, because one family (`WORK-MG-02`) has no curation severity
 record. The qualitative pattern is identical either way (llama and mistral
 survive the baseline WCB, gemma doesn't); both docs cite each number from
 its own script and note the discrepancy explicitly rather than silently
-picking one. See `docs/RQ1_STATISTICAL_METHODS_v1.1.md` §9's footnote.
+picking one. See `docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md` §9's footnote.

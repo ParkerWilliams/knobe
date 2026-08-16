@@ -1,6 +1,6 @@
 """Wild-cluster-bootstrap validation at G=21 (set_id) for RQ1a
 sign_x_valence_type, no severity covariate -- see
-docs/RQ1_STATISTICAL_METHODS_v1.1.md section 8. Companion:
+docs/rq1_findings/RQ1_STATISTICAL_METHODS_v1.1.md section 8. Companion:
 04_rq1a_severity_covariate.py adds the severity control and re-runs WCB.
 """
 from __future__ import annotations

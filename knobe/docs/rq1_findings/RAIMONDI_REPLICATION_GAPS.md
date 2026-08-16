@@ -109,7 +109,7 @@ real anomalies rather than normal model heterogeneity:
 - RQ1b's mistral-nonmoral cell has an independent, still-unresolved
   disagreement between estimators (family-FE WCB p=.255 vs. random-slope
   p=.0021) that SIMEX ruled out measurement-error as the explanation for
-  (`docs/OUTSTANDING_STATISTICAL_ANALYSIS.md` item 2).
+  (`docs/rq1_findings/OUTSTANDING_STATISTICAL_ANALYSIS.md` item 2).
 - This session's nonmoral-subdomain breakdown found mistral trending in the
   *reversed* direction (good > bad) across pooled nonmoral, aesthetic, and
   procedural subdomains alike — never significant, but a consistent pattern
