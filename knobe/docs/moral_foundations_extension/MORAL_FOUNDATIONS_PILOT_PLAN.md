@@ -1,9 +1,11 @@
 # Does the Knobe Effect Generalize Beyond Harm? A Moral-Foundations Extension of Ngo's Set (design doc, 2026-08-17)
 
 **Status:** design agreed via brainstorming, not yet built. This is the
-plan; `analysis/ngo_prudential_pilot/` (a sibling investigation, same
-underlying stimuli, different axis) is the closest precedent for how this
-would actually get built once approved.
+plan; `analysis/ngo_extensions/nonmoral_pilot/` (a sibling investigation, same
+underlying stimuli, different axis, grouped under `analysis/ngo_extensions/`
+for the shared strategy) is the closest precedent for how this would
+actually get built once approved. Will live at
+`analysis/ngo_extensions/moral_foundations_pilot/` once built.
 
 ## 1. Motivation
 
@@ -21,7 +23,7 @@ all (Haidt's moral-dumbfounding paradigm is the clearest demonstration).
 This project's own generation prompt explicitly excludes those three.
 
 **The gap this leaves:** even a clean "the Knobe effect is moral-specific"
-finding (from `analysis/ngo_prudential_pilot/`'s harm-vs-nonmoral test)
+finding (from `analysis/ngo_extensions/nonmoral_pilot/`'s harm-vs-nonmoral test)
 would only license a claim about *harm-structured* moral content. Whether
 the same asymmetry shows up when moral wrongness is presented via a
 different normative ground entirely is untested by anything built so far.
@@ -85,7 +87,7 @@ Ngo's shorter original wording.
 
 ## 4. Sourcing plan
 
-Reuse Ngo's 40 storylines (`analysis/ngo_prudential_pilot/
+Reuse Ngo's 40 storylines (`analysis/ngo_extensions/nonmoral_pilot/
 ngo_2015_original_80.txt`) as shared scaffolds — same agent archetypes,
 goals, and domains — rather than inventing unrelated content, to keep this
 a recognizable extension rather than a disconnected new battery.
@@ -102,7 +104,7 @@ animal/wildlife (~2), religious (~2), sports (~1).
   a broken promise, an undermined hierarchy, or an unfair process.
   Target ~25-30 of the 40 storylines; exact count depends on which hold up
   under actual drafting. The three storylines already flagged as
-  unadaptable in `analysis/ngo_prudential_pilot/prudential_variants.py`
+  unadaptable in `analysis/ngo_extensions/nonmoral_pilot/prudential_variants.py`
   (wartime bombing, terrorism, cult mass-suicide — items 13-14, 67-68,
   73-74) are skipped or substituted the same way they were there.
 - **Purity/sanctity**: the hard case. Only ~3-5 of Ngo's 40 storylines have
@@ -130,7 +132,7 @@ untestable G=2 within this project's own release.
 
 Two curation questions per item, not a full cross-check against all five
 conditions (kept lean, matching the single-question scope of
-`analysis/ngo_prudential_pilot/curate_moral_relevance.py`):
+`analysis/ngo_extensions/nonmoral_pilot/curate_moral_relevance.py`):
 
 1. **Harm relevance** (every item, every condition):
    > *"To what extent does this outcome involve harm or damage to

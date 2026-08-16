@@ -25,14 +25,14 @@ curate run` (same handoff pattern as `analysis/severity_wording_check/`).
 
 Usage:
     # 1. Verify it imports/runs clean with zero API access:
-    .venv/bin/python analysis/ngo_prudential_pilot/curate_moral_relevance.py --mock
+    .venv/bin/python analysis/ngo_extensions/nonmoral_pilot/curate_moral_relevance.py --mock
 
     # 2. Real run, once handed to someone with API access:
-    .venv/bin/python analysis/ngo_prudential_pilot/curate_moral_relevance.py \
+    .venv/bin/python analysis/ngo_extensions/nonmoral_pilot/curate_moral_relevance.py \
         --reviewer-model claude-sonnet-5
 
     # 3. Check pass/fail against configs/curation.yaml's thresholds:
-    .venv/bin/python analysis/ngo_prudential_pilot/curate_moral_relevance.py --check
+    .venv/bin/python analysis/ngo_extensions/nonmoral_pilot/curate_moral_relevance.py --check
 
 Writes outputs/moral_relevance_raw.jsonl (checkpoint/resume: already-completed
 variant_ids are skipped on rerun, same pattern as
@@ -47,7 +47,7 @@ import sys
 import time
 from pathlib import Path
 
-REPO_SRC = Path(__file__).resolve().parents[2] / "src"
+REPO_SRC = Path(__file__).resolve().parents[3] / "src"
 sys.path.insert(0, str(REPO_SRC))
 
 from knobe import constants  # noqa: E402

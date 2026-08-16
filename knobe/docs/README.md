@@ -38,7 +38,7 @@ whether that's fixable by better wording or needs new stimuli.
   for this project's harm-based taxonomy specifically.
 - **`SEVERITY_PILOT_PLAN.md`** — the two-phase plan to test that
   empirically (reworded curation question, then an escalated-severity
-  stimulus pilot). See also `analysis/ngo_prudential_pilot/` for a
+  stimulus pilot). See also `analysis/ngo_extensions/nonmoral_pilot/` for a
   differently-scoped attempt at the same underlying question, built
   directly on Raimondi's own stimuli instead of this project's taxonomy.
 

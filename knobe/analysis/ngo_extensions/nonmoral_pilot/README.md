@@ -71,7 +71,7 @@ errors. Whoever has the same curation-reviewer access already used for
 `knobe curate run` needs to run:
 
 ```
-.venv/bin/python analysis/ngo_prudential_pilot/curate_moral_relevance.py \
+.venv/bin/python analysis/ngo_extensions/nonmoral_pilot/curate_moral_relevance.py \
     --reviewer-model claude-sonnet-5
 ```
 
@@ -79,7 +79,7 @@ errors. Whoever has the same curation-reviewer access already used for
 curation cost profile). Then:
 
 ```
-.venv/bin/python analysis/ngo_prudential_pilot/curate_moral_relevance.py --check
+.venv/bin/python analysis/ngo_extensions/nonmoral_pilot/curate_moral_relevance.py --check
 ```
 
 ## What this reuses vs. what's new

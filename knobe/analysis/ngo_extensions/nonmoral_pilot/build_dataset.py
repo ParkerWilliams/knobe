@@ -42,7 +42,7 @@ import pandas as pd
 from prudential_variants import PRUDENTIAL_PAIRS
 from procedural_variants import PROCEDURAL_PAIRS
 
-REPO_SRC = Path(__file__).resolve().parents[2] / "src"
+REPO_SRC = Path(__file__).resolve().parents[3] / "src"
 sys.path.insert(0, str(REPO_SRC))
 from knobe import constants  # noqa: E402
 

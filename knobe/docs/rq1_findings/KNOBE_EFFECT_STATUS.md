@@ -62,7 +62,7 @@ stronger claim requires the direct interaction test (RQ1a's
 survive severity adjustment in any family. What's established here is
 narrower and safe: **a bad>good asymmetry exists, robustly, for moral
 content in 2 of 3 families.** Whether it's larger than a matched nonmoral
-asymmetry is the still-open question `analysis/ngo_prudential_pilot/`
+asymmetry is the still-open question `analysis/ngo_extensions/nonmoral_pilot/`
 was built to answer more cleanly than this release's confounded moral/
 nonmoral pairs can.
 
@@ -86,7 +86,7 @@ item 2). Prudential — the subdomain the moralization literature
 (`docs/severity_confound/SEVERITY_MORALIZATION_BACKGROUND.md`) flags as the best candidate
 for a genuine severity/moral-status dissociation — has only 2 families in
 this release and simply can't be tested here. That gap is what
-`analysis/ngo_prudential_pilot/` exists to fill.
+`analysis/ngo_extensions/nonmoral_pilot/` exists to fill.
 
 ## 4. The pretrained arm: a real, corrected reversal-turned-replication
 
@@ -144,7 +144,7 @@ than a gap in testing.
 ## What's still open
 
 - **Prudential nonmoral content is untested in the actual release** (only
-  2 families) — `analysis/ngo_prudential_pilot/` is built to test this
+  2 families) — `analysis/ngo_extensions/nonmoral_pilot/` is built to test this
   directly on Raimondi's own storylines, pending curation
   (`ANTHROPIC_API_KEY` needed) and, if that passes, elicitation.
 - **Whether the moral effect is genuinely moral-specific** (bigger than a
