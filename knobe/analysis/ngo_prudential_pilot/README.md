@@ -43,6 +43,20 @@ noted in `prudential_variants.py`'s docstring.
 - `ngo_2015_original_80.txt` — the source Ngo/Raimondi stimuli (80 items).
 - `prudential_variants.py` — the 40 new self-regarding pairs (hand-authored).
 - `procedural_variants.py` — the 40 new convention/etiquette pairs (hand-authored).
+
+Each of the 240 dataset rows carries three questions, not just one:
+`q_intentionality` (targets the foreseen SIDE EFFECT only — e.g. "Did Bill
+intentionally cause the death of babies?", never the main action, which is
+never in question), `q_blame`, and `q_praise` (`constants.QUESTIONS`'
+frozen wording, same agent phrase, rendered for every item regardless of
+sign — matching `render.py`'s production convention that every variant
+gets all three question types, with the *analysis* stage picking
+blame-for-bad/praise-for-good later, not elicitation). As with everything
+else here, each question type would be sent to the model as its own
+independent, single-turn completion (this project's existing
+"INDEPENDENT COMPLETIONS" convention, `curate.py`'s docstring, master spec
+§4.1) — never concatenated into one multi-question prompt, so adding
+blame/praise doesn't change what the model sees for `q_intentionality`.
 - `build_dataset.py` — merges all three into `outputs/ngo_prudential_dataset.csv`
   (240 rows: 80 moral + 80 nonmoral_prudential + 80 nonmoral_procedural,
   already generated and committed — this part needs no API access, it's
