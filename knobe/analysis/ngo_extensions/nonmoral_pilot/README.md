@@ -1,5 +1,8 @@
 # Ngo/Raimondi nonmoral-extension pilot
 
+**Running this yourself? See `HANDOFF.md` for the exact command sequence.**
+The rest of this file is design rationale, not a runbook.
+
 Extends Raimondi et al. (arXiv:2510.12229)'s own 80-scenario design (Ngo
 et al. 2015, *Scientific Reports* 5:17390 — the local copy is
 `ngo_2015_original_80.txt`) with **two independent** nonmoral third
