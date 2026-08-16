@@ -42,6 +42,19 @@ whether that's fixable by better wording or needs new stimuli.
   differently-scoped attempt at the same underlying question, built
   directly on Raimondi's own stimuli instead of this project's taxonomy.
 
+## `moral_foundations_extension/` — does the effect generalize beyond harm?
+
+A distinct question from the severity confound above: even a clean
+"moral-specific" finding only covers *harm-structured* moral content,
+since that's all Ngo's/Raimondi's paradigm and this project's own "moral"
+category ever test. This folder holds the plan to check whether the
+asymmetry holds for moral wrongness grounded in loyalty, authority,
+fairness, or purity instead of harm.
+
+- **`MORAL_FOUNDATIONS_PILOT_PLAN.md`** — design doc (not yet built):
+  vignette structure, storyline sourcing from Ngo's set, curation
+  manipulation-check wording, and analysis plan.
+
 ## `v1_1_release_process/` — how the v1.1 release got built
 
 Process docs from curating and freezing the v1.1 stimulus release, kept
