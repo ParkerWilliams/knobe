@@ -21,7 +21,9 @@ because they're the same kind of move against the same base material.
 
 Adds a nonmoral third variant (prudential, with a procedural fallback) to
 each of Ngo's 40 harm/help pairs. Tests whether the classic asymmetry is
-moral-specific at all. Built; curation blocked on `ANTHROPIC_API_KEY`.
+moral-specific at all. Dataset and elicitation both built and verified
+(with `--mock`/`--engine fake`); curation blocked on `ANTHROPIC_API_KEY`,
+elicitation blocked on GPU/`vllm` access.
 See `nonmoral_pilot/README.md`.
 
 ## `moral_foundations_pilot/`

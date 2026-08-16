@@ -62,25 +62,49 @@ blame/praise doesn't change what the model sees for `q_intentionality`.
   already generated and committed — this part needs no API access, it's
   pure text).
 - `curate_moral_relevance.py` — the curation-only manipulation check.
+- `elicit.py` — runs the actual intentionality/blame/praise questions
+  against the 6 subject models (gemma/llama/mistral, pretrained +
+  instruct), reusing this project's real inference machinery
+  (`knobe.elicit_vllm`'s engine abstraction, `knobe.jobs`' frozen seeding
+  rule, `knobe.registry`'s model resolution, `knobe.schemas.ResultRecord`
+  for output) rather than a one-off reimplementation — see the script's
+  own docstring for exactly what's reused vs. deliberately new.
 
-## Status: dataset built, curation not yet run
+## Status: dataset built, curation not yet run, elicitation built not yet run
 
-This environment has no `ANTHROPIC_API_KEY`. Verified clean with `--mock`
-(zero API calls, deterministic fake responses) — no import or logic
-errors. Whoever has the same curation-reviewer access already used for
-`knobe curate run` needs to run:
+This environment has no `ANTHROPIC_API_KEY` and no GPU/`vllm` — two
+different resources, possibly two different people on your end. Curation
+first, then elicitation:
 
+**1. Curation** (needs `ANTHROPIC_API_KEY`):
 ```
 .venv/bin/python analysis/ngo_extensions/nonmoral_pilot/curate_moral_relevance.py \
     --reviewer-model claude-sonnet-5
 ```
-
 (240 calls, one question each — a rounding error against the existing
 curation cost profile). Then:
-
 ```
 .venv/bin/python analysis/ngo_extensions/nonmoral_pilot/curate_moral_relevance.py --check
 ```
+
+**2. Elicitation** (needs a GPU + `uv pip install -e '.[vllm]'`), once
+curation passes for whichever `pair_id`s/framings clear the threshold
+(§"What success looks like" below):
+```
+.venv/bin/python analysis/ngo_extensions/nonmoral_pilot/elicit.py \
+    --engine vllm --n-samples 25
+```
+Verified clean with `--engine fake` (deterministic, zero GPU/model
+access) — correct model resolution against the real registry, correct
+seeding, correct resume behavior. **Not yet run for real.**
+
+Cost estimate, not yet validated against real throughput: 240 items x 3
+questions x 6 models x N=25 samples = 108,000 completions — about 6% of
+the v1.1 main run's scale (1.8M completions, "a few GPU-hours total" per
+`specs/00_PLAN.md`), so likely well under an hour on one H200, but that's
+an extrapolation, not a measurement. Recommend a quick timing check first
+(`--n-samples 1` against one model) before committing to the full N=25
+run, per this project's own cost-check-before-expensive-runs convention.
 
 ## What this reuses vs. what's new
 
@@ -121,6 +145,6 @@ aggregate (a pair can pass on one nonmoral framing and not the other):
   used them.
 
 Once each `pair_id` has at least one nonmoral framing that clears
-`nonmoral_max`, proceed to a real elicitation pilot: does the sign effect
-appear within the surviving nonmoral set, matched pairwise against the
+`nonmoral_max`, run `elicit.py` (above): does the sign effect appear
+within the surviving nonmoral set, matched pairwise against the
 `moral` sign effect on the same 40 storyline templates?
