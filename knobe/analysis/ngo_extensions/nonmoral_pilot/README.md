@@ -62,6 +62,12 @@ blame/praise doesn't change what the model sees for `q_intentionality`.
   already generated and committed — this part needs no API access, it's
   pure text).
 - `curate_moral_relevance.py` — the curation-only manipulation check.
+- `power_check.py` — projects whether the real post-curation cluster
+  count is large enough to detect an effect at all, before spending an
+  elicitation run on it. Reuses this project's existing MDE formula and
+  SE-scaling approximation (`analysis/rq1_v1_1_robustness/09` and `15`),
+  benchmarked against real numbers read from `05_valence_split_wcb.csv`
+  and `32_nonmoral_subdomain_sign_wcb.csv`, not hand-copied.
 - `elicit.py` — runs the actual intentionality/blame/praise questions
   against the 6 subject models (gemma/llama/mistral, pretrained +
   instruct), reusing this project's real inference machinery
@@ -70,7 +76,7 @@ blame/praise doesn't change what the model sees for `q_intentionality`.
   for output) rather than a one-off reimplementation — see the script's
   own docstring for exactly what's reused vs. deliberately new.
 
-## Status: dataset built, curation not yet run, elicitation built not yet run
+## Status: full pipeline built (dataset, curation, selection, power check, elicitation), nothing run for real yet
 
 This environment has no `ANTHROPIC_API_KEY` and no GPU/`vllm` — two
 different resources, possibly two different people on your end. Curation
@@ -102,7 +108,22 @@ after running elicitation, given the full run is estimated under an hour
 `--check` (no filtering, just prints the same pass/fail numbers) still
 works if you just want a quick look without building the selected file.
 
-**2. Elicitation** (needs a GPU + `uv pip install -e '.[vllm]'`), once
+**2. Power check** (no GPU/API needed, just curation's output), before
+committing to elicitation:
+```
+.venv/bin/python analysis/ngo_extensions/nonmoral_pilot/power_check.py
+```
+The thing worth checking before an elicitation run isn't cost (cheap
+regardless of item count) -- it's whether the number of storylines that
+survived curation is even large enough to make the result interpretable,
+the same failure mode as prudential's untestable G=2 in the existing v1.1
+release. Projects the minimum detectable effect at the REAL post-curation
+cluster count, benchmarked against this project's own closest analogous
+results (`05_valence_split_wcb.csv`'s moral-only sign_c fits,
+`32_nonmoral_subdomain_sign_wcb.csv`'s aesthetic/procedural fits) — not a
+blocking gate, just a report to weigh before spending the run.
+
+**3. Elicitation** (needs a GPU + `uv pip install -e '.[vllm]'`), once
 `--select` has produced `outputs/ngo_prudential_dataset_selected.csv`
 (`elicit.py` exits with an error if that file doesn't exist yet):
 ```
