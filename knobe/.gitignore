@@ -23,3 +23,15 @@ configs/storage.yaml
 docs/PILOT_G1_PROVENANCE.md
 build/
 *.bak
+
+# Ngo-extension pilot curation/elicitation outputs are local-only (raw
+# checkpoints, selected datasets, reports, results) -- only the base
+# dataset CSVs are committed. Same rule as results/.
+analysis/ngo_extensions/*/outputs/*_raw.jsonl*
+analysis/ngo_extensions/*/outputs/*_selected.csv
+analysis/ngo_extensions/*/outputs/selection_report.md
+analysis/ngo_extensions/*/outputs/power_check.csv
+analysis/ngo_extensions/*/outputs/elicit_results.jsonl
+
+# Cluster-platform code drops -- local-only, must never enter this repo
+orca-main.zip
