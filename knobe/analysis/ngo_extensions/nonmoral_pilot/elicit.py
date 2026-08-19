@@ -138,14 +138,14 @@ def build_prompts(df: pd.DataFrame) -> dict[str, str]:
     return prompts
 
 
-def build_job_list(prompt_ids: list[str], n_samples: int) -> list[tuple[str, str, int]]:
+def build_job_list(prompt_ids: list[str], model_keys: list[str], n_samples: int) -> list[tuple[str, str, int]]:
     """(prompt_id, model_key, sample_idx) triples, in the same
     prompt-then-model-then-sample order convention as
     ``jobs.build_jobs`` (byte-stable given the same inputs)."""
     return [
         (pid, model_key, sample_idx)
         for pid in prompt_ids
-        for model_key in MODEL_KEYS
+        for model_key in model_keys
         for sample_idx in range(n_samples)
     ]
 
@@ -155,7 +155,25 @@ def main() -> None:
     p.add_argument("--engine", default="fake", choices=["fake", "vllm", "hf"])
     p.add_argument("--n-samples", type=int, default=25, help="matches this project's production N (v1.1 main run)")
     p.add_argument("--batch-size", type=int, default=32)
+    p.add_argument("--model-keys",
+                    help="comma-separated subset of the six model keys to run (default: all). "
+                         "Lets the cluster runner split gemma (Triton attention backend) from "
+                         "llama/mistral into separate jobs and run one subprocess per model, "
+                         "per the main run's per-model-subprocess lesson.")
+    p.add_argument("--registry", type=Path, default=None,
+                    help="path to models.yaml (default: the repo's configs/models.yaml). "
+                         "Needed on-cluster, where the bundle ships its own copy and the "
+                         "repo root doesn't exist.")
     args = p.parse_args()
+
+    if args.model_keys:
+        model_keys = [k.strip() for k in args.model_keys.split(",") if k.strip()]
+        unknown = sorted(set(model_keys) - set(MODEL_KEYS))
+        if unknown:
+            print(f"unknown model key(s) {unknown}; valid: {MODEL_KEYS}", file=sys.stderr)
+            sys.exit(2)
+    else:
+        model_keys = MODEL_KEYS
 
     if not DATASET_PATH.exists():
         print(f"{DATASET_PATH} doesn't exist yet -- run "
@@ -164,15 +182,15 @@ def main() -> None:
     df = pd.read_csv(DATASET_PATH)
     prompts = build_prompts(df)
     prompt_ids = sorted(prompts)
-    jobs = build_job_list(prompt_ids, args.n_samples)
+    jobs = build_job_list(prompt_ids, model_keys, args.n_samples)
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     existing = {r.job_id for r in read_jsonl(OUT_PATH, ResultRecord)} if OUT_PATH.exists() else set()
     remaining = [j for j in jobs if f"{j[0]}::{j[1]}::{j[2]}" not in existing]
     print(f"{len(existing)} already done, {len(remaining)} remaining of {len(jobs)} total "
-          f"({len(prompt_ids)} prompts x {len(MODEL_KEYS)} models x {args.n_samples} samples)")
+          f"({len(prompt_ids)} prompts x {len(model_keys)} models x {args.n_samples} samples)")
 
-    registry = load_registry(default_registry_path())
+    registry = load_registry(args.registry if args.registry else default_registry_path())
     engine = build_engine(args.engine)
 
     by_model: dict[str, list[tuple[str, str, int]]] = {}
