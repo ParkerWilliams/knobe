@@ -238,12 +238,49 @@ def check_manipulation() -> None:
 
 
 def select_items() -> None:
-    """Builds outputs/mf_pilot_dataset_selected.csv (every item that
-    independently clears its own thresholds) and
+    """Builds outputs/mf_pilot_dataset_selected.csv and
     outputs/selection_report.md. Not a blocking gate -- see module
-    docstring."""
+    docstring.
+
+    **Selection is PAIR-level, keyed on the bad member** -- a data-driven
+    revision (2026-08-19) of the design doc's per-item rule, made after the
+    first real curation run showed the section-5 questions are
+    sign-asymmetric by construction: they name the violation pole ("harm or
+    damage", "unequal or unjust", "taboo...violation"), so GOOD-sign items
+    score near zero on them no matter how well-authored (observed means:
+    harm-control bad 9.2 vs good 0.7; fairness-good 1.1 on its own
+    foundation question). Per-item gating would therefore delete the good
+    arm entirely and with it the bad>good contrast the pilot exists to
+    test. Rule now: a (condition, pair_id) pair is selected iff its BAD
+    member passes the design-doc thresholds (the bad side is where the
+    category manipulation is measurable -- and gating on it is still
+    strictly more curation than Ngo/Raimondi's original materials had,
+    which is none) AND, for foundation conditions, its GOOD member parsed
+    and is not harm-contaminated (harm_relevance <= nonmoral_max).
+    Good-sign harm-controls are carried by their bad member alone: no
+    question in the section-5 instrument can measure "welfare benefit
+    relevance". All ratings survive into the selected CSV, so analysis can
+    re-gate differently without re-running curation. Flagged for
+    collaborator review in the selection report, the pilot README, and
+    results/ANALYSIS_LOG.md."""
     df, moral_min, nonmoral_max = _load_curated_and_thresholds()
-    selected = df[df["passed"]].drop(columns=["passed"])
+
+    def _pair_selected(sub: pd.DataFrame) -> bool:
+        by_sign = {r["sign"]: r for _, r in sub.iterrows()}
+        bad, good = by_sign.get("bad"), by_sign.get("good")
+        if bad is None or good is None or not bad["passed"]:
+            return False
+        if bad["condition"] != "harm_control":
+            if pd.isna(good.get("harm_relevance")) or good["harm_relevance"] > nonmoral_max:
+                return False
+        return True
+
+    pair_ok = {
+        key: _pair_selected(sub)
+        for key, sub in df.groupby(["condition", "pair_id"])
+    }
+    df["pair_selected"] = [pair_ok[(c, p)] for c, p in zip(df["condition"], df["pair_id"])]
+    selected = df[df["pair_selected"]].drop(columns=["passed", "pair_selected"])
     selected.to_csv(SELECTED_PATH, index=False)
 
     nonharm = df[df["condition"] != "harm_control"]
@@ -252,6 +289,13 @@ def select_items() -> None:
         "",
         f"moral_min={moral_min}, nonmoral_max={nonmoral_max} (configs/curation.yaml). "
         f"{len(selected)}/{len(df)} items selected -> `{SELECTED_PATH.name}`.",
+        "",
+        "**Selection rule: PAIR-level, keyed on the bad member** (see "
+        "`select_items`'s docstring for the full rationale -- the design doc's "
+        "per-item rule was revised 2026-08-19 after real curation data showed the "
+        "section-5 questions only measure the violation pole, which would have "
+        "deleted the good arm; flagged for collaborator review). Per-item "
+        "diagnostics below are unchanged and still worth reading.",
         "",
     ]
 
