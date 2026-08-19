@@ -30,10 +30,14 @@ See `nonmoral_pilot/README.md`.
 
 ## `moral_foundations_pilot/`
 
-Not yet built — design doc at `docs/moral_foundations_extension/
+Built 2026-08-19 from the design doc at `docs/moral_foundations_extension/
 MORAL_FOUNDATIONS_PILOT_PLAN.md`. Adds loyalty/authority/fairness/purity
-variants to (mostly) the same 40 storylines, plus a freshly-templated
-harm-control. Tests whether the asymmetry generalizes beyond the
-harm/welfare side-effect structure specifically, assuming
-`nonmoral_pilot/` establishes the effect is moral-specific in the first
-place. Will live in this directory once built.
+variants to a 30-storyline core of the same 40 storylines, plus a
+freshly-templated 4-clause harm-control. Tests whether the asymmetry
+generalizes beyond the harm/welfare side-effect structure specifically,
+assuming `nonmoral_pilot/` establishes the effect is moral-specific in the
+first place. Full pipeline built and verified end-to-end (`--mock`/
+`--engine fake`): stimuli -> dataset -> two-question curation ->
+selection -> power check -> elicitation. Same resource blocks as the
+sibling: curation needs `ANTHROPIC_API_KEY`, elicitation needs GPU/`vllm`.
+See `moral_foundations_pilot/README.md` and its `HANDOFF.md`.

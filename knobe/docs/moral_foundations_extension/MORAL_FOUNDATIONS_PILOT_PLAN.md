@@ -1,7 +1,10 @@
 # Does the Knobe Effect Generalize Beyond Harm? A Moral-Foundations Extension of Ngo's Set (design doc, 2026-08-17)
 
-**Status:** design agreed via brainstorming, not yet built. This is the
-plan; `analysis/ngo_extensions/nonmoral_pilot/` (a sibling investigation, same
+**Status:** design agreed via brainstorming; **built 2026-08-19 at
+`analysis/ngo_extensions/moral_foundations_pilot/`** (see its README for
+implementation decisions made within this plan's degrees of freedom, e.g.
+the exact 30-storyline core and 13/13/13/7 foundation assignments).
+This is the plan; `analysis/ngo_extensions/nonmoral_pilot/` (a sibling investigation, same
 underlying stimuli, different axis, grouped under `analysis/ngo_extensions/`
 for the shared strategy) is the closest precedent for how this would
 actually get built once approved. Will live at
