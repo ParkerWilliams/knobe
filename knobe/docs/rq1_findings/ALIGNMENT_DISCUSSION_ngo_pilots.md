@@ -40,15 +40,14 @@ A 6/6 pattern across three independently-trained architectures is unusually
 clean for this project — whatever produces the Knobe asymmetry here is
 something RLHF/instruction-tuning adds, not a capability already latent in
 the base model. Caveat: the pretrained *reversals* (llama, mistral harm)
-should not be over-read as a real "anti-Knobe" pretrained prior. This isn't
-a caveat unique to this draft — both pilots' `analyze_sign_wcb.py` import
-`_logit_ev_rating` directly from `analysis/rq1_v1_1_robustness/lib.py`, the
-identical fallback-scoring function implicated in the main run's pretrained
-reversal artifact (2026-08-15 log, scripts 33–35), and the project's own
-2026-08-21 log entries for both pilots already state this explicitly
-("interpret under the known v1.1 pretrained EV-scoring caveat"). The safer
-claim is "pretrained shows nothing reliable," not "pretrained shows the
-opposite."
+should not be over-read as a real "anti-Knobe" pretrained prior. Both
+pilots' `analyze_sign_wcb.py` import `_logit_ev_rating` directly from
+`analysis/rq1_v1_1_robustness/lib.py`, the identical fallback-scoring
+function implicated in the main run's pretrained reversal artifact
+(2026-08-15 log, scripts 33–35), and the project's own 2026-08-21 log
+entries for both pilots already state this caveat explicitly ("interpret
+under the known v1.1 pretrained EV-scoring caveat"). The safer claim:
+pretrained shows nothing reliable.
 
 **2. The Knobe asymmetry was demonstrated across moral foundations, not just
 harm, in llama and mistral (finetuned).** In those two families the
@@ -56,9 +55,9 @@ harm-vs-nonharm interaction is null — the pooled non-harm effect (loyalty +
 authority + fairness + purity) matches the harm effect in magnitude, not
 just direction. gemma is the exception, and in the surprising direction: its
 non-harm effect (2.34) is significantly *larger* than harm (interaction
-β=−1.24, p=.012). So this isn't "the model learned that harming people is
-bad" — it looks more like a general asymmetric-attribution style that fires
-wherever a foundation-relevant violation is present.
+β=−1.24, p=.012). The pattern reads as a general asymmetric-attribution
+style that fires wherever a foundation-relevant violation is present,
+rather than something specific to harming people.
 
 **2a. Authority showed a Knobe asymmetry in gemma and llama at both tuning
 states, but mistral's result was inconsistent.** gemma/llama authority:
@@ -115,15 +114,14 @@ in *both* domains, but 3–5x larger outside morality than within it. This
 directly contradicts any prediction that blame would simply mirror
 intentionality's per-model pattern — llama's intentionality result argued
 for moral-specificity, but llama's own blame result argues just as strongly
-against it. gemma is the one family where this isn't purely a finetuning
-story: its blame interaction is already significant *pretrained*
-(β=−0.25, p<.001), unlike intentionality, where gemma showed nothing in
-either tuning state.
+against it. gemma's blame interaction is already significant *pretrained*
+(β=−0.25, p<.001) — its intentionality result, by contrast, showed nothing
+in either tuning state.
 
 **4a. Interpretation, not yet a conclusion: the "bigger swing outside
-morality" isn't nonmoral scenarios getting blamed more — it's moral
-*good*-outcome scenarios getting an oddly high blame floor.** The raw means
-(finetuned) make this concrete:
+morality" comes from a moral-domain good-outcome blame floor, more than
+from nonmoral scenarios getting blamed more.** The raw means (finetuned)
+make this concrete:
 
 | | moral: good | moral: bad | nonmoral: good | nonmoral: bad |
 |---|---:|---:|---:|---:|
@@ -180,9 +178,8 @@ The human-psychology prior here (Baumeister et al.'s "bad is stronger than
 good," and the general negativity-bias literature) predicts blame should
 swing more than praise. That only holds for llama, in both domains — gemma
 and mistral swing *more* on praise, sometimes by a large margin (mistral
-moral: 3.76 vs. 0.80). So there's no general negativity bias to report here
-either; it's a fourth question these three models answer three different
-ways.
+moral: 3.76 vs. 0.80). This is a fourth question where the three models
+answer three different ways.
 
 **7. Blame, praise, and intentionality tell three different stories on the
 same items.** Intentionality: moral-specificity is genuinely contested
