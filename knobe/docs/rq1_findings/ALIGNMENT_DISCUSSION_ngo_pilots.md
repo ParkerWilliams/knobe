@@ -10,9 +10,11 @@ question-type fits, all from the same real elicitation run published
 `outputs/sign_wcb_blame.csv` and `outputs/sign_wcb_praise.csv`
 (q_blame/q_praise, commit `f3b19b3` — produced by
 `analyze_sign_wcb.py --question {q_blame,q_praise}`, added 2026-08-22).
-All fits: logit-EV, WCB B=1999. Point 8 adds a Holm multiple-comparisons
-check (`analysis/ngo_extensions/holm_correct_pilots.py`, outputs each
-pilot's `outputs/sign_wcb_holm_summary.csv`).
+All fits: logit-EV, WCB B=1999. Point 2b adds a joint foundation-gradient
+test (`moral_foundations_pilot/foundation_gradient_wcb.py`, new wild
+cluster bootstrap-F, `outputs/foundation_gradient_wcb.csv`). Point 8 adds a
+Holm multiple-comparisons check (`analysis/ngo_extensions/holm_correct_pilots.py`,
+outputs each pilot's `outputs/sign_wcb_holm_summary.csv`).
 
 ## The claim
 
@@ -76,6 +78,40 @@ framing used elsewhere in the analysis log doesn't hold for mistral
 specifically. Authority holds up on 3 of 4 non-mistral cells after
 correction, not all 4 — the closest thing to a second reliable
 "Knobe-eligible" foundation besides harm, but not a general one.
+
+**2b. One joint test — does the Knobe effect's size vary at all across the
+five foundations — confirms mistral-finetuned shows no heterogeneity
+anywhere; gemma and llama's finetuned results sit right on the border, in
+opposite directions.** Point 2 tested harm against pooled non-harm; this
+tests all five foundations (harm, loyalty, authority, fairness, purity)
+jointly in one model per cell (`ev_rating ~ sign_c * condition`, testing
+the four `sign_c:condition` interaction terms together via a wild cluster
+bootstrap-F — one p-value per cell instead of five separate per-foundation
+tests):
+
+| family | tuning | F | p_wcb |
+|---|---|---:|---:|
+| gemma | pretrained | 5.36 | .011 |
+| gemma | finetuned | 5.14 | .049 |
+| llama | pretrained | 15.53 | <.001 |
+| llama | finetuned | 3.57 | .060 |
+| mistral | pretrained | 6.11 | .012 |
+| mistral | finetuned | 0.82 | .672 |
+
+mistral-finetuned: p_wcb=.672 — the sign_c effect is statistically
+indistinguishable across all five foundations, the cleanest single
+confirmation of "harm isn't special" for this family. llama-finetuned:
+p_wcb=.060, just short of significance — consistent with point 2's
+harm-vs-pooled-nonharm interaction already being null for llama.
+gemma-finetuned: p_wcb=.049, barely significant — consistent with point 2's
+finding that gemma's non-harm effect significantly exceeds harm. All three
+*pretrained* cells show strong heterogeneity (p_wcb=.011/<.001/.012) — new,
+not visible in the primary harm-vs-pooled-nonharm split, where pretrained
+looked uniformly null. Two readings are both live: pretrained models may
+have real foundation-specific effects that cancel out when pooled into two
+arms, or this could reflect the same EV-scoring artifact hitting different
+foundations' parse rates unevenly — untested, and should carry the same
+pretrained caveat as point 1 until checked.
 
 **3. llama had a stronger Knobe asymmetry for moral scenarios than
 non-moral ones; mistral showed the opposite; gemma showed no reliable Knobe
@@ -288,5 +324,18 @@ point 2a. Every finetuned-cell claim in points 1, 3, 4, 5, and 6 survives.
   items. This sits under every arm-vs-arm comparison here (harm vs.
   non-harm foundations, moral vs. nonmoral) and would need a new curation
   pass, not a reanalysis, to resolve.
+- Point 2b's pretrained foundation-heterogeneity result is new and
+  unexplained — resolving whether it's real or a parse-rate/EV-scoring
+  artifact needs the same parsed_rating-substitution check (script 35's
+  method) applied per-foundation, not just per pretrained/finetuned as
+  point 1 already flags. Nothing currently distinguishes "pretrained
+  models treat foundations differently" from "pretrained scoring is noisy
+  in a foundation-dependent way."
+- The nonmoral pilot doesn't have an equivalent joint gradient test — its
+  arms (moral, nonmoral_prudential, nonmoral_procedural) aren't a graded
+  sequence the way harm→loyalty→authority→fairness→purity arguably is, so
+  point 2b's method wasn't ported there; the existing sign_c:arm_c
+  interaction (point 3/4/5) already is the single joint answer for that
+  pilot's two-arm question.
 
 — Draft sketch, 2026-08-22.
