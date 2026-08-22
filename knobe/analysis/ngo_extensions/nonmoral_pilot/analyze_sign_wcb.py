@@ -1,10 +1,13 @@
 """Primary analysis for the Ngo nonmoral-extension pilot: does the sign
-effect (bad > good foreseen-side-effect intentionality, the classic Knobe
-asymmetry) appear within the selected nonmoral items, compared against the
-moral sign effect on the same storyline templates?
+effect (bad > good foreseen-side-effect rating, the classic Knobe asymmetry)
+appear within the selected nonmoral items, compared against the moral sign
+effect on the same storyline templates?
 
 Fits, per subject family (gemma/llama/mistral) x tuning status
-(pretrained/finetuned), q_intentionality only:
+(pretrained/finetuned), for one question type at a time (`--question`,
+default q_intentionality; q_blame and q_praise were collected in the same
+real run and use identical machinery -- same formula, same clustering, same
+seed -- just a different `question` filter and output path):
 
 - `ev_rating ~ sign_c` split-sample within each arm -- moral (the
   benchmark), pooled nonmoral (primary), and prudential / procedural
@@ -24,17 +27,23 @@ interaction fit's clusters span arms, which is the conservative choice).
 Companion mixedlm fit per cell for comparability with the v1.1 tables.
 
 Seeding: one fixed seed (23) consumed per-call across all contrasts, same
-convention as the rq1_v1_1_robustness scripts (config.yaml `seeds` note).
+convention as the rq1_v1_1_robustness scripts (config.yaml `seeds` note) --
+shared across question types, since each question's WCB draws operate on a
+disjoint row subset and don't interact.
 
 Run from the knobe repo root:
     .venv/bin/python analysis/ngo_extensions/nonmoral_pilot/analyze_sign_wcb.py
+    .venv/bin/python analysis/ngo_extensions/nonmoral_pilot/analyze_sign_wcb.py --question q_blame
+    .venv/bin/python analysis/ngo_extensions/nonmoral_pilot/analyze_sign_wcb.py --question q_praise
 
 Reads outputs/elicit_results.jsonl + outputs/ngo_prudential_dataset_selected.csv
-(both local-only); writes outputs/sign_wcb.csv (small summary table,
-committed).
+(both local-only); writes outputs/sign_wcb.csv for q_intentionality (small
+summary table, committed) or outputs/sign_wcb_{question}.csv for
+q_blame/q_praise, suffix without the `q_` prefix.
 """
 from __future__ import annotations
 
+import argparse
 import sys
 import warnings
 from pathlib import Path
@@ -80,8 +89,13 @@ def load_frame() -> pd.DataFrame:
 
 
 def main() -> None:
+    p = argparse.ArgumentParser()
+    p.add_argument("--question", default="q_intentionality",
+                    choices=["q_intentionality", "q_blame", "q_praise"])
+    args = p.parse_args()
+
     d = load_frame()
-    sub = d[d["question"] == "q_intentionality"]
+    sub = d[d["question"] == args.question]
 
     rows = []
     for mk in MODEL_KEYS:
@@ -103,7 +117,8 @@ def main() -> None:
 
     out = pd.DataFrame(rows)
     print(out.to_string(index=False))
-    out_path = HERE / "outputs" / "sign_wcb.csv"
+    suffix = "" if args.question == "q_intentionality" else f"_{args.question.removeprefix('q_')}"
+    out_path = HERE / "outputs" / f"sign_wcb{suffix}.csv"
     out.to_csv(out_path, index=False)
     print(f"\nwrote {out_path}")
 

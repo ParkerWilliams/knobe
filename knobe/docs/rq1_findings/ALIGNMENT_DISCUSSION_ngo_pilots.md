@@ -1,13 +1,16 @@
 # Discussion draft: what the nonmoral and moral-foundations pilots say about alignment
 
-**Status:** draft sketch for discussion, not yet reviewed. Not a new analysis —
-synthesizes `analysis/ngo_extensions/moral_foundations_pilot/outputs/sign_wcb.csv`
-(commit `9c3b59f`) and `analysis/ngo_extensions/nonmoral_pilot/outputs/sign_wcb.csv`
-(commit `3b69645`), both real elicitation runs, **q_intentionality only** —
-the sole variable this draft makes claims about — logit-EV, WCB B=1999.
-q_blame/q_praise results will get their own pass once that data is in hand
-(nonmoral pilot: collected, awaiting transfer from the collaborator's GPU
-run; moral-foundations pilot: not yet collected, out of scope by design).
+**Status:** draft sketch for discussion, not yet reviewed. Synthesizes
+`analysis/ngo_extensions/moral_foundations_pilot/outputs/sign_wcb.csv`
+(commit `9c3b59f`, q_intentionality only — this pilot never collected
+q_blame/q_praise, out of scope by design) and the nonmoral pilot's three
+question-type fits, all from the same real elicitation run published
+2026-08-22 (`results_dist/results_pilot_nonmoral_all.jsonl.gz`):
+`outputs/sign_wcb.csv` (q_intentionality, commit `3b69645`),
+`outputs/sign_wcb_blame.csv` and `outputs/sign_wcb_praise.csv`
+(q_blame/q_praise, not yet committed — produced by
+`analyze_sign_wcb.py --question {q_blame,q_praise}`, added 2026-08-22).
+All fits: logit-EV, WCB B=1999.
 
 ## The claim
 
@@ -97,6 +100,50 @@ self-justification for actions taken) inherits whichever version of this
 bias its underlying model happened to acquire, with no guarantee it
 generalizes the same way across models or even model versions.
 
+**4. All three finetuned models had a larger blame asymmetry for nonmoral
+scenarios than moral ones — the opposite lean from intentionality's split
+verdict.** Where point 3 found the three models disagreeing about whether
+the asymmetry is moral-specific, blame gives a clean, unanimous answer, and
+it's "no, if anything less so":
+
+- gemma: moral β=0.60 (p=.005), nonmoral pooled β=3.23 (p<.001), interaction
+  β=−2.63 (p<.001).
+- llama: moral β=1.81 (p<.001), nonmoral pooled β=3.53 (p<.001), interaction
+  β=−1.71 (p=.002).
+- mistral: moral β=0.80 (p<.001), nonmoral pooled β=2.78 (p<.001),
+  interaction β=−1.98 (p<.001).
+
+In plain terms: for blame, every model shows the bad-rated-worse asymmetry
+in *both* domains, but 3–5x larger outside morality than within it. This
+directly contradicts any prediction that blame would simply mirror
+intentionality's per-model pattern — llama's intentionality result argued
+for moral-specificity, but llama's own blame result argues just as strongly
+against it. gemma is the one family where this isn't purely a finetuning
+story: its blame interaction is already significant *pretrained*
+(β=−0.25, p<.001), unlike intentionality, where gemma showed nothing in
+either tuning state.
+
+**5. Praise mostly just tracks valence correctly (bad acts rated less
+praiseworthy, almost everywhere, including pretrained) — but where it does
+show a moral-vs-nonmoral asymmetry, it leans the opposite way from blame.**
+Finetuned interaction: gemma β=+1.44 (p=.034), llama β=+1.60 (p<.001),
+mistral β=+1.19 (p=.088, trending same direction). Positive here means
+*moral bigger than nonmoral* — the reverse of blame's negative,
+nonmoral-bigger interaction in the same two families (gemma, llama) where
+both reach significance.
+
+**6. Blame, praise, and intentionality tell three different stories on the
+same items, which is the more interesting finding than any one of them.**
+Intentionality: moral-specificity is genuinely contested across models
+(point 3). Blame: unanimously *bigger* outside morality (point 4). Praise:
+leans bigger *inside* morality where it's significant at all (point 5). If
+these were one underlying construct — "the model's sense of moral
+valence" — expressed through three question wordings, you'd expect them to
+at least agree on direction. They don't. That argues against treating any
+one of intentionality, blame, or praise as a stand-in for the others when
+auditing a model's moral judgment — each question surfaces a materially
+different pattern, on identical items, in the same run.
+
 ## Why this matters for alignment (framing, not yet a formal argument)
 
 - If the goal of instruction-tuning is "make the model track human
@@ -116,6 +163,15 @@ generalizes the same way across models or even model versions.
   any single model's calibration as representative — an alignment audit for
   "does this model over-attribute intent based on outcome valence" needs to
   be run per-model, not assumed to transfer.
+- Point 6 raises a sharper practical concern than any single construct's
+  result: if intentionality, blame, and praise diverge on the same items,
+  then a system's answer to "was this intentional," "who's to blame," and
+  "who deserves credit" for the *same event* aren't guaranteed to cohere.
+  An alignment check that only probes one of these three constructs (most
+  commonly intentionality, since it's the one with the philosophy-literature
+  pedigree) could miss a real bias sitting in whichever construct wasn't
+  tested — here, blame turned out to have the cleanest, most unanimous
+  cross-model signal of the three.
 
 ## What would strengthen this before it's a real section
 
@@ -130,7 +186,16 @@ generalizes the same way across models or even model versions.
   distinction to see if it tracks which nonmoral framing "reads as moral"
   to each model) before treating either as a stable finding rather than one
   data point.
-- q_blame/q_praise follow-up (see status line) will get its own section once
-  that data is in hand — not sketched here yet.
+- `sign_wcb_blame.csv` and `sign_wcb_praise.csv` are not yet committed —
+  worth a decision on whether to commit them alongside this draft, and
+  whether `analyze_sign_wcb.py`'s new `--question` flag should be documented
+  in the pilot's own README/HANDOFF, not just this discussion doc.
+- The moral-foundations pilot never collected q_blame/q_praise, so points
+  4–6 rest entirely on the nonmoral pilot's harm-vs-nonmoral-prudential/
+  procedural framing — whether blame's "bigger outside morality" result
+  (point 4) also holds for loyalty/authority/fairness/purity specifically
+  is untested and would need new elicitation, not a reanalysis.
+- Points 4–5's pretrained cells carry the same EV-scoring caveat as point 1
+  — not re-verified separately for blame/praise here.
 
-— Draft sketch, 2026-08-22. Not yet committed; not yet cited anywhere.
+— Draft sketch, 2026-08-22.
