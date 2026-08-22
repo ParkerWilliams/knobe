@@ -15,14 +15,12 @@ All fits: logit-EV, WCB B=1999.
 ## The claim
 
 The Knobe asymmetry — rating an outcome-producing act as more intentional
-when the outcome is bad than when it's good — isn't just a quirky replication
-of a philosophy thought experiment in LLMs. In this data it behaves like
-something instruction-tuning *installs*, and it installs a version that
-generalizes past harm to other moral foundations. That's relevant to
-alignment because it means the tuning process meant to make models track
-human values also imports a specific human bias in **intentionality
-attribution** — judging intent from how an outcome turned out, not from
-evidence of intent — as an apparently unintended side effect.
+when the outcome is bad than when it's good — shows up in gemma, llama, and
+mistral as something instruction-tuning installs, and it generalizes past
+harm to other moral foundations. Instruction-tuning, meant to make models
+track human judgments, also imports a specific human bias in
+**intentionality attribution** — judging intent from how an outcome turned
+out, not from evidence of intent.
 
 ## Evidence
 
@@ -90,9 +88,8 @@ etiquette breach)? The three models disagree on the answer:
 - **gemma — neither:** nothing significant in either arm, so gemma's data
   doesn't support either story.
 
-This three-way disagreement is itself the more alignment-relevant finding
-than any single model's result: there is no single "the LLM's notion of
-intentionality attribution" to characterize. It's an artifact of each lab's
+There is no single "the LLM's notion of intentionality attribution" to
+characterize — this three-way disagreement is an artifact of each lab's
 particular pretraining + RLHF/instruction-tuning recipe, not a convergent
 property of scale or architecture. A downstream system that leans on a
 model's intent judgments (content moderation, incident postmortems, agentic
@@ -163,8 +160,7 @@ mistral β=+1.19 (p=.088, trending same direction). Positive here means
 *moral bigger than nonmoral* — the reverse of blame's negative,
 nonmoral-bigger interaction in the same two families (gemma, llama) where
 both reach significance. Point 4a's indifference-tracking interpretation
-doesn't obviously predict this reversal, so it's worth flagging that 4a's
-read doesn't yet explain praise's own pattern.
+doesn't explain this reversal — praise's own pattern is still open.
 
 **6. Do models blame more than they praise for the equivalent shift?
 Mixed — only llama fits the classic "bad is stronger than good" prediction;
@@ -189,56 +185,49 @@ either; it's a fourth question these three models answer three different
 ways.
 
 **7. Blame, praise, and intentionality tell three different stories on the
-same items, which is the more interesting finding than any one of them.**
-Intentionality: moral-specificity is genuinely contested across models
-(point 3). Blame: unanimously *bigger* outside morality, though point 4a's
-indifference-tracking read complicates what "bigger" even means here.
-Praise: leans bigger *inside* morality where it's significant at all
-(point 5) — the opposite lean from blame, and not obviously explained by
-4a's mechanism. Blame-vs-praise sensitivity (point 6) is itself
-family-dependent, contradicting a plausible textbook prior. If these were
-one underlying construct — "the model's sense of moral valence" —
-expressed through three question wordings, you'd expect them to at least
-agree on direction. They don't. That argues against treating any one of
-intentionality, blame, or praise as a stand-in for the others when auditing
-a model's moral judgment — each question surfaces a materially different
+same items.** Intentionality: moral-specificity is genuinely contested
+across models (point 3). Blame: unanimously *bigger* outside morality,
+though point 4a's indifference-tracking read complicates what "bigger"
+even means here. Praise: leans bigger *inside* morality where it's
+significant at all (point 5) — the opposite lean from blame, not explained
+by 4a's mechanism. Blame-vs-praise sensitivity (point 6) is itself
+family-dependent, contradicting the textbook negativity-bias prediction.
+If these were one underlying construct — "the model's sense of moral
+valence" — expressed through three question wordings, they'd at least
+agree on direction. They don't. Treating any one of intentionality, blame,
+or praise as a stand-in for the others, when auditing a model's moral
+judgment, would miss this — each question surfaces a materially different
 pattern, on identical items, in the same run.
 
-## Why this matters for alignment (framing, not yet a formal argument)
+## Interpretation (framing, not yet a formal argument)
 
-- If the goal of instruction-tuning is "make the model track human
-  judgments," this is a case where it's *succeeding* at that goal — human
-  raters show exactly this asymmetry in intentionality attribution (Knobe
-  2003 and the whole intentionality literature) — but succeeding at it may
-  not be what anyone actually wants from a system used to reason about
-  intent. Faithfully reproducing a documented human bias via RLHF is a
-  different thing from being "aligned" in the sense of making fair or
-  evidentially-grounded judgments.
-- The fact that the effect is present pretrained-null and finetuned-large
-  makes RLHF/instruction-tuning a plausible causal lever, worth targeting
-  directly (e.g., testing whether preference data that penalizes
-  outcome-driven intentionality attribution reduces the effect) rather than
-  treating it as an inherent property of "how LLMs reason."
-- The cross-family disagreement on moral-specificity argues against treating
-  any single model's calibration as representative — an alignment audit for
-  "does this model over-attribute intent based on outcome valence" needs to
-  be run per-model, not assumed to transfer.
-- Point 7 raises a sharper practical concern than any single construct's
-  result: if intentionality, blame, and praise diverge on the same items,
-  then a system's answer to "was this intentional," "who's to blame," and
-  "who deserves credit" for the *same event* aren't guaranteed to cohere.
-  An alignment check that only probes one of these three constructs (most
-  commonly intentionality, since it's the one with the philosophy-literature
-  pedigree) could miss a real bias sitting in whichever construct wasn't
-  tested — here, blame turned out to have the cleanest, most unanimous
-  cross-model signal of the three.
-- If point 4a's indifference-tracking read holds up, it suggests these
-  models' blame judgments may be more sensitive to a described *mental
-  state* (did the agent care) than to the *outcome* itself when the two are
-  pulled apart — which is arguably closer to how blame *should* work
-  (culpability tracks mental state, not just consequences) than a pure
-  outcome-driven bias would be. That would be a more reassuring reading than
-  "blame overreacts to bad outcomes," but it's not yet established.
+- Human raters show exactly this asymmetry in intentionality attribution
+  (Knobe 2003 and the whole intentionality literature), so instruction-
+  tuning here is reproducing a documented human bias, not inventing one.
+  Faithfully reproducing that bias via RLHF is a different thing from
+  making fair or evidentially-grounded judgments.
+- The effect is pretrained-null and finetuned-large, which points at
+  RLHF/instruction-tuning as the causal lever — e.g. testing whether
+  preference data that penalizes outcome-driven intentionality attribution
+  reduces the effect, rather than treating it as an inherent property of
+  "how LLMs reason."
+- Treating any single model's calibration as representative doesn't hold up
+  given the cross-family disagreement on moral-specificity — an audit for
+  "does this model over-attribute intent based on outcome valence" has to
+  run per-model, not assumed to transfer.
+- Point 7: intentionality, blame, and praise diverge on the same items, so
+  a system's answer to "was this intentional," "who's to blame," and "who
+  deserves credit" for the same event aren't guaranteed to cohere. Auditing
+  only one of these three constructs — most commonly intentionality, given
+  its philosophy-literature pedigree — could miss a bias sitting in
+  whichever construct wasn't tested. Here, blame turned out to have the
+  cleanest, most unanimous cross-model signal of the three.
+- If point 4a's indifference-tracking read holds up, these models' blame
+  judgments are more sensitive to a described mental state (did the agent
+  care) than to the outcome itself, once the two are pulled apart — closer
+  to how blame *should* work (culpability tracks mental state, not just
+  consequences) than a pure outcome-driven bias would be. Not yet
+  established.
 
 ## What would strengthen this before it's a real section
 
