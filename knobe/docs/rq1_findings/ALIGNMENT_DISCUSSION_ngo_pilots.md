@@ -337,5 +337,18 @@ point 2a. Every finetuned-cell claim in points 1, 3, 4, 5, and 6 survives.
   point 2b's method wasn't ported there; the existing sign_c:arm_c
   interaction (point 3/4/5) already is the single joint answer for that
   pilot's two-arm question.
+- Curation provenance is missing for both pilots and needs to be requested
+  from whoever ran the real curation step (per the 2026-08-19 log entries,
+  244+240 reviewer calls): `moral_relevance_raw.jsonl` +
+  `selection_report.md` (nonmoral pilot) and `foundation_relevance_raw.jsonl`
+  + `selection_report.md` (MF pilot), all gitignored and never transferred.
+  Without them, the 196/240 and 126/152 selected-item sets used throughout
+  this draft are reconstructed by inference (matching elicited variant_ids
+  back to the full dataset CSV, verified against the logged counts and
+  bit-identical WCB reproduction) rather than directly verified against the
+  actual per-item scores — and there's no way to check *why* any specific
+  item was excluded, or how close borderline items were to threshold. These
+  files would also be the natural starting point for the severity-matching
+  check above, if curation scores turn out to correlate with severity.
 
 — Draft sketch, 2026-08-22.
