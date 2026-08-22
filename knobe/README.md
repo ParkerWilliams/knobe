@@ -106,6 +106,20 @@ gunzip -c results_dist/results_v1.0_all.jsonl.gz > results/v1.0/results_all.json
 gunzip -c results_dist/results_v1.1_all.jsonl.gz > results/v1.1/results_all.jsonl
 ```
 
+The two Ngo-extension pilots' per-response results (see
+`analysis/ngo_extensions/`) ship the same way, published 2026-08-22:
+`results_pilot_nonmoral_all.jsonl.gz` (88,200 rows) and
+`results_pilot_moral_foundations_all.jsonl.gz` (18,900 rows). Their
+analysis scripts read them from each pilot's `outputs/` directory
+(gitignored):
+
+```
+gunzip -c results_dist/results_pilot_nonmoral_all.jsonl.gz \
+    > analysis/ngo_extensions/nonmoral_pilot/outputs/elicit_results.jsonl
+gunzip -c results_dist/results_pilot_moral_foundations_all.jsonl.gz \
+    > analysis/ngo_extensions/moral_foundations_pilot/outputs/elicit_results.jsonl
+```
+
 v1.0 caveat: all Mistral `logprobs_0_10` vectors in the v1.0 file are flat
 (the retracted measurement artifact -- see `docs/rq1_findings/MAIN_RUN_WRITEUP_v1.0.md`);
 v1.1 contains the corrected re-elicitation. Analysis commands and fallback
