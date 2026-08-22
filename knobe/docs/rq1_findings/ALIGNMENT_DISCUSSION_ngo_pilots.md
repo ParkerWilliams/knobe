@@ -10,7 +10,9 @@ question-type fits, all from the same real elicitation run published
 `outputs/sign_wcb_blame.csv` and `outputs/sign_wcb_praise.csv`
 (q_blame/q_praise, commit `f3b19b3` — produced by
 `analyze_sign_wcb.py --question {q_blame,q_praise}`, added 2026-08-22).
-All fits: logit-EV, WCB B=1999.
+All fits: logit-EV, WCB B=1999. Point 8 adds a Holm multiple-comparisons
+check (`analysis/ngo_extensions/holm_correct_pilots.py`, outputs each
+pilot's `outputs/sign_wcb_holm_summary.csv`).
 
 ## The claim
 
@@ -59,17 +61,21 @@ non-harm effect (2.34) is significantly *larger* than harm (interaction
 style that fires wherever a foundation-relevant violation is present,
 rather than something specific to harming people.
 
-**2a. Authority showed a Knobe asymmetry in gemma and llama at both tuning
-states, but mistral's result was inconsistent.** gemma/llama authority:
-pretrained p=.016/.003, finetuned p=.001/.003 — all significant. mistral
-authority: pretrained is null *and wrong-signed* (β=−0.098, p=.176), and
-finetuned sits right at the edge of significance (p=.052). Authority isn't
-even mistral's largest finetuned foundation effect — purity (1.26) and
-fairness (1.06) both exceed it (0.54) — so the "authority strongest
-everywhere" framing used elsewhere in the analysis log doesn't hold for
-mistral specifically. Authority is the closest thing to a second reliably
-"Knobe-eligible" foundation besides harm, but on a 2/3 pattern, not a
-general one.
+**2a. Authority showed a Knobe asymmetry in llama at both tuning states and
+in gemma finetuned; gemma's pretrained result and mistral's result are both
+weaker than they first look.** llama authority: pretrained p=.003,
+finetuned p=.003 — both survive Holm correction (p_holm=.012 each, within
+the exploratory-arm group for that family/tuning cell). gemma authority:
+finetuned p=.001 survives (p_holm=.004); pretrained (raw p=.016) does not
+(p_holm=.062). mistral authority: pretrained is null *and wrong-signed*
+(β=−0.098, p=.176), and finetuned sits right at the edge of significance
+even before correction (p=.052, p_holm=.083). Authority isn't even
+mistral's largest finetuned foundation effect — purity (1.26) and fairness
+(1.06) both exceed it (0.54) — so the "authority strongest everywhere"
+framing used elsewhere in the analysis log doesn't hold for mistral
+specifically. Authority holds up on 3 of 4 non-mistral cells after
+correction, not all 4 — the closest thing to a second reliable
+"Knobe-eligible" foundation besides harm, but not a general one.
 
 **3. llama had a stronger Knobe asymmetry for moral scenarios than
 non-moral ones; mistral showed the opposite; gemma showed no reliable Knobe
@@ -196,6 +202,17 @@ or praise as a stand-in for the others, when auditing a model's moral
 judgment, would miss this — each question surfaces a materially different
 pattern, on identical items, in the same run.
 
+**8. Holm-correcting within each (family, tuning, question) group — the
+pilot analogue of the main run's own per-(family, RQ) correction
+(`models.holm_correct`) — leaves nearly everything above intact.** Neither
+pilot's `analyze_sign_wcb.py` applied any multiple-comparisons correction,
+unlike the main run; across both pilots' 132 individually-computed p_wcb
+values (`analysis/ngo_extensions/holm_correct_pilots.py`, correcting the
+MF pilot's primary and exploratory arms separately, per its own status
+column), only 7 flip from p<.05 to p≥.05 under Holm, and only one is a
+claim cited above — gemma's pretrained authority result, now reflected in
+point 2a. Every finetuned-cell claim in points 1, 3, 4, 5, and 6 survives.
+
 ## Interpretation (framing, not yet a formal argument)
 
 - Human raters show exactly this asymmetry in intentionality attribution
@@ -258,5 +275,18 @@ pattern, on identical items, in the same run.
   tracks the indifference clause independent of outcome. Without that,
   4a should be read as a hypothesis the aggregate data doesn't rule out,
   not a finding.
+- Point 8's correction groups — per (family, tuning, question), primary
+  separate from exploratory for the MF pilot — are a judgment call, not a
+  prescribed convention; the main run's own `holm_correct` groups by
+  (family, rq) without a tuning split. Grouping across tuning instead (pooling
+  pretrained with finetuned per family/question) would tighten the bar
+  further for every claim; worth someone else's sign-off before treating
+  this grouping choice as settled.
+- Severity/item-matching (the confound that explained away an earlier
+  main-run finding via script 20) is still entirely unchecked for both
+  pilots — no reviewer-rated severity question exists for either pilot's
+  items. This sits under every arm-vs-arm comparison here (harm vs.
+  non-harm foundations, moral vs. nonmoral) and would need a new curation
+  pass, not a reanalysis, to resolve.
 
 — Draft sketch, 2026-08-22.
