@@ -33,6 +33,7 @@ changes between p_wcb and p_holm.
 """
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 import pandas as pd
@@ -56,13 +57,13 @@ def holm_within_groups(df: pd.DataFrame, group_cols: list[str]) -> pd.DataFrame:
     return result
 
 
-def process_nonmoral() -> pd.DataFrame:
+def process_nonmoral(suffix: str = "") -> pd.DataFrame:
     base = HERE / "nonmoral_pilot" / "outputs"
     frames = []
     for question, fname in [
-        ("q_intentionality", "sign_wcb.csv"),
-        ("q_blame", "sign_wcb_blame.csv"),
-        ("q_praise", "sign_wcb_praise.csv"),
+        ("q_intentionality", f"sign_wcb{suffix}.csv"),
+        ("q_blame", f"sign_wcb_blame{suffix}.csv"),
+        ("q_praise", f"sign_wcb_praise{suffix}.csv"),
     ]:
         d = pd.read_csv(base / fname)
         d["question"] = question
@@ -72,17 +73,25 @@ def process_nonmoral() -> pd.DataFrame:
     return holm_within_groups(d, ["question", "family", "tuning"])
 
 
-def process_moral_foundations() -> pd.DataFrame:
+def process_moral_foundations(suffix: str = "") -> pd.DataFrame:
     base = HERE / "moral_foundations_pilot" / "outputs"
-    d = pd.read_csv(base / "sign_wcb.csv")
+    d = pd.read_csv(base / f"sign_wcb{suffix}.csv")
     d["question"] = "q_intentionality"
     d["pilot"] = "moral_foundations"
     return holm_within_groups(d, ["family", "tuning", "status"])
 
 
 def main() -> None:
-    nonmoral = process_nonmoral()
-    mf = process_moral_foundations()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--score", default="ev", choices=["ev", "parsed"],
+                    help="which sign_wcb tables to correct. The 2026-08-22 pass "
+                         "only ever covered ev; the parsed tables added in "
+                         "6c73ab6 were uncorrected until this flag existed.")
+    args = ap.parse_args()
+    suffix = "" if args.score == "ev" else "_parsed"
+
+    nonmoral = process_nonmoral(suffix)
+    mf = process_moral_foundations(suffix)
     mf["status"] = mf.get("status", pd.Series(dtype=str))
 
     cols = ["pilot", "question", "arm", "family", "tuning", "term",
@@ -103,7 +112,7 @@ def main() -> None:
 
     for pilot, sub in combined.groupby("pilot"):
         out_dir = HERE / ("nonmoral_pilot" if pilot == "nonmoral" else "moral_foundations_pilot") / "outputs"
-        out_path = out_dir / "sign_wcb_holm_summary.csv"
+        out_path = out_dir / f"sign_wcb_holm_summary{suffix}.csv"
         sub.drop(columns=["pilot"]).to_csv(out_path, index=False)
         print(f"wrote {out_path}")
 
