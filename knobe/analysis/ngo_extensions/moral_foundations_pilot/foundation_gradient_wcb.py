@@ -37,6 +37,7 @@ outputs/foundation_gradient_wcb.csv (small summary table, committed).
 """
 from __future__ import annotations
 
+import argparse
 import sys
 import warnings
 from pathlib import Path
@@ -54,8 +55,9 @@ from analyze_sign_wcb import MODEL_KEYS, load_frame  # noqa: E402
 warnings.filterwarnings("ignore")
 
 SEED = 25  # next unused seed in this pilot's sequence (24 = analyze_sign_wcb.py)
-FULL_FORMULA = 'ev_rating ~ sign_c * C(condition, Treatment(reference="harm_control"))'
-RESTRICTED_FORMULA = 'ev_rating ~ sign_c + C(condition, Treatment(reference="harm_control"))'
+CONDITION = 'C(condition, Treatment(reference="harm_control"))'
+FULL_FORMULA = f"{{resp}} ~ sign_c * {CONDITION}"
+RESTRICTED_FORMULA = f"{{resp}} ~ sign_c + {CONDITION}"
 
 
 def wild_cluster_bootstrap_joint(
@@ -102,20 +104,33 @@ def wild_cluster_bootstrap_joint(
 
 
 def main() -> None:
+    p = argparse.ArgumentParser()
+    p.add_argument("--score", default="ev", choices=["ev", "parsed"],
+                    help="ev (default) = the spec section-4.4 logit-fallback EV score. "
+                         "parsed = the model's own numeric answer, parse_ok rows only. "
+                         "Matches analyze_sign_wcb.py --score; this joint F-test is the "
+                         "one fit the 6c73ab6 substitution did not cover.")
+    args = p.parse_args()
+    resp = "ev_rating" if args.score == "ev" else "parsed_rating"
+    full, restricted = FULL_FORMULA.format(resp=resp), RESTRICTED_FORMULA.format(resp=resp)
+
     d = load_frame()
+    if args.score == "parsed":
+        d = d[d["parse_ok"] & d["parsed_rating"].notna()]
     rows = []
     for mk in MODEL_KEYS:
         cell = d[d["model_key"] == mk]
         fam, tuning = cell["family"].iloc[0], cell["tuning_status"].iloc[0]
         res = wild_cluster_bootstrap_joint(
-            cell, FULL_FORMULA, RESTRICTED_FORMULA,
+            cell, full, restricted,
             interaction_prefix="sign_c:C(condition", groups_col="pair_id", seed=SEED,
         )
         rows.append(dict(family=fam, tuning=tuning, n=len(cell), **res))
 
     out = pd.DataFrame(rows)
     print(out.to_string(index=False))
-    out_path = HERE / "outputs" / "foundation_gradient_wcb.csv"
+    suffix = "" if args.score == "ev" else "_parsed"
+    out_path = HERE / "outputs" / f"foundation_gradient_wcb{suffix}.csv"
     out.to_csv(out_path, index=False)
     print(f"\nwrote {out_path}")
 
