@@ -39,6 +39,12 @@ already returns, and the same `n_groups` it clustered on. The WCB p-value
 remains the estimator of record for the significance question -- these are a
 complement to it, not a replacement.
 
+Item 2c adds `clusters_for_benchmark`: under script 15's own
+`se ~ sqrt(G_current / G_new)` scaling approximation, the cluster count a
+follow-up would need for 80% power against a benchmark-sized interaction.
+That approximation's caveats are script 15's and carry over verbatim -- read
+it as "how big would a follow-up have to be to have a chance," not a promise.
+
 Scope: single-df interaction terms only. The MF pilot's joint 4-df
 foundation-gradient F has no single beta/se, so an equivalence bound isn't
 defined for it and it is deliberately absent rather than faked.
@@ -66,6 +72,7 @@ _spec = importlib.util.spec_from_file_location(
 _mde_mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_mde_mod)
 mde, ALPHA, DOF_ADJ = _mde_mod.mde, _mde_mod.ALPHA, _mde_mod.DOF_ADJ
+required_sets = _mde_mod.required_sets
 
 from scipy import stats  # noqa: E402
 
@@ -116,6 +123,12 @@ def main() -> None:
                 is_null=bool(r.p_wcb >= 0.05),
                 bound_below_benchmark=(bool(eq < abs(bench.beta_obs))
                                        if r.p_wcb >= 0.05 else ""),
+                # Item 2c: for an underpowered null, how many clusters would a
+                # follow-up need to detect an interaction the size of the
+                # benchmark? Turns "underpowered" into a number a limitations
+                # section can state. required_sets() is script 15's, imported.
+                clusters_for_benchmark=required_sets(
+                    abs(bench.beta_obs), r.se_obs, g),
             ))
 
     out = pd.DataFrame(rows)

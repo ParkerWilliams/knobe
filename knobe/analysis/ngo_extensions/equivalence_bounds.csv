@@ -1,13 +1,13 @@
-claim,family,n_groups,beta_obs,se_obs,p_wcb,mde_80,equivalence_bound,benchmark_arm,benchmark,is_null,bound_below_benchmark
-Rank 3: moral vs nonmoral (intentionality),gemma,40,-0.5192,0.5262,0.3487,1.5132,1.4064,nonmoral_pooled,2.7064,True,True
-Rank 3: moral vs nonmoral (intentionality),llama,40,-0.0401,0.4641,0.9345,1.3346,0.8226,nonmoral_pooled,0.0897,True,False
-Rank 3: moral vs nonmoral (intentionality),mistral,40,0.2906,0.3902,0.4877,1.1221,0.9485,nonmoral_pooled,0.8101,True,False
-Rank 1 context: moral vs nonmoral (blame),gemma,40,-3.8099,0.5082,0.0,1.4613,4.6667,nonmoral_pooled,5.624,False,
-Rank 1 context: moral vs nonmoral (blame),llama,40,-3.1258,0.4998,0.0,1.4372,3.9684,nonmoral_pooled,4.7315,False,
-Rank 1 context: moral vs nonmoral (blame),mistral,40,-2.2624,0.509,0.0025,1.4637,3.1206,nonmoral_pooled,3.7418,False,
-Rank 1 context: moral vs nonmoral (praise),gemma,40,1.6514,0.5029,0.01,1.446,2.4992,nonmoral_pooled,2.7563,False,
-Rank 1 context: moral vs nonmoral (praise),llama,40,1.7784,0.3055,0.0,0.8785,2.2935,nonmoral_pooled,2.5414,False,
-Rank 1 context: moral vs nonmoral (praise),mistral,40,1.5281,0.7267,0.0625,2.0898,2.7533,nonmoral_pooled,4.9211,True,True
-Rank 2: harm vs non-harm (intentionality),gemma,34,-0.3019,0.7565,0.7039,2.1864,1.5834,nonharm_pooled,4.4352,True,True
-Rank 2: harm vs non-harm (intentionality),llama,34,0.3724,0.4537,0.4382,1.3111,1.1409,nonharm_pooled,0.2873,True,False
-Rank 2: harm vs non-harm (intentionality),mistral,34,0.7478,0.4135,0.0695,1.1951,1.4483,nonharm_pooled,1.0012,True,False
+claim,family,n_groups,beta_obs,se_obs,p_wcb,mde_80,equivalence_bound,benchmark_arm,benchmark,is_null,bound_below_benchmark,clusters_for_benchmark
+Rank 3: moral vs nonmoral (intentionality),gemma,40,-0.5192,0.5262,0.3487,1.5132,1.4064,nonmoral_pooled,2.7064,True,True,41.0
+Rank 3: moral vs nonmoral (intentionality),llama,40,-0.0401,0.4641,0.9345,1.3346,0.8226,nonmoral_pooled,0.0897,True,False,
+Rank 3: moral vs nonmoral (intentionality),mistral,40,0.2906,0.3902,0.4877,1.1221,0.9485,nonmoral_pooled,0.8101,True,False,75.0
+Rank 1 context: moral vs nonmoral (blame),gemma,40,-3.8099,0.5082,0.0,1.4613,4.6667,nonmoral_pooled,5.624,False,,41.0
+Rank 1 context: moral vs nonmoral (blame),llama,40,-3.1258,0.4998,0.0,1.4372,3.9684,nonmoral_pooled,4.7315,False,,41.0
+Rank 1 context: moral vs nonmoral (blame),mistral,40,-2.2624,0.509,0.0025,1.4637,3.1206,nonmoral_pooled,3.7418,False,,41.0
+Rank 1 context: moral vs nonmoral (praise),gemma,40,1.6514,0.5029,0.01,1.446,2.4992,nonmoral_pooled,2.7563,False,,41.0
+Rank 1 context: moral vs nonmoral (praise),llama,40,1.7784,0.3055,0.0,0.8785,2.2935,nonmoral_pooled,2.5414,False,,41.0
+Rank 1 context: moral vs nonmoral (praise),mistral,40,1.5281,0.7267,0.0625,2.0898,2.7533,nonmoral_pooled,4.9211,True,True,41.0
+Rank 2: harm vs non-harm (intentionality),gemma,34,-0.3019,0.7565,0.7039,2.1864,1.5834,nonharm_pooled,4.4352,True,True,35.0
+Rank 2: harm vs non-harm (intentionality),llama,34,0.3724,0.4537,0.4382,1.3111,1.1409,nonharm_pooled,0.2873,True,False,668.0
+Rank 2: harm vs non-harm (intentionality),mistral,34,0.7478,0.4135,0.0695,1.1951,1.4483,nonharm_pooled,1.0012,True,False,48.0

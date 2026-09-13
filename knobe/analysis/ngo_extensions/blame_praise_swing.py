@@ -42,8 +42,9 @@ unpacked, plus both --score runs of analyze_sign_wcb.py already written):
     .venv/bin/python analysis/ngo_extensions/blame_praise_swing.py
 
 Writes two small committed summary tables under nonmoral_pilot/outputs/:
-    blame_praise_swing.csv      -- swings per (score, family, arm) + verdict
-    question_cell_means.csv     -- raw means/SDs per (question, family, arm, sign)
+    blame_praise_swing.csv        -- swings per (score, family, arm) + verdict
+    question_cell_means.csv       -- raw means/SDs per (question, family, arm, sign)
+    domain_gap_decomposition.csv  -- the moral-vs-nonmoral gap split by sign
 """
 from __future__ import annotations
 
@@ -115,10 +116,41 @@ def swings(means: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(out)
 
 
+def domain_gap_decomposition(means: pd.DataFrame) -> pd.DataFrame:
+    """Where does the moral-vs-nonmoral difference actually live -- in the
+    good-outcome cell or the bad-outcome one?
+
+    Point 4a raised this for blame and answered it from three hand-read rows;
+    point 5 left praise open entirely. Splitting the domain gap by sign
+    answers both at once and is the table the interaction terms summarize.
+    """
+    out = []
+    for question in ["q_blame", "q_praise"]:
+        for score in ["ev", "parsed"]:
+            for fam in FAMILIES:
+                g = lambda arm, sign: means[
+                    (means.question == question) & (means.score == score)
+                    & (means.family == fam) & (means.arm == arm)
+                    & (means.sign == sign)]["mean"].iloc[0]
+                good_gap = g("moral", "good") - g("nonmoral_pooled", "good")
+                bad_gap = g("moral", "bad") - g("nonmoral_pooled", "bad")
+                out.append(dict(
+                    question=question, score=score, family=fam,
+                    moral_good=g("moral", "good"), nonmoral_good=g("nonmoral_pooled", "good"),
+                    good_cell_gap=round(good_gap, 4),
+                    moral_bad=g("moral", "bad"), nonmoral_bad=g("nonmoral_pooled", "bad"),
+                    bad_cell_gap=round(bad_gap, 4),
+                    gap_ratio_good_to_bad=(round(abs(good_gap) / abs(bad_gap), 2)
+                                           if bad_gap else float("inf")),
+                ))
+    return pd.DataFrame(out)
+
+
 def main() -> None:
     d = load_frame()
     means = cell_means(d)
     sw = swings(means)
+    gaps = domain_gap_decomposition(means)
 
     print("=== raw cell means (finetuned) ===")
     print(means.to_string(index=False))
@@ -132,6 +164,10 @@ def main() -> None:
             print(f"  {score:<7} {col:<11}: {len(hit)}/{len(s)} cells, "
                   f"families {sorted(set(hit.family)) or '--'}")
 
+    print("\n=== where the domain difference lives (parsed) ===")
+    print(gaps[gaps.score == "parsed"].to_string(index=False))
+
+    gaps.to_csv(PILOT / "outputs" / "domain_gap_decomposition.csv", index=False)
     means.to_csv(PILOT / "outputs" / "question_cell_means.csv", index=False)
     sw.to_csv(PILOT / "outputs" / "blame_praise_swing.csv", index=False)
     print(f"\nwrote {PILOT / 'outputs'}/question_cell_means.csv + blame_praise_swing.csv")
