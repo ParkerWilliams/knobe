@@ -1,0 +1,13 @@
+score,family,arm,blame_swing,blame_p_wcb,praise_swing,praise_p_wcb,blame_swing_sd,praise_swing_sd,bigger_raw,bigger_sd
+ev,gemma,moral,0.5972,0.0050025012506253,2.1872,0.0005002501250625,0.9132,1.7592,praise,praise
+ev,gemma,nonmoral_pooled,3.2253,0.0,3.6254,0.0,3.5381,3.1415,praise,blame
+ev,llama,moral,1.8121,0.0,1.2401,0.0,1.8518,1.8532,blame,praise
+ev,llama,nonmoral_pooled,3.5264,0.0,2.8352,0.0,3.5899,2.2247,blame,blame
+ev,mistral,moral,0.7957,0.0,3.758,0.0,1.5322,2.9704,praise,praise
+ev,mistral,nonmoral_pooled,2.7749,0.0,4.9438,0.0,3.5962,7.2692,praise,praise
+parsed,gemma,moral,1.814,0.001000500250125,1.105,0.0050025012506253,1.0,0.979,blame,blame
+parsed,gemma,nonmoral_pooled,5.624,0.0,2.7563,0.0,2.7551,1.5807,blame,blame
+parsed,llama,moral,1.6057,0.0025012506253126,0.7631,0.0,0.5325,0.4539,blame,blame
+parsed,llama,nonmoral_pooled,4.7315,0.0,2.5414,0.0,1.4778,0.8772,blame,blame
+parsed,mistral,moral,1.4794,0.0,3.3931,0.0,0.9229,1.3359,praise,praise
+parsed,mistral,nonmoral_pooled,3.7418,0.0,4.9211,0.0,1.9511,2.479,praise,praise
