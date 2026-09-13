@@ -15,11 +15,35 @@ measurement section. Rationale is C1.
 claim is explicitly about tuning. Both pilots use Ngo-derived storylines;
 the v1.1 main run contributes C6 and the inference machinery only.
 
+**Confidence tiering — added 2026-09-13 after review.** The first version of
+this doc presented all six claims at one level, which overstated two of them.
+Today's gameplan work (§5 items 1, 2, 2a, 2b, 2c) consisted entirely of
+**measurement** gates. Those settled which claims survive the scoring
+question and are now closed. They did not touch the **stimulus** gates —
+severity matching and curation selection — and those are exactly what the
+arm-vs-arm claims depend on.
+
+| tier | claims | status |
+|---|---|---|
+| **A — draftable now** | C1, C2, C4, C6 | Gates closed. Design does not rest on arm-vs-arm matching |
+| **B — pattern solid, interpretation open** | C3, C5 | Two uncharacterized confounds, one of which has *no data at all* |
+
+Tier B is not "a caveat away" from Tier A. **Neither pilot has any severity
+measurement whatsoever** — both deliberately asked only the `moral_relevance`
+curation question (`curate_moral_relevance.py`: "severity/vividness/
+typicality_perception don't apply here"). The main run's severity confound
+was catastrophic where it was measured (MB exceeds NMB by 5.42 points in
+21/21 storylines). An alternative explanation with zero data against it is an
+open question, not a limitation.
+
+Write Tier A now. Write Tier B's *pattern* now and hold its *interpretation*
+until the severity pass runs.
+
 ---
 
 ## The claims, in the order the paper should make them
 
-### C1 — Logprob-EV scoring is question-dependent and can invert conclusions
+### C1 (Tier A) — Logprob-EV scoring is question-dependent and can invert conclusions
 
 Reconstructing a 0–10 rating from first-token logprobs agrees with the
 model's own stated answer for some question wordings and not others, on the
@@ -44,7 +68,7 @@ not tested.
 *Provenance:* `395a9ed`, `6c73ab6`. Tables: `measurement_audit.csv`,
 `sign_wcb*_parsed.csv`.
 
-### C2 — Instruction tuning increases the outcome-valence asymmetry
+### C2 (Tier A) — Instruction tuning increases the outcome-valence asymmetry
 
 Formal `sign_c × tuning_c` interaction per (pilot, family, arm):
 **8 of 12 cells significant, 11 of 12 positive**, every family retaining at
@@ -65,12 +89,15 @@ same reading for llama independently (script 33), so two datasets agree.
 confound nor the C-caveat attrition touches it.
 *Caveat:* intentionality only — pretrained blame/praise parse at 25.5–29.9%,
 too thin. Four cells are ns under parsed; report the cell table, not the
-count.
+count. **Not Holm-corrected**: `tuning_contrast_wcb_parsed.csv` sits outside
+`holm_correct_pilots.py`'s scope and its grouping is an open judgment call.
+gemma's four cells (p≤.0005) survive Holm over all 12 trivially; llama's MF
+harm cell (p=.0305) would not.
 *Provenance:* `1bc6e12`. Table: `tuning_contrast_wcb_parsed.csv`.
 *Note:* point 1's original "6/6" was six split-sample fits compared by eye.
 This is the first actual test of the difference.
 
-### C3 — The moral/nonmoral difference lives entirely in the good-outcome cell
+### C3 (Tier B) — The moral/nonmoral difference lives entirely in the good-outcome cell
 
 For **both** blame and praise, in **all three** families, the domain
 difference is concentrated in good-outcome items; bad-outcome items barely
@@ -105,7 +132,7 @@ paragraph as the result, not in a limitations section.
 *Provenance:* `0dc641b` (decomposition), `395a9ed` (attrition). Tables:
 `domain_gap_decomposition.csv`, `selection_attrition.csv`.
 
-### C4 — Blame-vs-praise sensitivity is family-dependent
+### C4 (Tier A) — Blame-vs-praise sensitivity is family-dependent
 
 On identical items, comparing each family's blame swing against its own
 praise swing: gemma and llama obey the human negativity-bias prior (blame
@@ -127,9 +154,13 @@ Best-measured cells in the project.
 *Caveat:* cross-question magnitude comparison presumes both questions use the
 0–10 scale comparably; parsed scoring makes that assumption as weak as it can
 be made, but it is not zero.
-*Provenance:* `244db46`. Table: `blame_praise_swing.csv`.
+*Multiplicity:* survives. 17 of the 18 cells C3 and C4 rest on hold under
+Holm on the parsed tables (`20e22e2`); the sole failure is mistral's praise
+interaction, already ns at p=.0625.
+*Provenance:* `244db46`, `20e22e2`. Tables: `blame_praise_swing.csv`,
+`sign_wcb_holm_summary_parsed.csv`.
 
-### C5 — In gemma, the asymmetry is not specific to morality or to harm
+### C5 (Tier B) — In gemma, the asymmetry is not specific to morality or to harm
 
 No family shows a significant moral-vs-nonmoral or harm-vs-non-harm
 interaction under parsed scoring. Equivalence-bounding says only gemma's
@@ -151,7 +182,7 @@ for harm," not "uniform across foundations."
 *Provenance:* `03b8f1b`, `70f1a34`. Tables: `equivalence_bounds.csv`,
 `foundation_gradient_wcb_parsed.csv`.
 
-### C6 — Typicality runs opposite to the human pattern (v1.1 main run)
+### C6 (Tier A) — Typicality runs opposite to the human pattern (v1.1 main run)
 
 The bad>good intentionality gap is *larger* for typical actions and shrinks
 or reverses for atypical ones, in gemma and mistral — the reverse of the
@@ -206,7 +237,13 @@ contribution, and it is why the reader should believe C2–C6.
 
 Ranked by whether they block drafting.
 
-**Blocks C3 as written:** the four curation provenance files
+**Blocks C3 and C5 from Tier A — the severity pass.** ~400 reviewer calls
+using the existing `curate_*_relevance.py` machinery plus a severity
+question. Neither pilot has any severity data, so this is the difference
+between "C3 is an indifference-tracking finding" and "C3 may be a severity
+finding." It is the single highest-value remaining task and it is cheap.
+
+**Also blocks C3 as written:** the four curation provenance files
 (`moral_relevance_raw.jsonl`, `selection_report.md` per pilot). They are the
 only way to compare the 26 dropped moral-good items against the 14 that
 survived. Without them C3 ships with an unresolvable confound rather than a
