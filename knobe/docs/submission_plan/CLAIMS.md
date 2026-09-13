@@ -26,18 +26,20 @@ arm-vs-arm claims depend on.
 | tier | claims | status |
 |---|---|---|
 | **A — draftable now** | C1, C2, C4, C6 | Gates closed. Design does not rest on arm-vs-arm matching |
-| **B — pattern solid, interpretation open** | C3, C5 | Two uncharacterized confounds, one of which has *no data at all* |
+| **A− — draftable, one open confound** | C3 | Stakes rival reading tested and largely ruled out (`710b4c3`); curation attrition still uncharacterized |
+| **B — underpowered** | C5 | One family, inherits attrition, needs G=48–75 for the other two |
 
-Tier B is not "a caveat away" from Tier A. **Neither pilot has any severity
-measurement whatsoever** — both deliberately asked only the `moral_relevance`
-curation question (`curate_moral_relevance.py`: "severity/vividness/
-typicality_perception don't apply here"). The main run's severity confound
-was catastrophic where it was measured (MB exceeds NMB by 5.42 points in
-21/21 storylines). An alternative explanation with zero data against it is an
-open question, not a limitation.
+**On severity, corrected.** An earlier version of this section said the
+severity question was C3's biggest problem and that a ~400-call curation pass
+was the highest-value remaining task. That was wrong on both counts. The main
+run's severity confound was an authoring accident specific to *its* taxonomy
+(MB written around genuine harm, NMB written to be low-stakes, nothing
+enforcing parity); the pilots don't inherit that taxonomy. The version that
+does transfer is a rival *interpretation* — that C3 tracks stakes rather than
+moral domain — and the pilot already contained the discriminating comparison
+in its prudential/procedural split. See C3.
 
-Write Tier A now. Write Tier B's *pattern* now and hold its *interpretation*
-until the severity pass runs.
+Write Tier A and C3 now. Hold C5.
 
 ---
 
@@ -97,7 +99,7 @@ harm cell (p=.0305) would not.
 *Note:* point 1's original "6/6" was six split-sample fits compared by eye.
 This is the first actual test of the difference.
 
-### C3 (Tier B) — The moral/nonmoral difference lives entirely in the good-outcome cell
+### C3 (Tier A−) — The moral/nonmoral difference lives entirely in the good-outcome cell
 
 For **both** blame and praise, in **all three** families, the domain
 difference is concentrated in good-outcome items; bad-outcome items barely
@@ -121,8 +123,20 @@ the same way. It is also the most direct support yet for the
 indifference-tracking reading (an agent indifferent to *others'* welfare
 reads as culpable; one indifferent to *their own* interests does not).
 
-*Strength:* high on the pattern, contested on the explanation.
-*Caveat — mandatory, and it is severe:* the moral-good cell is the one that
+*Strength:* high on the pattern; the leading rival explanation is now tested.
+*Rival reading, largely ruled out (`710b4c3`):* that this tracks **stakes**
+rather than moral domain — indifference about babies vs. about a report's
+font. The nonmoral arm's own prudential (matters to the agent) vs. procedural
+(trivial) split measures the stakes gradient directly. For **blame** the
+gradient is real but small (+0.99/+1.06/+1.07) while the moral jump over
+prudential is 4.38/3.67/2.36 — **2.2 to 4.4 gradient-steps**, so moral is not
+one step further along the same line. For **praise** there is no coherent
+gradient at all (+0.41 ns, −0.97 *wrong direction*, +0.09 ns) while the full
+moral effect is present. A stakes account has to explain why praise shows the
+effect without showing the gradient. Residual, blame only: the argument is
+ordinal, since the stakes *distance* from prudential to moral is unmeasured.
+A stakes rating would sharpen this, not rescue it.
+*Caveat — mandatory, and it is the remaining one:* the moral-good cell is the one that
 lost **65% of its items to curation** (14/40 surviving vs. 97.5% for
 moral-bad and 82.5–95% for all nonmoral cells). The surviving items were
 selected for scoring highest on moral relevance. Differential selection
