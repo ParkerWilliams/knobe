@@ -32,10 +32,14 @@ The results themselves, and the honest accounting of how much to trust them.
 The active planning doc. Unlike `rq1_findings/`, which records what the
 results are, this folder records what we intend to do with them.
 
-- **`SUBMISSION_GAMEPLAN.md`** — claim inventory ranked by what survives
-  review, the gate blocking each one, venue targets, and the ordered
-  worklist. Revised as claims clear or fail their gates; start here when
-  picking the project back up.
+- **`CLAIMS.md`** — the flattened claim set to write the draft from: each
+  claim with its test, its scoring, the caveat that ships with it, and the
+  commit it traces to, plus what the paper explicitly does *not* claim and a
+  section skeleton. Start here when drafting.
+- **`SUBMISSION_GAMEPLAN.md`** — the planning doc behind it: claims ranked by
+  what survives review, the gate blocking each one, venue targets, and the
+  ordered worklist. Carries its own revision history, so read `CLAIMS.md` for
+  the current position and this for how it got there.
 
 ## `severity_confound/` — the RQ1a severity/moral-status entanglement
 
