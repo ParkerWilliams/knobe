@@ -156,20 +156,39 @@ problem.
 
 ---
 
-## 4. Venue targets
+## 4. Venue: TMLR (decided 2026-09-13)
 
-Deadlines are not listed because they need checking against the current
-cycle before any of this is actionable.
+**Decided, not a shortlist.** Drafting targets TMLR.
 
-| Target | The paper it fits | Fit notes |
-|---|---|---|
-| **TMLR** | Ranks 1–3 plus the measurement section, heterogeneity intact | Best fit. Claims-matched-to-evidence review rewards exactly this project's strength; three-models-three-answers reads as a finding here rather than as inconclusiveness |
-| **AIES / FAccT** | Same evidence, audit framing: auditing one moral construct doesn't transfer to another, and bias must be audited per-model | Lowest additional work — a reframe of the same core |
-| **CogSci** | Knobe + Hindriks + foundations + the typicality reversal, psychology-facing | 6 pages, fast, stakes the claim early without spending the full result set |
-| ***ACL via ARR** | As TMLR but needs a tighter single story | Rolling submission removes deadline pressure; needs the heterogeneity framed as the finding or reviewers read it as a null result |
-| **BlackboxNLP / ICLR** | Only if the mech arm runs | See §6 |
+Reasons, in order of weight:
 
----
+1. **No human baseline, by explicit scope call.** `V1_1_REVISION_PLAN.md`:
+   "This project's aim is to locate and decompose a known human effect inside
+   LLMs, not to re-establish the human effect on a new stimulus set." C3, C4
+   and C6 are all framed against *published* human results, on modified Ngo
+   items rather than the originals. At CogSci or Cognition that is a
+   first-round objection; at TMLR it is unremarkable.
+2. **C1 leads naturally.** The strongest contribution is a measurement
+   finding about how LLM Likert responses are scored — an ML/NLP audience
+   question.
+3. **Cross-model heterogeneity reads as a finding**, not as an inconclusive
+   result. TMLR reviews on whether claims match evidence rather than on
+   novelty or a unified story, which is exactly this project's shape.
+4. **No deadline pressure**, so the provenance files and any v2 elicitation
+   can land mid-review rather than gating submission.
+5. The mechanistic arm (§6) extends naturally in the same venue later.
+
+Not chosen: *ACL via ARR (same shape, but needs a tighter single story and
+risks heterogeneity reading as inconclusive); AIES/FAccT (a good fit for a
+C4-led audit framing, worth revisiting for a second paper); CogSci (blocked
+by reason 1).
+
+**Drafting decisions that follow:** C1 leads. C3 is drafted now with its
+attrition confound stated in-line and explicit placeholders for the analysis
+the curation provenance files will enable — the files are being chased in
+parallel, so this is a fill-in rather than a rewrite. Manuscript starts in
+markdown at `paper/DRAFT.md`; conversion to the TMLR LaTeX template is a
+later mechanical step.
 
 ## 5. Worklist, in order
 
