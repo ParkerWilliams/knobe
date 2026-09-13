@@ -14,15 +14,24 @@ numbers below refer to that draft's numbering.
 (`outputs/sign_wcb*_parsed.csv`); `blame_praise_swing.py`, commit `244db46`
 (`outputs/blame_praise_swing.csv`, `outputs/question_cell_means.csv`).
 
-**2026-09-13 — §5 items 1 and 2 are done, and they changed the paper.** The
-parsed-rating substitution flipped 14 of 30 q_intentionality cells and 0 of
-30 q_praise cells. Net effect: the intentionality claims got simpler and
-better, not worse. Under correct scoring the asymmetry is **domain-general**
-— not moral-specific (nonmoral pilot) and not harm-specific (MF pilot) — in
-every family, replacing the draft's three-way cross-model disagreement.
-Rankings below are revised accordingly; see
-`ALIGNMENT_DISCUSSION_ngo_pilots.md`'s correction note for what that
-supersedes.
+**2026-09-13 — §5 items 1, 2, 2a and 2b are done, and they changed the
+paper.** The parsed-rating substitution flipped 14 of 30 q_intentionality
+cells and 0 of 30 q_praise cells. Two consequences, in order of importance:
+
+- **The blame/praise claims are untouched and are now the whole spine.**
+  Every finetuned blame and praise cell holds under both scorings.
+- **The intentionality claims shrank rather than improved.** An earlier pass
+  of this note claimed the asymmetry is "domain-general in every family";
+  that was wrong, and §5 item 2b is what caught it. Under parsed scoring
+  **llama-finetuned shows no significant intentionality asymmetry in any arm
+  of either pilot** (0/4 nonmoral, 1/6 MF), so there is no effect for a
+  domain interaction to generalize across. Of the remaining two, only gemma's
+  nulls are informative once equivalence-bounded; mistral's are underpowered.
+  Domain-generality is a one-family result with a second family consistent
+  but undetermined.
+
+See `ALIGNMENT_DISCUSSION_ngo_pilots.md`'s correction note for what all this
+supersedes in the draft.
 
 ---
 
@@ -105,21 +114,21 @@ pair-level gating kept every cell perfectly sign-balanced (§3). Nothing in
 the published Knobe-in-LLMs literature tests beyond harm, because neither
 Ngo's nor Raimondi's paradigm leaves it.
 
-**Strengthened 2026-09-13.** Under parsed scoring gemma's
-harm-vs-non-harm interaction — the one significant finetuned cell, and the
-only thing standing against "harm isn't special" — goes β=−1.24 (p=.012) →
-−0.30 (p=.70). **No family now shows a significant harm-vs-non-harm
-interaction**, and mistral's two primary arms both hold. The claim is
-unanimous across three families rather than 2-of-3 with gemma dissenting.
+**Revised twice on 2026-09-13.** Under parsed scoring gemma's
+harm-vs-non-harm interaction — the one significant finetuned cell — goes
+β=−1.24 (p=.012) → −0.30 (p=.70), so no family shows a significant
+harm-vs-non-harm interaction. Equivalence-bounding then showed only gemma's
+null is informative; mistral's is underpowered and llama has no asymmetry to
+be general about. See Rank 3 for the table. "Harm isn't special" is a
+gemma result, not a three-family one.
 
 **Gates, both reportable-with-caveat rather than blocking:**
 
-- Frame the nulls as equivalence results, not absence of heterogeneity. A
-  null joint F at G=26–30 is weak evidence *for* homogeneity on its own. Use
-  the Bloom (2006) MDE machinery from `rq1_v1_1_robustness/09` + `15` —
-  already used this way in `RQ1_STATISTICAL_METHODS_v1.1.md` §9.3 — and
-  report "heterogeneity above X is ruled out." This now carries more weight,
-  since the claim rests on three nulls rather than one.
+- ~~Frame the nulls as equivalence results~~ — DONE 2026-09-13, `03b8f1b`,
+  and it cut the claim down. 1 of 3 null cells is informative here and 1 of 3
+  for Rank 3. The Bloom MDE machinery from `rq1_v1_1_robustness/15` is
+  imported rather than recopied, so alpha/power/dof stay tied to that
+  directory's config.
 - ~~Re-run the joint foundation-gradient F-test under parsed scoring~~ —
   DONE 2026-09-13, `70f1a34`. It adds one nuance: gemma-finetuned still shows
   significant heterogeneity across the five foundations (p=.043, the only
@@ -132,30 +141,38 @@ unanimous across three families rather than 2-of-3 with gemma dissenting.
   parsed, leaving only mistral-pretrained. The draft's "all three pretrained
   cells, new and unexplained" was reading the EV artifact.
 
-### Rank 3 — The asymmetry is domain-general (replaces old Rank 4)
+### Rank 3 — The asymmetry is domain-general, in gemma (replaces old Rank 4)
 
-**New as of 2026-09-13, and it is the direct product of refuting the old
-Rank 4.** Under parsed scoring, no family shows a significant
-moral-vs-nonmoral interaction on intentionality, and no family shows a
-significant harm-vs-non-harm interaction. Every finetuned family shows a
-large bad>good asymmetry in *every* arm tested — moral, prudential,
-procedural, harm, loyalty, authority, fairness, purity.
+Under parsed scoring no family shows a significant moral-vs-nonmoral or
+harm-vs-non-harm interaction. But a null only means something where there is
+an effect to be general *about*, and where the design could have detected a
+difference. Equivalence-bounding (`03b8f1b`) narrows this to one family:
 
-Paired with Rank 2, this is one claim rather than two: the Knobe asymmetry
-these models acquire under instruction tuning is **not specific to morality
-and not specific to harm**. That is a cleaner and more surprising result than
-the draft's three-way cross-model disagreement, and it is a sharper contrast
-with the human literature, where moral-specificity is the live debate.
+| family | asymmetry present? | moral-vs-nonmoral null | harm-vs-non-harm null |
+|---|---|---|---|
+| gemma | yes, all arms | **informative** (1.41 < 2.71) | **informative** (1.58 < 4.44) |
+| mistral | yes, all arms | underpowered (0.95 vs 0.81) | underpowered (1.45 vs 1.00) |
+| llama | **no, anywhere** | benchmark ≈ 0 | benchmark ≈ 0 |
+
+So the claim is: **in gemma, the asymmetry is demonstrably not specific to
+morality or to harm** — the design can rule out a domain interaction as large
+as the asymmetry itself. Mistral is consistent but undetermined. Llama has
+nothing to generalize.
+
+Llama's absence is a finding in its own right and belongs with the
+measurement section: its EV-scored result was "the largest effect in the
+study," and it sat on the worst `ev_rating`/`parsed_rating` agreement in the
+project (r=.146 nonmoral, .130 MF). Correctly scored, it vanishes.
 
 **Gates:**
 
-- Inherits Rank 4's severity and attrition problems, since it is still an
-  arm-vs-arm comparison. The difference is that the claim is now a null
-  across arms, and the severity confound would have to *manufacture* a null
-  to explain it away — a harder story to tell than manufacturing a
+- Inherits the severity and attrition problems, since it is still an
+  arm-vs-arm comparison — though a severity confound would now have to
+  *manufacture* a null, which is a harder story than manufacturing a
   difference. State it that way.
-- Equivalence framing, as in Rank 2. "No significant interaction" at these
-  cluster counts needs an MDE to mean anything.
+- Mistral's underpowered cells need the "additional clusters required"
+  number, which `required_sets()` in script 15 already computes, so the
+  writeup can say how much bigger a follow-up would have to be.
 
 ### Rank 4 — Construct divergence (point 7), reduced
 
@@ -323,9 +340,14 @@ cycle before any of this is actionable.
    2026-09-13, `70f1a34`. Killed two of three pretrained heterogeneity
    results; added the gemma-finetuned nuance to Rank 2.
 
-2b. **MDE / equivalence bounds for Ranks 2 and 3.** Both now rest on nulls
-   across arms, which makes the Bloom machinery load-bearing rather than
-   nice-to-have.
+2b. ~~**MDE / equivalence bounds for Ranks 2 and 3**~~ — DONE 2026-09-13,
+   `03b8f1b`. Only 1 of 3 null cells is informative for each; both claims
+   narrow to gemma. Caught an overstatement in this doc's own earlier
+   summary.
+
+2c. **`required_sets()` for mistral's underpowered cells.** Script 15 already
+   computes it. Turns "underpowered" into "a follow-up needs N clusters,"
+   which is a usable limitation rather than a shrug.
 
 ### Do in parallel
 
