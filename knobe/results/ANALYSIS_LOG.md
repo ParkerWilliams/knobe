@@ -153,3 +153,45 @@ unaddressed:
 2026-09-13 | `analysis/ngo_extensions/blame_praise_swing.py` (extended: `domain_gap_decomposition`) + `equivalence_bounds.py` (extended: item 2c `clusters_for_benchmark` via script 15's `required_sets`) | descriptive decomposition, no refits: the moral-vs-nonmoral gap split by sign for q_blame and q_praise, finetuned, both scores; plus required-cluster counts under script 15's se~sqrt(G_current/G_new) approximation | Closes point 4a's open thread and point 5's "praise pattern still open" at once. The domain difference lives almost entirely in the GOOD-outcome cell for both questions in all three families (parsed): blame good-cell gap +2.93/+4.27/+5.02 vs bad-cell +0.67/+1.14/+1.21 (3.7-4.4x); praise good-cell -1.80/-1.87/-2.18 vs bad-cell -0.22/-0.28/-0.41 (5.4-8.4x). Moral good-outcome agents are blamed MORE (~7.0 vs 2.1-4.1) and praised LESS (~1.0-4.4 vs 3.2-6.2); bad-outcome agents are treated alike across domains. One phenomenon, not blame and praise diverging -- supports the indifference-tracking reading directly, but is also exactly what the 65% moral-good curation attrition would manufacture, so the selection confound is live in precisely the cell the effect lives in. Item 2c: mistral's two underpowered nulls need G=75 (from 40) and G=48 (from 34); llama's 668 is the degenerate case implied by its ~0 benchmark. Writes `outputs/domain_gap_decomposition.csv`, adds a column to `equivalence_bounds.csv` | 0dc641b
 2026-09-13 | `analysis/ngo_extensions/stakes_gradient_check.py` (new, REAL run) | tests whether CLAIMS.md C3's good-outcome effect is about moral domain or about stakes, using the nonmoral arm's existing prudential (matters to the agent) vs procedural (trivial) split rather than new curation. `parsed_rating ~ stakes_c` (prudential +0.5 / procedural -0.5) within GOOD-sign nonmoral items, WCB B=1999 cluster=pair_id seed=27, finetuned, parsed scoring; reports the step next to the moral jump it would have to explain | The stakes reading is ruled out for praise and substantially constrained for blame. BLAME: a real stakes gradient exists (+0.99/+1.06/+1.07, p_wcb=.060/.014/.0005) but the moral jump over prudential is 4.38/3.67/2.36 -- i.e. 4.4/3.5/2.2 prudential-vs-procedural steps, so moral is not one step further along the gradient but a multiple of it. PRAISE: no coherent gradient at all (gemma +0.41 p=.43, llama -0.969 p=.019 in the WRONG direction, mistral +0.086 p=.82) while the full moral effect is present (-2.12/-1.66/-1.85) -- if C3 were stakes-driven, praise should show the gradient blame does, and it does not. Residual caveat for blame only: the argument is ordinal, since the stakes DISTANCE from prudential to moral is unmeasured, so a stakes/severity rating would sharpen it rather than being load-bearing. This supersedes the earlier same-day recommendation that a ~400-call severity curation pass was the highest-value remaining task -- the discriminating comparison was already in the data. Writes `analysis/ngo_extensions/stakes_gradient_check.csv` | (this commit)
 2026-09-13 | `analysis/human_study/cost_model.py` (new) | planning model, no data: cost = item_question_pairs x ratings_per_item x sec_per_rating x hourly_rate x (1+fee), plus per-session overhead charged once per participant. Defaults 25s/rating, 3min overhead, $12/hr, 33% fee | Corrects an earlier same-day estimate of $2.5-3k, which anchored on 20 ratings/item and framed the problem as participant count. Cost scales with total RATINGS, not participants -- 872 people at 9min ($2,146) vs 291 at 22min ($1,682) differ by only ~20%, while item count and ratings-per-item are linear. Full LLM-matched design is $1,199 at 10 ratings/item, not $2,397 as quoted. Targeted designs: moral-vs-nonmoral blame both signs $330; foundations intentionality $209; both $539. The project's own ICC work (23_icc_variance_decomposition.py, design effects 6-160x) argues against >15 ratings/item -- the binding constraint is 40 storylines / 76 foundation pairs, not raters. Final rater count should come from a pilot, since human between-item variance on these stimuli is unknown | (this commit)
+
+## Session summary — 2026-09-13
+
+Per `CLAUDE.md` section 6. 28 commits, `25a79c0..HEAD`, all pushed to
+`origin/main`. Working tree clean; nothing uncommitted.
+
+**New analysis scripts** (7): `measurement_selection_audit.py`,
+`blame_praise_swing.py`, `equivalence_bounds.py`, `tuning_contrast_wcb.py`,
+`stakes_gradient_check.py` (all `analysis/ngo_extensions/`),
+`analysis/human_study/cost_model.py`.
+
+**Modified analysis scripts** (4): `--score {ev,parsed}` added to both pilots'
+`analyze_sign_wcb.py`, to `foundation_gradient_wcb.py`, and to
+`holm_correct_pilots.py`. All four verified to reproduce their committed ev
+tables (p_wcb bit-identical).
+
+**New committed tables** (14): `measurement_audit.csv` + `selection_attrition.csv`
+(both pilots), `sign_wcb{,_blame,_praise}_parsed.csv` (nonmoral),
+`sign_wcb_parsed.csv` + `foundation_gradient_wcb_parsed.csv` (MF),
+`sign_wcb_holm_summary_parsed.csv` (both), `blame_praise_swing.csv`,
+`question_cell_means.csv`, `domain_gap_decomposition.csv`,
+`equivalence_bounds.csv`, `tuning_contrast_wcb{,_parsed}.csv`,
+`stakes_gradient_check.csv`.
+
+**Regenerated for schema consistency** (4): both pilots' ev `sign_wcb*.csv` --
+p_wcb bit-identical, no cited number moved.
+
+**New docs** (3): `docs/submission_plan/CLAIMS.md`,
+`docs/human_study/PROTOCOL.md`, `paper/DRAFT.md`.
+
+**Modified docs** (4): `docs/submission_plan/SUBMISSION_GAMEPLAN.md` (claim
+inventory moved to CLAIMS.md; venue fixed to TMLR; worklist and priorities
+resynced; human-study track added), `docs/rq1_findings/ALIGNMENT_DISCUSSION_ngo_pilots.md`
+(correction note, four items), `docs/README.md` (two new subfolders),
+`results/ANALYSIS_LOG.md`.
+
+**Four conclusions reversed this session**, all recorded rather than quietly
+edited: moral-specificity refuted; praise's "opposite lean" was a
+sign-convention error; the finetuning contrast went from lowest-ranked to
+Tier A by being tested for the first time; the severity curation pass went
+from "highest-value remaining task" to demoted after the stakes test showed
+the discriminating data was already collected.

@@ -246,6 +246,34 @@ rival readings survives test.
    items. Would extend C4 (the strongest claim) across foundations and merge
    the two pilots into one result rather than two.
 
+### Parallel track — human replication (new 2026-09-13)
+
+Decided today, scoped and costed in `docs/human_study/PROTOCOL.md`. Two arms
+as one study: blame on the 240 authored nonmoral items (a direct human test
+of C3), and intentionality on the 152 authored foundation items (standalone —
+whether the Knobe effect extends past harm has never been tested in humans).
+~131 participants, ~$540 plus an ~$80 pilot.
+
+**Does not gate the TMLR submission.** Paper one is model-only and its
+framing is sound without human data. This is paper two, and it makes paper
+one stronger if it lands during review.
+
+Two payoffs beyond the obvious one:
+
+- Running the **authored** sets rather than the post-curation subsets means
+  human ratings on the 26 dropped moral-good items. That substitutes for the
+  missing curation provenance files and converts C3's last open confound from
+  a person-dependent gate into one we control.
+- The foundations arm is a moral-psychology contribution independent of any
+  LLM result, which opens venues the model-only work cannot reach.
+
+**Blocking step, and it is irreversible if skipped:** an IRB determination.
+IRBs cannot approve research retroactively, and the project's affiliation
+status is genuinely unclear (side project, external collaborator), so the
+determination request goes out before anything else in this track. Everything
+else — instrument build, block generator, pilot design — proceeds in
+parallel; only collection waits.
+
 ### Before submission, not before drafting
 
 7. **Multiplicity exposure.** Partly addressed — the parsed tables are now
