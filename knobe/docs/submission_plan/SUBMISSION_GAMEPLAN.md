@@ -53,9 +53,11 @@ is citable.
 ### Rank 1 — Blame-vs-praise sensitivity on identical items (point 6)
 
 Each family's blame swing compared against its own praise swing, same
-vignettes. The negativity-bias prediction from the human literature
-(Baumeister et al., "bad is stronger than good") holds in llama only; gemma
-and mistral swing harder on praise, mistral by 3.76 vs. 0.80 on moral items.
+vignettes, measured against the negativity-bias prediction from the human
+literature (Baumeister et al., "bad is stronger than good"). gemma and llama
+obey it in both domains; mistral inverts it in both, swinging harder on
+praise than on blame. See the corrected table under the gate below — the
+original draft's "llama only" read off the wrong scale.
 
 This is the strongest claim in the project, for reasons the others don't
 share:
@@ -93,10 +95,10 @@ negativity-bias prior while two families obey it is the claim.
 
 ### Rank 2 — Foundation gradient, finetuned only (point 2b)
 
-Joint 4-df wild cluster bootstrap-F over all five foundations per cell.
-mistral-finetuned `p_wcb=.672` — the sign effect is statistically
-indistinguishable across harm, loyalty, authority, fairness, and purity.
-gemma (.049) and llama (.060) sit on opposite sides of the line.
+Joint 4-df wild cluster bootstrap-F over all five foundations per cell,
+plus the pairwise harm-vs-pooled-non-harm interaction. Under parsed scoring
+llama (.476) and mistral (.218) show no detectable heterogeneity across
+harm, loyalty, authority, fairness, and purity; gemma (.043) does.
 
 The MF pilot's design is clean on the axis that damages the nonmoral pilot:
 pair-level gating kept every cell perfectly sign-balanced (§3). Nothing in
