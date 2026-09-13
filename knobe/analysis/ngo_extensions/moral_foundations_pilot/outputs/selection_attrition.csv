@@ -1,0 +1,11 @@
+arm,sign,n_authored,n_selected,survival_rate
+authority,bad,13,9,0.6923
+authority,good,13,9,0.6923
+fairness,bad,13,8,0.6154
+fairness,good,13,8,0.6154
+harm_control,bad,30,30,1.0
+harm_control,good,30,30,1.0
+loyalty,bad,13,10,0.7692
+loyalty,good,13,10,0.7692
+purity,bad,7,6,0.8571
+purity,good,7,6,0.8571

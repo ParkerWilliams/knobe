@@ -1,0 +1,7 @@
+arm,sign,n_authored,n_selected,survival_rate
+moral,bad,40,39,0.975
+moral,good,40,14,0.35
+nonmoral_procedural,bad,40,37,0.925
+nonmoral_procedural,good,40,38,0.95
+nonmoral_prudential,bad,40,35,0.875
+nonmoral_prudential,good,40,33,0.825
