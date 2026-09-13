@@ -7,10 +7,22 @@ restate results. For the numbers themselves see
 `docs/rq1_findings/ALIGNMENT_DISCUSSION_ngo_pilots.md` (both pilots); point
 numbers below refer to that draft's numbering.
 
-**Provenance for the two audits this plan's rankings turn on:**
-`analysis/ngo_extensions/measurement_selection_audit.py`, commit `395a9ed`,
-tables at each pilot's `outputs/measurement_audit.csv` and
-`outputs/selection_attrition.csv`.
+**Provenance for the audits this plan's rankings turn on:**
+`analysis/ngo_extensions/measurement_selection_audit.py`, commit `395a9ed`
+(`outputs/measurement_audit.csv`, `outputs/selection_attrition.csv`);
+`analyze_sign_wcb.py --score parsed`, commit `6c73ab6`
+(`outputs/sign_wcb*_parsed.csv`); `blame_praise_swing.py`, commit `244db46`
+(`outputs/blame_praise_swing.csv`, `outputs/question_cell_means.csv`).
+
+**2026-09-13 — §5 items 1 and 2 are done, and they changed the paper.** The
+parsed-rating substitution flipped 14 of 30 q_intentionality cells and 0 of
+30 q_praise cells. Net effect: the intentionality claims got simpler and
+better, not worse. Under correct scoring the asymmetry is **domain-general**
+— not moral-specific (nonmoral pilot) and not harm-specific (MF pilot) — in
+every family, replacing the draft's three-way cross-model disagreement.
+Rankings below are revised accordingly; see
+`ALIGNMENT_DISCUSSION_ngo_pilots.md`'s correction note for what that
+supersedes.
 
 ---
 
@@ -57,11 +69,27 @@ share:
 - Finetuned-only, so the pretrained scoring caveat never arises.
 - Survives Holm within (family, tuning, question).
 
-**Gate:** a scale-comparability check. The blame-vs-praise swing comparison
-assumes the two 0–10 scales behave alike. Produce the point-4a analogue for
-praise — raw cell means to expose floor/ceiling structure — and report
-swings in per-cell SD units alongside raw units. The draft already concedes
-"praise's own pattern is still open." Cost: hours, reanalysis only.
+**Gate — CLEARED 2026-09-13** (`244db46`), and it changed the answer. The
+scale check mattered: EV is a logprob-weighted mean whose compression depends
+on a per-question logprob distribution, so it is the wrong scale for a
+cross-question magnitude comparison, and the instability shows up directly —
+under EV the raw and SD-standardized verdicts disagree in 2 of 6 cells, under
+parsed they agree in 6 of 6. **Report point 6 under `parsed`, not as a
+robustness check but as the primary scale.** Corrected claim: the
+negativity-bias prior holds for **gemma and llama** in both domains, with
+mistral reversed — not "llama only."
+
+| family | arm | blame | praise | bigger |
+|---|---|---:|---:|---|
+| gemma | moral | 1.81 | 1.11 | blame |
+| gemma | nonmoral | 5.62 | 2.76 | blame |
+| llama | moral | 1.61 | 0.76 | blame |
+| llama | nonmoral | 4.73 | 2.54 | blame |
+| mistral | moral | 1.48 | 3.39 | praise |
+| mistral | nonmoral | 3.74 | 4.92 | praise |
+
+All twelve swings are individually significant. Mistral inverting the
+negativity-bias prior while two families obey it is the claim.
 
 ### Rank 2 — Foundation gradient, finetuned only (point 2b)
 
@@ -75,58 +103,69 @@ pair-level gating kept every cell perfectly sign-balanced (§3). Nothing in
 the published Knobe-in-LLMs literature tests beyond harm, because neither
 Ngo's nor Raimondi's paradigm leaves it.
 
+**Strengthened 2026-09-13.** Under parsed scoring gemma's
+harm-vs-non-harm interaction — the one significant finetuned cell, and the
+only thing standing against "harm isn't special" — goes β=−1.24 (p=.012) →
+−0.30 (p=.70). **No family now shows a significant harm-vs-non-harm
+interaction**, and mistral's two primary arms both hold. The claim is
+unanimous across three families rather than 2-of-3 with gemma dissenting.
+
 **Gates, both reportable-with-caveat rather than blocking:**
 
-- Frame mistral's null as an equivalence result, not an absence of
-  heterogeneity. A null joint F at G=26–30 is weak evidence *for* homogeneity
-  on its own. Use the Bloom (2006) MDE machinery from
-  `rq1_v1_1_robustness/09` + `15` — already used this way in
-  `RQ1_STATISTICAL_METHODS_v1.1.md` §9.3 — and report "heterogeneity above X
-  is ruled out."
-- llama's cell is measured at r = .130. Flag it on measurement grounds, not
-  only as a borderline p-value.
-- Pretrained foundation heterogeneity (all three cells significant) stays
-  "under investigation" pending §5 item 1. Do not block Rank 2 on it.
+- Frame the nulls as equivalence results, not absence of heterogeneity. A
+  null joint F at G=26–30 is weak evidence *for* homogeneity on its own. Use
+  the Bloom (2006) MDE machinery from `rq1_v1_1_robustness/09` + `15` —
+  already used this way in `RQ1_STATISTICAL_METHODS_v1.1.md` §9.3 — and
+  report "heterogeneity above X is ruled out." This now carries more weight,
+  since the claim rests on three nulls rather than one.
+- The joint foundation-gradient F-test (`foundation_gradient_wcb.py`) has not
+  been re-run under parsed scoring; only the pairwise arm fits have. Do that
+  before citing point 2b's per-cell F values.
+- Pretrained foundation heterogeneity stays "under investigation." Parsed
+  scoring scrambles it rather than settling it — mistral-pretrained's
+  authority and fairness arms go from null to significant, llama-pretrained's
+  three significant arms all go null.
 
-### Rank 3 — Full construct divergence (point 7)
+### Rank 3 — The asymmetry is domain-general (replaces old Rank 4)
 
-Intentionality, blame, and praise tell three different stories on the same
-items. Recoverable, but it is not within-item the way Rank 1 is: as the
-draft writes it, point 7 rests on the three moral-vs-nonmoral *interactions*
-(points 3, 4, 5), which are between-arm and inherit both the severity gap
-and the attrition in §3.
+**New as of 2026-09-13, and it is the direct product of refuting the old
+Rank 4.** Under parsed scoring, no family shows a significant
+moral-vs-nonmoral interaction on intentionality, and no family shows a
+significant harm-vs-non-harm interaction. Every finetuned family shows a
+large bad>good asymmetry in *every* arm tested — moral, prudential,
+procedural, harm, loyalty, authority, fairness, purity.
+
+Paired with Rank 2, this is one claim rather than two: the Knobe asymmetry
+these models acquire under instruction tuning is **not specific to morality
+and not specific to harm**. That is a cleaner and more surprising result than
+the draft's three-way cross-model disagreement, and it is a sharper contrast
+with the human literature, where moral-specificity is the live debate.
 
 **Gates:**
 
-- Re-run the pilots' finetuned q_intentionality fits with `parsed_rating`
-  substituted on parse_ok rows (script 35's method). At r = .146–.180, the
-  intentionality leg is currently the weak one, and a reviewer will say the
-  constructs diverge because one of them is badly measured.
-- State the differencing argument explicitly in place of "within-item":
-  blame's interaction is negative and praise's is positive over the *same*
-  arm contrast, so a severity main effect cancels. It survives as a confound
-  only if severity hits blame and praise asymmetrically — which is what
-  point 4a's raw-means table would look like if it did.
+- Inherits Rank 4's severity and attrition problems, since it is still an
+  arm-vs-arm comparison. The difference is that the claim is now a null
+  across arms, and the severity confound would have to *manufacture* a null
+  to explain it away — a harder story to tell than manufacturing a
+  difference. State it that way.
+- Equivalence framing, as in Rank 2. "No significant interaction" at these
+  cluster counts needs an MDE to mean anything.
 
-### Rank 4 — Cross-architecture disagreement on moral-specificity (point 3)
+### Rank 4 — Construct divergence (point 7), reduced
 
-llama moral-specific (interaction p=.017), mistral leaning the opposite way,
-gemma neither. Good framing ("no single LLM notion of intentionality
-attribution; it's recipe-dependent"), three independent problems:
+Blame and praise no longer disagree in direction. Point 5's "praise leans
+the opposite way from blame" was a sign-convention error: `arm_c` is +0.5
+moral / −0.5 nonmoral, so `sign_c:arm_c` = β_moral − β_nonmoral, and praise's
+`sign_c` betas are negative, so a positive praise interaction means a
+*smaller* magnitude swing in the moral arm. Praise swings bigger outside
+morality in all three families under both scorings, the same direction as
+blame.
 
-1. The 65% attrition in the moral-good cell (§3) — this *is* the
-   moral-vs-nonmoral contrast, in the pilot that has the problem.
-2. Severity is unchecked across arms in both pilots; no reviewer-rated
-   severity question exists for either.
-3. The deciding cell, llama-instruct q_intentionality, is measured at
-   r = .146.
-
-Future-work paragraph this cycle unless there's bandwidth for a curation
-pass. Note it is *not* cross-pilot — all three arms live in the nonmoral
-pilot and share a `pair_id` — but `pair_id` clusters a four-clause template
-family, not a matched item (within pair 1: Bill/gadget/babies vs.
-Priya/app-update/job-security vs. Trevor/font vs. Naomi/template). Better
-matched than the main run's MB/NMB pairs; not a matched-stimulus design.
+What remains is real but narrower: blame and praise agree on direction and
+disagree on magnitude (Rank 1), and intentionality — once correctly scored —
+shows no domain effect at all where blame and praise both show a large one.
+That last contrast is the defensible version of "these constructs are not
+interchangeable," and it is worth a paragraph rather than a section.
 
 ### Rank 5 — Finetuning as the causal lever (point 1)
 
@@ -136,10 +175,15 @@ is scored by `_logit_ev_rating`, the function script 35 proved manufactures
 significant wrong-direction effects at low parse rate, and pretrained
 agreement here is r = .026–.227.
 
-**Gate:** §5 item 1. Until then the honest version is "pretrained shows
-nothing reliable," not "finetuning installs this bias." Reviewers in this
-subfield will know to ask, because the artifact is documented in this
-project's own logs.
+**Gate — partly cleared 2026-09-13, and the answer is "split by family."**
+Parsed scoring does not rescue a uniform pretrained null. llama-pretrained
+keeps a large significant *reversed* nonmoral effect (β=−0.88, p<.0001);
+mistral-pretrained's reversal goes null; gemma-pretrained stays marginal.
+The finetuned side is unaffected and large everywhere. So the defensible
+claim is "the asymmetry is finetuned-large and pretrained-inconsistent,"
+which still supports instruction tuning as the lever but drops the clean 6/6
+framing. The pretrained cells also parse at 25.5–29.9% for blame and praise,
+so per-family pretrained claims stay thin regardless of scoring.
 
 ### Carried from the main run
 
@@ -150,7 +194,16 @@ project's own logs.
 - **Methodological pair:** logit-fallback EV scoring manufacturing spurious
   effects, and Wald/LRT overconfidence at G=21–84 in exactly the cells WCB
   rejects. Directly transferable to anyone scoring LLM Likert responses from
-  logprobs. This is a section, not a footnote.
+  logprobs. This is a section, not a footnote — and as of 2026-09-13 it is
+  arguably the strongest contribution in the paper. The main run showed the
+  artifact on one cell; the pilots now show it flips **14 of 30**
+  q_intentionality cells while leaving all 30 praise cells untouched, on the
+  same items, in the same run, differing only by question wording. The
+  generalizable claim is that logprob-EV scoring is safe exactly where the
+  question elicits a number and unsafe where it doesn't, and that agreement
+  with `parsed_rating` — not parse rate — is the diagnostic. gemma-instruct
+  parses intentionality *better* than blame (58.1% vs. 53.0%) and still lands
+  at r=.180 vs. .823.
 - **Mistral does not replicate Raimondi** at the finetuned stage, on two
   independent tests, at a 98.2% parse rate. Needs the cheap diagnostic
   (§5 item 4) before it's a claim rather than a loose end.
@@ -247,18 +300,29 @@ cycle before any of this is actionable.
 
 ## 5. Worklist, in order
 
-### Do first — gates other work
+### Done
 
-1. **Parsed-rating substitution across both pilots, all cells** — reanalysis,
-   no elicitation, no GPU, reuses script 35's method. Covers pretrained cells
-   (gates Rank 5, clears the pretrained half of Rank 2) **and finetuned
-   q_intentionality cells** (gates Rank 3, sharpens Ranks 2 and 4). The
-   single highest-leverage task left in the project.
+1. ~~**Parsed-rating substitution across both pilots, all cells**~~ — DONE
+   2026-09-13, `6c73ab6`. 14/30 q_intentionality cells flip, 5/30 blame (all
+   pretrained), 0/30 praise. Refuted old Rank 4, produced new Rank 3,
+   strengthened Rank 2, split Rank 5 by family.
+2. ~~**Praise scale-comparability check**~~ — DONE 2026-09-13, `244db46`.
+   Changed Rank 1's verdict from "llama only" to "gemma and llama," and
+   established `parsed` as the primary scale for point 6 rather than a
+   robustness check.
 
-2. **Praise scale-comparability check** — raw cell means for praise plus
-   swings in per-cell SD units. Gates Rank 1, the claim being drafted first.
+### Do next
 
-### Do in parallel with 1–2
+2a. **Re-run `foundation_gradient_wcb.py` under parsed scoring.** The joint
+   4-df F-test is the whole basis of point 2b and is the one fit the
+   substitution hasn't touched. Same flag, same pattern as `6c73ab6`. Cheap,
+   and Rank 2 shouldn't be written up until it's done.
+
+2b. **MDE / equivalence bounds for Ranks 2 and 3.** Both now rest on nulls
+   across arms, which makes the Bloom machinery load-bearing rather than
+   nice-to-have.
+
+### Do in parallel
 
 3. **Draft Rank 1**, not claim 1 whole. The spine of the draft should be the
    part that cannot be attacked on item composition; points 3/4/5/7 attach to

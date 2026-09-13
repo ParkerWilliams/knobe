@@ -1,5 +1,43 @@
 # Discussion draft: what the nonmoral and moral-foundations pilots say about alignment
 
+> **CORRECTION NOTE (2026-09-13) — read before citing anything below.**
+> Executing `docs/submission_plan/SUBMISSION_GAMEPLAN.md` §5 items 1–2
+> (commits `6c73ab6`, `244db46`) overturned four things in this draft. The
+> points below are left as written for the record; where they conflict with
+> this note, this note wins.
+>
+> 1. **Point 3 (moral-specificity) is refuted, not merely uncertain.** Every
+>    fit here uses `ev_rating`; substituting the models' own `parsed_rating`
+>    flips 14 of 30 q_intentionality cells. llama's moral arm goes β=0.93
+>    (p=.002) → −0.13 (p=.79) and its interaction 0.66 (p=.017) → −0.04
+>    (p=.93). Under parsed scoring **no family shows a significant
+>    moral-vs-nonmoral interaction**, and gemma's "null" was itself an
+>    artifact — it becomes large and significant in every arm. The three-way
+>    cross-model disagreement this draft builds on does not survive.
+> 2. **Point 5's "praise leans the opposite way from blame" is a
+>    sign-convention error.** `arm_c` is +0.5 moral / −0.5 nonmoral, so
+>    `sign_c:arm_c` = β_moral − β_nonmoral, and praise's `sign_c` betas are
+>    *negative* (bad → less praiseworthy). A positive praise interaction
+>    therefore means the moral arm is *less* negative — a **smaller**
+>    magnitude swing. Praise swings bigger **outside** morality in all three
+>    families under both scorings (parsed: gemma 1.105 vs. 2.756, llama 0.763
+>    vs. 2.541, mistral 3.393 vs. 4.921), the same direction as blame.
+> 3. **Point 7 loses a leg.** With point 5 corrected, blame and praise agree
+>    on the moral-vs-nonmoral contrast; they differ only in which swings
+>    harder, which is point 6's question. "Three different stories" overstates
+>    it.
+> 4. **Point 6's verdict changes, and EV is the wrong scale for it.** EV is a
+>    logprob-weighted mean whose compression depends on a per-question
+>    logprob distribution; parsed is the raw integer on a scale identical
+>    across questions. Under EV the raw and SD-standardized verdicts disagree
+>    in 2 of 6 cells; under parsed they agree in 6 of 6. Corrected: the
+>    negativity-bias prior holds for **gemma and llama**, with mistral
+>    reversed — not "llama only."
+>
+> What survives untouched: every finetuned q_blame and q_praise significance
+> result (0/30 praise cells and 0/15 finetuned blame cells flip), which is
+> why point 6 rather than point 7 is the gameplan's Rank 1.
+
 **Status:** draft sketch for discussion, not yet reviewed. Synthesizes
 `analysis/ngo_extensions/moral_foundations_pilot/outputs/sign_wcb.csv`
 (commit `9c3b59f`, q_intentionality only — this pilot never collected
