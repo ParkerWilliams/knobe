@@ -15,6 +15,11 @@ and template text — never duplicate or hand-edit those values elsewhere.
 Research docs (results, methodology, process history) live under `docs/`,
 organized by subfolder — see [`docs/README.md`](docs/README.md) for the index.
 
+**Two different things are called "paper" in this repo.** Top-level
+[`paper/`](paper/) holds the manuscript (`DRAFT.md`, TMLR target).
+`results/<release>/paper/` holds *generated* numbers and figures, and is what
+`make paper` writes — it is gitignored output, not prose.
+
 ## Pipeline stage map
 
 Each stage reads and writes JSONL/CSV/parquet artifacts validated against

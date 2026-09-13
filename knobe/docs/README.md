@@ -23,6 +23,10 @@ The results themselves, and the honest accounting of how much to trust them.
 - **`KNOBE_EFFECT_STATUS.md`** — the narrower question "is the classic
   effect present at all, and where," stripped of the full RQ1a-d
   decomposition.
+- **`ALIGNMENT_DISCUSSION_ngo_pilots.md`** — what the two Ngo-extension
+  pilots say about alignment. **Carries a correction note (2026-09-13):**
+  four of its points were overturned by the parsed-rating substitution and
+  a sign-convention error. Read that note before citing anything in it.
 - **`RAIMONDI_REPLICATION_GAPS.md`** — how this project's results compare
   to Raimondi et al. (arXiv:2510.12229), the paper this project extends,
   including where they don't line up and why.
