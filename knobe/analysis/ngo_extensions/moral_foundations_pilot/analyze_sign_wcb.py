@@ -26,15 +26,30 @@ Companion mixedlm fit per cell for comparability with the v1.1 tables.
 Seeding: one fixed seed (24) consumed per-call across all contrasts, same
 convention as the rq1_v1_1_robustness scripts (config.yaml `seeds` note).
 
+`--score` selects the response variable. `ev` (default) is the
+spec-section-4.4 logit-fallback EV score every committed table here uses.
+`parsed` substitutes the model's own numeric answer on parse_ok rows only --
+the check `35_rq1_base_sign_pretrained_parsed_rating_wcb.py` used to overturn
+the main run's pretrained "reversal", generalized from that one cell to every
+cell here. `measurement_selection_audit.py` (commit 395a9ed) is why it's run
+across finetuned cells too and not just pretrained ones: this pilot's
+ev/parsed agreement is r=.523/.130/.530 for gemma/llama/mistral finetuned,
+and .059-.094 for all three pretrained. The two scores are on different
+scales -- EV is a logprob-weighted mean over 0-10, parsed is the raw integer
+-- so compare significance patterns across `--score` runs, not coefficient
+magnitudes, exactly as item 11 did.
+
 Run from the knobe repo root:
     .venv/bin/python analysis/ngo_extensions/moral_foundations_pilot/analyze_sign_wcb.py
+    .venv/bin/python analysis/ngo_extensions/moral_foundations_pilot/analyze_sign_wcb.py --score parsed
 
 Reads outputs/elicit_results.jsonl + outputs/mf_pilot_dataset_selected.csv
 (both local-only); writes outputs/sign_wcb.csv (small summary table,
-committed).
+committed), or outputs/sign_wcb_parsed.csv under --score parsed.
 """
 from __future__ import annotations
 
+import argparse
 import sys
 import warnings
 from pathlib import Path
@@ -49,6 +64,12 @@ from lib import _logit_ev_rating, wild_cluster_bootstrap  # noqa: E402
 warnings.filterwarnings("ignore")
 
 SEED = 24
+# Untestable-cell guards, only ever triggered under --score parsed (the full
+# frame is balanced by construction). G=5 generalizes the G=2 prudential
+# exclusion in 32_nonmoral_subdomain_sign_wcb.py: Rademacher weights admit
+# only 2^G distinct bootstrap draws, so p_wcb is granular to 1/2^G at small G.
+MIN_ROWS = 30
+MIN_CLUSTERS = 5
 SIGN_C = {"bad": 0.5, "good": -0.5}   # config.yaml effect_coding, frozen
 FOUNDATIONS = ["loyalty", "authority", "fairness", "purity"]
 ARMS = [
@@ -76,31 +97,54 @@ def load_frame() -> pd.DataFrame:
     return d
 
 
+def fit_or_skip(s: pd.DataFrame, formula: str, term: str, **meta) -> dict:
+    """One cell's mixedlm + WCB, or a counts-only row when the cell can't
+    support the test. Under `--score parsed` the parse_ok filter drops rows
+    unevenly across arms, so a cell that was fine on the full frame can lose
+    a sign level or most of its clusters -- record that as an untestable cell
+    rather than crashing or, worse, reporting a WCB over 2^G weight vectors.
+    Matters more here than in the sibling pilot: purity is authored at G=7."""
+    n_groups = s["pair_id"].nunique()
+    if len(s) < MIN_ROWS or n_groups < MIN_CLUSTERS or s["sign_c"].nunique() < 2:
+        return dict(**meta, term=term, n=len(s), n_groups=n_groups, untestable=True)
+    m = smf.mixedlm(formula, s, groups=s["pair_id"]).fit(reml=False, method="lbfgs")
+    wcb = wild_cluster_bootstrap(s, formula, term, "pair_id", seed=SEED)
+    return dict(**meta, term=term, n=len(s), lmm_estimate=m.params[term],
+                lmm_p=m.pvalues[term], untestable=False, **wcb)
+
+
 def main() -> None:
+    p = argparse.ArgumentParser()
+    p.add_argument("--score", default="ev", choices=["ev", "parsed"],
+                    help="ev (default) = the spec section-4.4 logit-fallback EV score "
+                         "the committed tables use. parsed = the model's own numeric "
+                         "answer, parse_ok rows only -- the substitution "
+                         "35_rq1_base_sign_pretrained_parsed_rating_wcb.py used to "
+                         "overturn the main run's pretrained reversal.")
+    args = p.parse_args()
+
+    resp = "ev_rating" if args.score == "ev" else "parsed_rating"
     d = load_frame()
+    if args.score == "parsed":
+        d = d[d["parse_ok"] & d["parsed_rating"].notna()]
 
     rows = []
     for mk in MODEL_KEYS:
         cell = d[d["model_key"] == mk]
         fam, tuning = cell["family"].iloc[0], cell["tuning_status"].iloc[0]
         for arm, status, mask in ARMS:
-            s = cell[mask(cell)]
-            m = smf.mixedlm("ev_rating ~ sign_c", s, groups=s["pair_id"]).fit(reml=False, method="lbfgs")
-            wcb = wild_cluster_bootstrap(s, "ev_rating ~ sign_c", "sign_c", "pair_id", seed=SEED)
-            rows.append(dict(arm=arm, status=status, family=fam, tuning=tuning, term="sign_c",
-                             n=len(s), lmm_estimate=m.params["sign_c"],
-                             lmm_p=m.pvalues["sign_c"], **wcb))
+            rows.append(fit_or_skip(cell[mask(cell)], f"{resp} ~ sign_c", "sign_c",
+                                    arm=arm, status=status, family=fam, tuning=tuning))
         # direct harm-vs-pooled-non-harm difference test
         s = cell.assign(arm_c=(cell["condition"] == "harm_control").map({True: 0.5, False: -0.5}))
-        wcb = wild_cluster_bootstrap(s, "ev_rating ~ sign_c * arm_c", "sign_c:arm_c", "pair_id", seed=SEED)
-        m = smf.mixedlm("ev_rating ~ sign_c * arm_c", s, groups=s["pair_id"]).fit(reml=False, method="lbfgs")
-        rows.append(dict(arm="harm_vs_nonharm_pooled", status="primary", family=fam, tuning=tuning,
-                         term="sign_c:arm_c", n=len(s), lmm_estimate=m.params["sign_c:arm_c"],
-                         lmm_p=m.pvalues["sign_c:arm_c"], **wcb))
+        rows.append(fit_or_skip(s, f"{resp} ~ sign_c * arm_c", "sign_c:arm_c",
+                                arm="harm_vs_nonharm_pooled", status="primary",
+                                family=fam, tuning=tuning))
 
     out = pd.DataFrame(rows)
     print(out.to_string(index=False))
-    out_path = HERE / "outputs" / "sign_wcb.csv"
+    suffix = "" if args.score == "ev" else "_parsed"
+    out_path = HERE / "outputs" / f"sign_wcb{suffix}.csv"
     out.to_csv(out_path, index=False)
     print(f"\nwrote {out_path}")
 
