@@ -41,6 +41,16 @@ results are, this folder records what we intend to do with them.
   ordered worklist. Carries its own revision history, so read `CLAIMS.md` for
   the current position and this for how it got there.
 
+## `human_study/` — how do we run the human replication?
+
+Protocol and design decisions for collecting human ratings on the
+Ngo-extension stimuli, to sit alongside the model results.
+
+- **`PROTOCOL.md`** — design, sampling and counterbalancing, instrument,
+  quality controls, pilot, pre-registered analysis plan, and IRB notes.
+  Doubles as the study-description section of an exempt application. Cost
+  arithmetic is in `analysis/human_study/cost_model.py`.
+
 ## `severity_confound/` — the RQ1a severity/moral-status entanglement
 
 One specific, still-partly-open problem: RQ1a's moral-vs-nonmoral
