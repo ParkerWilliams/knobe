@@ -1,6 +1,6 @@
 # Docs index
 
-Four subfolders, organized by what question each doc answers, not by date.
+Subfolders, organized by what question each doc answers, not by date.
 When adding a new doc, put it in the subfolder whose question it answers;
 if none fit, that's a sign a new subfolder is needed rather than a reason
 to drop it in the top level.
@@ -26,6 +26,16 @@ The results themselves, and the honest accounting of how much to trust them.
 - **`RAIMONDI_REPLICATION_GAPS.md`** — how this project's results compare
   to Raimondi et al. (arXiv:2510.12229), the paper this project extends,
   including where they don't line up and why.
+
+## `submission_plan/` — what do we submit, where, and in what order?
+
+The active planning doc. Unlike `rq1_findings/`, which records what the
+results are, this folder records what we intend to do with them.
+
+- **`SUBMISSION_GAMEPLAN.md`** — claim inventory ranked by what survives
+  review, the gate blocking each one, venue targets, and the ordered
+  worklist. Revised as claims clear or fail their gates; start here when
+  picking the project back up.
 
 ## `severity_confound/` — the RQ1a severity/moral-status entanglement
 
