@@ -118,13 +118,17 @@ unanimous across three families rather than 2-of-3 with gemma dissenting.
   already used this way in `RQ1_STATISTICAL_METHODS_v1.1.md` §9.3 — and
   report "heterogeneity above X is ruled out." This now carries more weight,
   since the claim rests on three nulls rather than one.
-- The joint foundation-gradient F-test (`foundation_gradient_wcb.py`) has not
-  been re-run under parsed scoring; only the pairwise arm fits have. Do that
-  before citing point 2b's per-cell F values.
-- Pretrained foundation heterogeneity stays "under investigation." Parsed
-  scoring scrambles it rather than settling it — mistral-pretrained's
-  authority and fairness arms go from null to significant, llama-pretrained's
-  three significant arms all go null.
+- ~~Re-run the joint foundation-gradient F-test under parsed scoring~~ —
+  DONE 2026-09-13, `70f1a34`. It adds one nuance: gemma-finetuned still shows
+  significant heterogeneity across the five foundations (p=.043, the only
+  cell significant under both scorings), even though its harm-vs-pooled-non-harm
+  interaction is null. Pooling four foundations into one arm can hide
+  variation among them. So state the claim as "the asymmetry is not
+  privileged for harm," not "it is uniform across foundations."
+- Pretrained foundation heterogeneity is resolved, and it was mostly
+  artifact: gemma .011 → .295 and llama <.001 → .233 both vanish under
+  parsed, leaving only mistral-pretrained. The draft's "all three pretrained
+  cells, new and unexplained" was reading the EV artifact.
 
 ### Rank 3 — The asymmetry is domain-general (replaces old Rank 4)
 
@@ -313,10 +317,9 @@ cycle before any of this is actionable.
 
 ### Do next
 
-2a. **Re-run `foundation_gradient_wcb.py` under parsed scoring.** The joint
-   4-df F-test is the whole basis of point 2b and is the one fit the
-   substitution hasn't touched. Same flag, same pattern as `6c73ab6`. Cheap,
-   and Rank 2 shouldn't be written up until it's done.
+2a. ~~**Re-run `foundation_gradient_wcb.py` under parsed scoring**~~ — DONE
+   2026-09-13, `70f1a34`. Killed two of three pretrained heterogeneity
+   results; added the gemma-finetuned nuance to Rank 2.
 
 2b. **MDE / equivalence bounds for Ranks 2 and 3.** Both now rest on nulls
    across arms, which makes the Bloom machinery load-bearing rather than
