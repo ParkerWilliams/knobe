@@ -20,7 +20,11 @@ cells and 0 of 30 q_praise cells. Two consequences, in order of importance:
 
 - **The blame/praise claims are untouched and are now the whole spine.**
   Every finetuned blame and praise cell holds under both scorings.
-- **The intentionality claims shrank rather than improved.** An earlier pass
+- **The pretrained→finetuned contrast survived and got stronger.** Now
+  formally tested (`1bc6e12`) rather than read off six split-sample fits:
+  8/12 cells significant and 11/12 positive under parsed, with gemma's
+  interaction 2–4x larger than under EV. Promoted to Rank 2b.
+- **The domain-generality claims shrank rather than improved.** An earlier pass
   of this note claimed the asymmetry is "domain-general in every family";
   that was wrong, and §5 item 2b is what caught it. Under parsed scoring
   **llama-finetuned shows no significant intentionality asymmetry in any arm
@@ -190,23 +194,47 @@ shows no domain effect at all where blame and praise both show a large one.
 That last contrast is the defensible version of "these constructs are not
 interchangeable," and it is worth a paragraph rather than a section.
 
-### Rank 5 — Finetuning as the causal lever (point 1)
+### Rank 2b — Finetuning increases the asymmetry (point 1)
 
-The 6/6 pretrained-null / finetuned-large pattern across three
-architectures. Most headline-sounding, most exposed: every pretrained cell
-is scored by `_logit_ev_rating`, the function script 35 proved manufactures
-significant wrong-direction effects at low parse rate, and pretrained
-agreement here is r = .026–.227.
+**Promoted from Rank 5 on 2026-09-13.** It survived correct scoring, and it
+is now formally tested rather than eyeballed.
 
-**Gate — partly cleared 2026-09-13, and the answer is "split by family."**
-Parsed scoring does not rescue a uniform pretrained null. llama-pretrained
-keeps a large significant *reversed* nonmoral effect (β=−0.88, p<.0001);
-mistral-pretrained's reversal goes null; gemma-pretrained stays marginal.
-The finetuned side is unaffected and large everywhere. So the defensible
-claim is "the asymmetry is finetuned-large and pretrained-inconsistent,"
-which still supports instruction tuning as the lever but drops the clean 6/6
-framing. The pretrained cells also parse at 25.5–29.9% for blame and praise,
-so per-family pretrained claims stay thin regardless of scoring.
+Point 1's "6/6 pretrained-null, finetuned-large" was six separate
+split-sample `sign_c` fits with a significance-threshold comparison by eye,
+which is not a test of the difference. `tuning_contrast_wcb.py` (`1bc6e12`)
+fits `sign_c * tuning_c` per (pilot, family, arm) and bootstraps the
+interaction:
+
+| scoring | significant | positive |
+|---|---|---|
+| ev | 11/12 | 12/12 |
+| parsed | **8/12** | **11/12** |
+
+Every family keeps at least one significant cell under parsed, and **gemma's
+interaction is 2–4× larger under correct scoring than under EV** (nonmoral
+moral 0.11 → 2.32; MF harm 1.14 → 4.40). The EV artifact was suppressing this
+result, not creating it — the opposite of what it did to moral-specificity.
+
+Why this is better positioned than the domain claims: it does not depend on
+an arm-vs-arm comparison, so the severity confound and the 65% moral-good
+attrition in §3.2 don't touch it. Its exposure is the pretrained side's
+scoring, which is exactly what the substitution addressed.
+
+**One real qualification.** llama's mechanism differs from the other two. Its
+significant cells come from a significantly *negative* pretrained slope
+moving to zero (nonmoral_pooled −0.88 → −0.09), so finetuning erodes an
+anti-Knobe pretrained prior rather than installing a positive effect. That is
+the same reading script 33's log entry reached for the main run, so the two
+datasets agree. Report it as two mechanisms, not one: installation in gemma
+and mistral, erosion in llama.
+
+**Gates:**
+
+- Pretrained blame/praise cells parse at 25.5–29.9%, so this contrast stays
+  intentionality-only. Extending it to blame/praise would need better
+  pretrained elicitation, not reanalysis.
+- Four cells go ns under parsed. Report the cell-level table, not just the
+  count.
 
 ### Carried from the main run
 
