@@ -36,10 +36,11 @@ The results themselves, and the honest accounting of how much to trust them.
 The active planning doc. Unlike `rq1_findings/`, which records what the
 results are, this folder records what we intend to do with them.
 
-- **`CLAIMS.md`** — the flattened claim set to write the draft from: each
-  claim with its test, its scoring, the caveat that ships with it, and the
-  commit it traces to, plus what the paper explicitly does *not* claim and a
-  section skeleton. Start here when drafting.
+- **`CLAIMS.md`** — the inventory of what our experiments support, ordered
+  by strength of support, each claim separating established result from
+  interpretation and naming its provenance. Deliberately not a paper plan;
+  packaging decisions should follow from it. Includes an explicit
+  "what we do not claim" table. Start here.
 - **`SUBMISSION_GAMEPLAN.md`** — the planning doc behind it: claims ranked by
   what survives review, the gate blocking each one, venue targets, and the
   ordered worklist. Carries its own revision history, so read `CLAIMS.md` for

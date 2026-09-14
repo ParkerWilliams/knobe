@@ -1,287 +1,297 @@
-# Claim Set for the Paper Draft (2026-09-13)
+# Claim Inventory (2026-09-14)
 
-**Status:** the claim inventory to write from. `SUBMISSION_GAMEPLAN.md` is a
-planning doc carrying its own revision history; this is the flattened,
-current statement of what the paper asserts, each claim with the test behind
-it, the scoring it depends on, the caveat that must ship with it, and the
-commit it traces to.
+**What this is.** An inventory of the claims our experiments support, ordered
+by how well they're supported. Not a paper plan — no venue framing, no
+section ordering, no pre-commitment to which subset becomes a paper. Those
+decisions live in `SUBMISSION_GAMEPLAN.md` and should follow from this rather
+than shape it.
 
-**Scoring convention for the whole paper.** Every claim below is stated under
-`parsed_rating` (the model's own numeric answer, parse_ok rows) unless marked
-otherwise. EV scoring appears only as a robustness comparison and in the
-measurement section. Rationale is C1.
+**Conventions.** Every claim separates *what is established* from *what is
+interpretation*, and names its provenance (script, commit, table). Unless
+stated otherwise, claims are about instruction-tuned checkpoints and use
+`parsed_rating` scoring on parse-ok rows — see claim 1 for why that choice is
+not neutral.
 
-**Scope.** All pilot claims are finetuned/instruct checkpoints unless the
-claim is explicitly about tuning. Both pilots use Ngo-derived storylines;
-the v1.1 main run contributes C6 and the inference machinery only.
-
-**Confidence tiering — added 2026-09-13 after review.** The first version of
-this doc presented all six claims at one level, which overstated two of them.
-Today's gameplan work (§5 items 1, 2, 2a, 2b, 2c) consisted entirely of
-**measurement** gates. Those settled which claims survive the scoring
-question and are now closed. They did not touch the **stimulus** gates —
-severity matching and curation selection — and those are exactly what the
-arm-vs-arm claims depend on.
-
-| tier | claims | status |
-|---|---|---|
-| **A — draftable now** | C1, C2, C4, C6 | Gates closed. Design does not rest on arm-vs-arm matching |
-| **A− — draftable, one open confound** | C3 | Stakes rival reading tested and largely ruled out (`710b4c3`); curation attrition still uncharacterized |
-| **B — underpowered** | C5 | One family, inherits attrition, needs G=48–75 for the other two |
-
-**On severity, corrected.** An earlier version of this section said the
-severity question was C3's biggest problem and that a ~400-call curation pass
-was the highest-value remaining task. That was wrong on both counts. The main
-run's severity confound was an authoring accident specific to *its* taxonomy
-(MB written around genuine harm, NMB written to be low-stakes, nothing
-enforcing parity); the pilots don't inherit that taxonomy. The version that
-does transfer is a rival *interpretation* — that C3 tracks stakes rather than
-moral domain — and the pilot already contained the discriminating comparison
-in its prudential/procedural split. See C3.
-
-Write Tier A and C3 now. Hold C5.
+**Sources.** v1.1 main run (378,000 completions, decomposed factorial);
+nonmoral extension (88,200 responses, three question types); moral-foundations
+extension (18,900 responses, intentionality). Three families — Gemma-2-9B,
+Llama-3.1-8B, Mistral-7B-v0.1 — pretrained and instruction-tuned.
 
 ---
 
-## The claims, in the order the paper should make them
+## Strongly supported
 
-### C1 (Tier A) — Logprob-EV scoring is question-dependent and can invert conclusions
+### 1. Logprob-EV scoring is question-dependent, and parse rate does not diagnose it
 
-Reconstructing a 0–10 rating from first-token logprobs agrees with the
-model's own stated answer for some question wordings and not others, on the
-same items in the same run. Substituting the stated answer flips **14 of 30**
-intentionality cells and **0 of 30** praise cells.
+When a model does not emit a parseable number, the standard fallback
+reconstructs an expected value from the logprobs of the eleven rating tokens.
+That reconstruction tracks the model's own stated answer well for some
+question wordings and poorly for others, on the same items in the same run:
 
-| question | ev/parsed agreement (finetuned) | cells flipping |
-|---|---|---|
-| q_praise | r = .56–.81 | 0/30 |
-| q_blame | r = .66–.82 | 5/30 (all pretrained) |
-| q_intentionality | r = **.146–.421** | 14/30 |
+| question | Gemma | Llama | Mistral | contrasts flipping significance |
+|---|---:|---:|---:|---:|
+| praise | .761 | .558 | .812 | 0 / 30 |
+| blame | .823 | .656 | .773 | 5 / 30 (all pretrained) |
+| intentionality | **.180** | **.146** | .421 | **14 / 30** |
 
-**The diagnostic is agreement, not parse rate.** gemma-instruct parses
-intentionality *better* than blame (58.1% vs. 53.0%) and still lands at
-r=.180 vs. .823. A parse-rate check would have passed this cell.
+Pretrained checkpoints sit at .026–.227 across all three questions.
 
-*Strength:* highest in the paper. Descriptive, no inference, same items,
-same run, one variable differs.
-*Caveat:* the mechanism — why a question that asks for a number yields a
-usable logprob vector and one that invites a verdict does not — is proposed,
-not tested.
-*Provenance:* `395a9ed`, `6c73ab6`. Tables: `measurement_audit.csv`,
+Two things make this more than a local nuisance. **Parse rate does not detect
+it** — Gemma parses intentionality *better* than blame (58.1% vs. 53.0%) and
+still lands at .180 against .823, so the sanity check in common use passes
+the broken cell. And **the artifact distorts in both directions**: it
+manufactured a significant wrong-direction pretrained effect (the earlier
+"anti-Knobe" finding, retracted), and it suppressed a real one (Gemma's
+tuning contrast, 0.11 → 2.32 once corrected).
+
+*Established:* the agreement figures, the flip counts, the parse-rate
+dissociation.
+*Interpretation:* that this is about whether a question invites a number
+versus a verdict. Plausible, untested.
+*Provenance:* `395a9ed`, `6c73ab6` — `measurement_audit.csv`,
 `sign_wcb*_parsed.csv`.
 
-### C2 (Tier A) — Instruction tuning increases the outcome-valence asymmetry
+### 2. Instruction tuning increases the outcome-valence asymmetry
 
-Formal `sign_c × tuning_c` interaction per (pilot, family, arm):
-**8 of 12 cells significant, 11 of 12 positive**, every family retaining at
-least one significant cell. No negative interaction anywhere, under either
-scoring.
+Fitting `rating ~ sign × tuning` per family and arm and bootstrapping the
+interaction: **8 of 12 cells significant, 11 of 12 positive**, no negative
+interaction anywhere under either scoring, every family retaining at least
+one significant cell.
 
-gemma's interaction is **2–4× larger under parsed than under EV** (nonmoral
-moral 0.11 → 2.32; MF harm 1.14 → 4.40) — the artifact was suppressing this
-result, not producing it.
+Two mechanisms, not one. Gemma and Mistral move from ≈0 pretrained to large
+positive — tuning installs the asymmetry. Llama moves from a significantly
+*negative* pretrained slope to zero (−0.88 → −0.09) — tuning erodes a
+reversed prior without installing a positive effect. The v1.1 main run
+reached the same reading for Llama independently, so two datasets agree.
 
-**Two mechanisms, not one.** gemma and mistral move from ≈0 pretrained to
-large positive. llama moves from a significantly *negative* pretrained slope
-to zero (nonmoral pooled −0.88 → −0.09): erosion of an anti-Knobe prior
-rather than installation of a positive effect. The v1.1 main run reached the
-same reading for llama independently (script 33), so two datasets agree.
+This matters partly because "does the model show the effect" and "did tuning
+change the model" come apart: Llama's shift is invisible to any analysis that
+only tests the tuned checkpoint.
 
-*Strength:* high. Not an arm-vs-arm comparison, so neither the severity
-confound nor the C-caveat attrition touches it.
-*Caveat:* intentionality only — pretrained blame/praise parse at 25.5–29.9%,
-too thin. Four cells are ns under parsed; report the cell table, not the
-count. **Not Holm-corrected**: `tuning_contrast_wcb_parsed.csv` sits outside
-`holm_correct_pilots.py`'s scope and its grouping is an open judgment call.
-gemma's four cells (p≤.0005) survive Holm over all 12 trivially; llama's MF
-harm cell (p=.0305) would not.
-*Provenance:* `1bc6e12`. Table: `tuning_contrast_wcb_parsed.csv`.
-*Note:* point 1's original "6/6" was six split-sample fits compared by eye.
-This is the first actual test of the difference.
+*Established:* the interaction table.
+*Caveats:* intentionality only — pretrained blame and praise parse at
+25.5–29.9%. Not Holm-corrected (this table sits outside the correction
+script's scope); Gemma's four cells survive correction over all twelve
+trivially, Llama's harm cell (p = .031) does not.
+*Provenance:* `1bc6e12` — `tuning_contrast_wcb_parsed.csv`.
 
-### C3 (Tier B) — Outcome moves blame far less in moral than nonmoral scenarios
+### 3. The three questions dissociate on identical items
 
-**Rewritten 2026-09-14 after review. The previous version overstated this in
-three ways; they are recorded below rather than deleted.**
+Under correct scoring, the moral-vs-nonmoral interaction is **absent for
+intentionality in every family** and **large for blame in every family**:
 
-**What is established.** The moral-vs-nonmoral × sign interaction is
-significant in all three families for blame and two of three for praise.
-Decomposed by sign, the domain gap is 3.7–4.4× larger in the good-outcome
-cell than the bad one (5.4–8.4× for praise). Equivalently, stated as
-within-domain sensitivity:
+| question | Gemma | Llama | Mistral |
+|---|---|---|---|
+| intentionality | −0.52 (p=.349) | −0.04 (p=.934) | +0.29 (p=.488) |
+| blame | **−3.81 (p<.001)** | **−3.13 (p<.001)** | **−2.26 (p=.003)** |
+| praise | **+1.65 (p=.010)** | **+1.78 (p<.001)** | +1.53 (p=.063) |
+
+This is the best-identified substantive result in the set, for a structural
+reason: it is a within-item comparison *across questions*. The same
+vignettes, the same run, differing only in what was asked — so item
+composition, stakes, and the curation attrition in claim 10 are all
+differenced out exactly. It survives the confound that claim 9's magnitude
+does not.
+
+The practical reading: asking a model whether an act was intentional and
+asking who is to blame for it are not interchangeable probes of the same
+underlying judgment, and an audit of one says little about the other.
+
+*Established:* the dissociation, and its immunity to item-composition
+confounds.
+*Interpretation:* anything about *why* the constructs come apart.
+*Provenance:* `6c73ab6` — `sign_wcb{,_blame,_praise}_parsed.csv`.
+
+### 4. Blame-vs-praise sensitivity differs by family
+
+Each family's blame swing against its own praise swing, same vignettes:
+
+| family | arm | blame | praise | stronger |
+|---|---|---:|---:|---|
+| Gemma | moral / nonmoral | 1.81 / 5.62 | 1.11 / 2.76 | blame |
+| Llama | moral / nonmoral | 1.61 / 4.73 | 0.76 / 2.54 | blame |
+| Mistral | moral / nonmoral | 1.48 / 3.74 | 3.39 / 4.92 | **praise** |
+
+All twelve swings individually significant; 17 of the 18 cells claims 3, 4
+and 9 rest on survive Holm correction. Raw and SD-standardized verdicts agree
+in 6/6 cells under parsed scoring and disagree in 2/6 under EV — which is the
+empirical reason claim 1's scoring rule is load-bearing rather than
+pedantic, since EV's compression depends on a per-question logprob
+distribution and so supplies no common scale for a cross-question magnitude
+comparison.
+
+Also within-item, so the same identification argument as claim 3 applies.
+
+*Established:* the swing comparison.
+*Interpretation:* reading Mistral's inversion against the human
+negativity-bias literature. We have no human data on these items; the prior
+is general, not stimulus-matched.
+*Provenance:* `244db46` — `blame_praise_swing.csv`.
+
+### 5. Asymptotic inference is badly overconfident at these cluster counts
+
+At G = 21–84, Wald tests substantially overstate significance, and a
+likelihood-ratio test reproduces the same overconfidence in exactly the cells
+the wild cluster bootstrap rejects. This is why the bootstrap is the
+estimator of record throughout, and it overturned several first-pass findings
+in the main run.
+
+*Established:* the cell-by-cell agreement between Wald and LRT overconfidence.
+*Provenance:* pre-existing — `rq1_v1_1_robustness/08`, `24`;
+`OUTSTANDING_STATISTICAL_ANALYSIS.md` items 7–8.
+
+---
+
+## Moderately supported
+
+### 6. Typicality runs opposite to the human exacerbation pattern
+
+In Gemma and Mistral, the bad-over-good intentionality gap is *larger* for
+typical actions and shrinks or reverses for atypical ones — the reverse of
+the human finding that atypicality exacerbates the asymmetry. Survives the
+bootstrap, an independent family-random-slope model, and parsed-rating
+substitution. Absent in Llama by three independent checks.
+
+*Caveat:* the main effect and interaction decompose differently by family
+(Gemma interaction-only, Llama main-effect-only, Mistral both), so "the same
+effect in 2 of 3 families" understates the heterogeneity.
+*Provenance:* pre-existing — `RQ1_MECHANISM_ANALYSIS_v1.1.md` §3.
+
+### 7. Mistral does not replicate Raimondi et al.'s finetuned effect
+
+Null on two independent tests at a 98.2% parse rate, so not a measurement
+gap. Gemma and Llama replicate on the same stimuli and pipeline, which rules
+out most shared-infrastructure explanations.
+
+*Open:* the cheap diagnostics — weight revision tag and chat-template
+handling — have not been run. Until they are, this is unresolved rather than
+a finding about the model.
+*Provenance:* pre-existing — `RAIMONDI_REPLICATION_GAPS.md` §4.
+
+### 8. In Gemma, the asymmetry is not privileged for harm or for morality
+
+No family shows a significant moral-vs-nonmoral or harm-vs-non-harm
+interaction on intentionality under correct scoring. Equivalence-bounding
+shows only Gemma's nulls are informative — its design rules out an
+interaction as large as the asymmetry itself (1.41 < 2.71; 1.58 < 4.44).
+Mistral's are underpowered (needs G = 75 and 48). Llama's are vacuous: it
+shows no significant intentionality asymmetry in any arm of either extension
+under correct scoring, so there is nothing to be general about.
+
+*Caveat:* Gemma still shows joint heterogeneity across the five foundations
+(p = .043) despite its harm-vs-pooled-non-harm null, so "not privileged for
+harm" is the claim, not "uniform across foundations."
+*Provenance:* `03b8f1b`, `70f1a34` — `equivalence_bounds.csv`,
+`foundation_gradient_wcb_parsed.csv`.
+
+---
+
+## Pattern solid, explanation open
+
+### 9. Blame is far less outcome-sensitive in moral than nonmoral scenarios
 
 | | moral: good → bad | swing | nonmoral: good → bad | swing |
 |---|---|---:|---|---:|
-| blame, gemma | 7.10 → 8.92 | 1.81 | 2.09 → 7.71 | 5.62 |
-| blame, llama | 6.92 → 8.53 | 1.61 | 2.66 → 7.39 | 4.73 |
-| blame, mistral | 7.00 → 8.48 | 1.48 | 4.07 → 7.81 | 3.74 |
+| Gemma | 7.10 → 8.92 | 1.81 | 2.09 → 7.71 | 5.62 |
+| Llama | 6.92 → 8.53 | 1.61 | 2.66 → 7.39 | 4.73 |
+| Mistral | 7.00 → 8.48 | 1.48 | 4.07 → 7.81 | 3.74 |
 
-That is the finding: **within moral scenarios blame is relatively
-insensitive to how the outcome turned out; within nonmoral scenarios it is
-not.** Everything past that sentence is interpretation.
+Equivalently: the domain gap is 3.7–4.4× larger in the good-outcome cell than
+the bad one for blame, 5.4–8.4× for praise.
 
-**What is not established — three live readings, none ruled out.**
+**Three live readings, none ruled out.** (a) *Indifference-tracking* — blame
+follows the agent's stated mental state, held constant across sign by design.
+(b) *Content asymmetry* — moral-good items contain reckless indifference
+about serious third-party consequences while nonmoral-good items concern a
+style guide or a seating chart, so blaming the first and not the second may
+simply be correct, in which case there is no bias here. (c) *Differential
+selection* — the moral-good cell lost 65% of its items to curation (claim 10)
+and retained the most morally loaded, which predicts this pattern directly.
 
-1. *Indifference-tracking.* Blame follows the agent's stated mental state,
-   which is held constant across sign by design, so it stays flat where the
-   indifference is culpable.
-2. *Content asymmetry.* Moral-good items contain reckless indifference about
-   serious third-party consequences; nonmoral-good items contain indifference
-   about a style guide or a seating chart. Blaming the first and not the
-   second may simply be correct, in which case there is no bias here at all.
-3. *Differential selection.* The moral-good cell lost **65% of its items to
-   curation** (14/40 vs. 97.5% for moral-bad and 82.5–95% for all nonmoral
-   cells), retaining those that scored highest on moral relevance. This
-   predicts the pattern directly, and it is the cell the whole interaction
-   rests on.
+**A design limit worth stating explicitly.** The three arms differ in *who
+bears the consequence*: third parties (moral), the agent themselves
+(prudential), a convention (procedural). So moral domain and
+serious-third-party-consequence are confounded by construction, and no
+contrast in this design separates them. The prudential/procedural stakes
+gradient (`710b4c3`) varies stakes among self-directed and conventional
+outcomes only; it does not adjudicate this.
 
-**Correction — the stakes test does less than previously claimed.** An
-earlier version of this entry said a stakes reading was "largely ruled out"
-by the prudential/procedural gradient (`710b4c3`). That test varies who bears
-the consequence *among self-directed and conventional outcomes* — prudential
-items are about the agent's own job security or retirement account. It never
-varies third-party stakes, because by construction no arm has serious
-third-party consequences without being moral. **Moral domain and
-serious-third-party-consequence are confounded in this design and cannot be
-separated by it.** The gradient result still stands on its own terms; it just
-does not adjudicate what it was said to adjudicate.
-
-**Two further corrections to the earlier entry.** It described this as "an
-agent who brings about a good outcome being blamed more," which misreads what
-is judged — the agent is being rated on conduct that includes professed
-indifference, not on the good outcome. And it called the pattern "the most
-direct support yet for the indifference-tracking reading," which asserts
-reading 1 over readings 2 and 3 without evidence.
-
-*Strength:* the pattern is solid and survives Holm; the explanation is open,
-and the cell carrying it is the compromised one. **Tier B, not A−.**
-*Provenance:* `0dc641b` (decomposition), `395a9ed` (attrition),
-`710b4c3` (stakes gradient). Tables: `domain_gap_decomposition.csv`,
-`selection_attrition.csv`, `stakes_gradient_check.csv`.
-
-### C4 (Tier A) — Blame-vs-praise sensitivity is family-dependent
-
-On identical items, comparing each family's blame swing against its own
-praise swing: gemma and llama obey the human negativity-bias prior (blame
-swings harder); **mistral inverts it** in both domains.
-
-| family | arm | blame | praise | bigger |
-|---|---|---:|---:|---|
-| gemma | moral / nonmoral | 1.81 / 5.62 | 1.11 / 2.76 | blame |
-| llama | moral / nonmoral | 1.61 / 4.73 | 0.76 / 2.54 | blame |
-| mistral | moral / nonmoral | 1.48 / 3.74 | 3.39 / 4.92 | **praise** |
-
-All twelve swings individually significant. Raw and SD-standardized verdicts
-agree in 6/6 cells under parsed (they disagree in 2/6 under EV, which is the
-empirical reason C1's scoring rule is load-bearing rather than pedantic).
-
-*Strength:* highest of the substantive claims. Within-item, so item
-composition, severity, and the C3 attrition are all differenced out exactly.
-Best-measured cells in the project.
-*Caveat:* cross-question magnitude comparison presumes both questions use the
-0–10 scale comparably; parsed scoring makes that assumption as weak as it can
-be made, but it is not zero.
-*Multiplicity:* survives. 17 of the 18 cells C3 and C4 rest on hold under
-Holm on the parsed tables (`20e22e2`); the sole failure is mistral's praise
-interaction, already ns at p=.0625.
-*Provenance:* `244db46`, `20e22e2`. Tables: `blame_praise_swing.csv`,
-`sign_wcb_holm_summary_parsed.csv`.
-
-### C5 (Tier B) — In gemma, the asymmetry is not specific to morality or to harm
-
-No family shows a significant moral-vs-nonmoral or harm-vs-non-harm
-interaction under parsed scoring. Equivalence-bounding says only gemma's
-nulls are informative:
-
-| family | moral vs nonmoral | harm vs non-harm |
-|---|---|---|
-| gemma | bound 1.41 < benchmark 2.71 ✓ | bound 1.58 < 4.44 ✓ |
-| mistral | 0.95 vs 0.81 — underpowered (needs G=75) | 1.45 vs 1.00 — underpowered (needs G=48) |
-| llama | benchmark ≈ 0 — no asymmetry to generalize | benchmark ≈ 0 |
-
-*Strength:* moderate, one family.
-*Caveat:* still an arm-vs-arm comparison, so it inherits C3's attrition and
-the unchecked severity matching — though a confound would have to
-*manufacture* a null here, which is a harder story than manufacturing a
-difference. Gemma also shows joint five-foundation heterogeneity (p=.043)
-even with its harm-vs-pooled-non-harm null, so the claim is "not privileged
-for harm," not "uniform across foundations."
-*Provenance:* `03b8f1b`, `70f1a34`. Tables: `equivalence_bounds.csv`,
-`foundation_gradient_wcb_parsed.csv`.
-
-### C6 (Tier A) — Typicality runs opposite to the human pattern (v1.1 main run)
-
-The bad>good intentionality gap is *larger* for typical actions and shrinks
-or reverses for atypical ones, in gemma and mistral — the reverse of the
-human exacerbation result. Survives WCB, an independent family-random-slope
-model, and parsed-rating substitution. Absent in llama by three independent
-checks.
-
-*Strength:* high; the most robust main-run result.
-*Caveat:* `typ_c` main effect and interaction decompose differently by family
-(gemma interaction-only, llama main-effect-only, mistral both).
-*Provenance:* pre-existing. `RQ1_MECHANISM_ANALYSIS_v1.1.md` §3.
+*Established:* the pattern, and that it survives Holm.
+*Not established:* the explanation, and whether this is a defect at all.
+*Provenance:* `0dc641b`, `395a9ed`, `710b4c3` —
+`domain_gap_decomposition.csv`, `selection_attrition.csv`,
+`stakes_gradient_check.csv`.
 
 ---
 
-## What the paper does not claim
+## Findings about method, not about models
 
-Stated explicitly because earlier drafts did claim several of these.
+### 10. LLM-reviewer curation with a valence-asymmetric question causes severe differential attrition
 
-| Not claimed | Why |
+Both extensions authored balanced designs and screened them with an LLM
+reviewer. The nonmoral extension's question named only the violation pole, so
+good-sign items scored near zero regardless of authoring quality:
+
+| arm | bad | good |
+|---|---:|---:|
+| moral | 97.5% (39/40) | **35.0% (14/40)** |
+| nonmoral, procedural | 92.5% | 95.0% |
+| nonmoral, prudential | 87.5% | 82.5% |
+
+The foundations extension hit the same problem and switched to pair-level
+gating mid-curation, which preserved perfect balance in every cell. That
+contrast — same team, same reviewer, same week, two selection rules, one
+catastrophic imbalance — is a clean demonstration.
+
+This is generalizable and, as far as we know, undiscussed: anyone screening
+stimuli with an LLM reviewer on a valence-asymmetric question will hit it,
+and the failure is silent unless per-cell survival is inspected.
+
+*Provenance:* `395a9ed` — `selection_attrition.csv`.
+
+### 11. The main run's moral/nonmoral comparison is confounded by stimulus design
+
+Moral-bad items exceed nonmoral-bad on reviewer-rated severity in **21 of 21**
+storylines, mean gap 5.42 points. Severity correlates with sign at r = .885
+within moral items, and family-mean severity occupies nearly disjoint ranges
+by valence. No regression term fixes a manipulation that was never matched;
+this is a design finding, not a statistical one, and it is why that
+comparison is not reported as a result.
+
+*Provenance:* pre-existing — `RQ1_MECHANISM_ANALYSIS_v1.1.md` §1.
+
+---
+
+## What we do not claim
+
+Recorded because earlier drafts asserted several of these.
+
+| not claimed | why |
 |---|---|
-| The asymmetry is moral-specific | Refuted. llama's interaction 0.66 (p=.017) → −0.04 (p=.93) under parsed; no family significant |
-| llama shows the largest asymmetry in the study | Artifact. 0/4 nonmoral and 1/6 MF cells significant under parsed; it had the project's worst agreement (r=.146/.130) |
+| The asymmetry is moral-specific | Refuted. Llama's interaction 0.66 (p=.017) → −0.04 (p=.93) under correct scoring; no family significant |
+| Llama shows the largest asymmetry in the study | Artifact. 0/4 nonmoral and 1/6 foundation cells significant under parsed; it had the project's worst score agreement |
 | Blame and praise lean opposite ways on domain | Sign-convention error. Praise's betas are negative, so its positive interaction means a *smaller* moral swing. Both swing bigger outside morality |
-| Pretrained models show foundation-specific effects | Artifact. gemma .011 → .295, llama <.001 → .233; only mistral survives |
-| Intentionality, blame and praise tell three different stories | Overstated. Blame and praise agree in direction (C3); they differ in magnitude (C4) |
-| RQ1a moral-vs-nonmoral (main run) | Stimulus manipulation failure — MB exceeds NMB on severity in 21/21 storylines |
+| Pretrained models show foundation-specific effects | Artifact. Gemma .011 → .295, Llama <.001 → .233; only Mistral survives |
+| Intentionality, blame and praise tell three different stories | Overstated. Blame and praise agree in direction; they differ in magnitude (claim 4) |
+| Models are "biased" in claim 9 | Reading (b) says the behavior may be correct. Unresolved |
+| Models are less susceptible to moral luck than people | No human data exists. Asserted in discussion, withdrawn |
 | Any pretrained blame/praise result | 25.5–29.9% parse rates |
+| The v1.1 moral-vs-nonmoral comparison | Claim 11 |
 
 ---
 
-## Proposed paper skeleton
+## Mapping to the older C-numbers
 
-1. **Intro** — the Knobe asymmetry, Ngo/Raimondi, what a decomposed design buys.
-2. **Measurement (C1)** — lead with it. It licenses every later number and is
-   the most transferable contribution.
-3. **Instruction tuning (C2)** — the asymmetry is installed/amplified, with
-   two mechanisms across families.
-4. **Where the domain effect lives (C3, C4)** — the good-cell localization
-   and the blame/praise sensitivity split. The empirical core.
-5. **Generality (C5, C6)** — domain-generality in gemma; the typicality
-   reversal.
-6. **Limitations** — C3's attrition, unchecked severity, multiplicity,
-   mistral/Raimondi non-replication.
+`paper/DRAFT.md` still references the previous `C1`–`C6` scheme:
 
-C1 first is the important structural choice: it converts the paper's biggest
-liability (results that change under rescoring) into its headline
-contribution, and it is why the reader should believe C2–C6.
+| old | new |
+|---|---|
+| C1 measurement | 1 |
+| C2 instruction tuning | 2 |
+| C3 good-outcome localization | 9 (rewritten and downgraded) |
+| C4 blame-vs-praise | 4 |
+| C5 domain generality | 8 |
+| C6 typicality | 6 |
 
----
-
-## Gates still open
-
-Ranked by whether they block drafting.
-
-**Blocks C3 and C5 from Tier A — the severity pass.** ~400 reviewer calls
-using the existing `curate_*_relevance.py` machinery plus a severity
-question. Neither pilot has any severity data, so this is the difference
-between "C3 is an indifference-tracking finding" and "C3 may be a severity
-finding." It is the single highest-value remaining task and it is cheap.
-
-**Also blocks C3 as written:** the four curation provenance files
-(`moral_relevance_raw.jsonl`, `selection_report.md` per pilot). They are the
-only way to compare the 26 dropped moral-good items against the 14 that
-survived. Without them C3 ships with an unresolvable confound rather than a
-characterized one.
-
-**Blocks nothing, strengthens C3/C5:** a severity curation pass over both
-pilots (~400 reviewer calls).
-
-**Blocks the Raimondi comparison only:** the mistral weights-revision and
-chat-template check.
-
-**Before submission, not before drafting:** multiplicity exposure
-(`OUTSTANDING_STATISTICAL_ANALYSIS.md` item 9), and the preregistered
-confirmatory run that would convert C2–C4 from exploratory to confirmed.
+Claims 3, 5, 7, 10 and 11 had no C-number. The draft's cross-references need
+a pass.
