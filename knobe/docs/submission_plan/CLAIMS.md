@@ -19,6 +19,36 @@ Llama-3.1-8B, Mistral-7B-v0.1 — pretrained and instruction-tuned.
 
 ---
 
+## Which experiment each claim rests on
+
+| | claim | source |
+|---:|---|---|
+| 1 | logprob-EV scoring is question-dependent | both extensions |
+| 2 | instruction tuning increases the asymmetry | both extensions |
+| 3 | the three questions dissociate | **nonmoral only** |
+| 4 | blame-vs-praise sensitivity differs by family | **nonmoral only** |
+| 5 | asymptotic inference is overconfident at these G | **main run only** |
+| 6 | typicality runs opposite to humans | **main run only** |
+| 7 | Mistral doesn't replicate Raimondi | **main run only** |
+| 8 | not privileged for harm or morality, in Gemma | both extensions |
+| 9 | blame is outcome-insensitive in moral scenarios | **nonmoral only** |
+| 10 | LLM curation causes differential attrition | both extensions |
+| 11 | v1.1's moral/nonmoral comparison is confounded | **main run only** |
+
+**The landscape.** The Ngo extensions carry seven of eleven claims, including
+every strongly-supported substantive one. The main run's four unique
+contributions are one real behavioural result (6, typicality), one
+methodological result (5, inference), one unresolved non-replication (7), and
+one negative design finding (11) — and 11 is the reason the main run's own
+headline comparison is not reported at all.
+
+So an extensions-only account loses the typicality reversal and the inference
+argument, and keeps everything else. That is a defensible scope, and 5 and 11
+can still be cited as method precedent without making the main run a
+first-class source.
+
+---
+
 ## Strongly supported
 
 ### 1. Logprob-EV scoring is question-dependent, and parse rate does not diagnose it
@@ -48,6 +78,8 @@ tuning contrast, 0.11 → 2.32 once corrected).
 dissociation.
 *Interpretation:* that this is about whether a question invites a number
 versus a verdict. Plausible, untested.
+*Source:* **both Ngo extensions** (the question axis exists only there). The
+artifact was first caught in the main run, on one cell.
 *Provenance:* `395a9ed`, `6c73ab6` — `measurement_audit.csv`,
 `sign_wcb*_parsed.csv`.
 
@@ -73,6 +105,8 @@ only tests the tuned checkpoint.
 25.5–29.9%. Not Holm-corrected (this table sits outside the correction
 script's scope); Gemma's four cells survive correction over all twelve
 trivially, Llama's harm cell (p = .031) does not.
+*Source:* **both Ngo extensions**; the main run reaches the same reading for
+Llama independently.
 *Provenance:* `1bc6e12` — `tuning_contrast_wcb_parsed.csv`.
 
 ### 3. The three questions dissociate on identical items
@@ -100,6 +134,8 @@ underlying judgment, and an audit of one says little about the other.
 *Established:* the dissociation, and its immunity to item-composition
 confounds.
 *Interpretation:* anything about *why* the constructs come apart.
+*Source:* **nonmoral extension only** — the only dataset with three question
+types on the same items.
 *Provenance:* `6c73ab6` — `sign_wcb{,_blame,_praise}_parsed.csv`.
 
 ### 4. Blame-vs-praise sensitivity differs by family
@@ -126,6 +162,7 @@ Also within-item, so the same identification argument as claim 3 applies.
 *Interpretation:* reading Mistral's inversion against the human
 negativity-bias literature. We have no human data on these items; the prior
 is general, not stimulus-matched.
+*Source:* **nonmoral extension only.**
 *Provenance:* `244db46` — `blame_praise_swing.csv`.
 
 ### 5. Asymptotic inference is badly overconfident at these cluster counts
@@ -137,6 +174,7 @@ estimator of record throughout, and it overturned several first-pass findings
 in the main run.
 
 *Established:* the cell-by-cell agreement between Wald and LRT overconfidence.
+*Source:* **v1.1 main run only.**
 *Provenance:* pre-existing — `rq1_v1_1_robustness/08`, `24`;
 `OUTSTANDING_STATISTICAL_ANALYSIS.md` items 7–8.
 
@@ -155,6 +193,7 @@ substitution. Absent in Llama by three independent checks.
 *Caveat:* the main effect and interaction decompose differently by family
 (Gemma interaction-only, Llama main-effect-only, Mistral both), so "the same
 effect in 2 of 3 families" understates the heterogeneity.
+*Source:* **v1.1 main run only.**
 *Provenance:* pre-existing — `RQ1_MECHANISM_ANALYSIS_v1.1.md` §3.
 
 ### 7. Mistral does not replicate Raimondi et al.'s finetuned effect
@@ -166,6 +205,7 @@ out most shared-infrastructure explanations.
 *Open:* the cheap diagnostics — weight revision tag and chat-template
 handling — have not been run. Until they are, this is unresolved rather than
 a finding about the model.
+*Source:* **v1.1 main run only** (moral-only subset, matched to Raimondi's scope).
 *Provenance:* pre-existing — `RAIMONDI_REPLICATION_GAPS.md` §4.
 
 ### 8. In Gemma, the asymmetry is not privileged for harm or for morality
@@ -181,6 +221,8 @@ under correct scoring, so there is nothing to be general about.
 *Caveat:* Gemma still shows joint heterogeneity across the five foundations
 (p = .043) despite its harm-vs-pooled-non-harm null, so "not privileged for
 harm" is the claim, not "uniform across foundations."
+*Source:* **both Ngo extensions** — moral-vs-nonmoral from one, harm-vs-non-harm
+from the other.
 *Provenance:* `03b8f1b`, `70f1a34` — `equivalence_bounds.csv`,
 `foundation_gradient_wcb_parsed.csv`.
 
@@ -218,6 +260,7 @@ outcomes only; it does not adjudicate this.
 
 *Established:* the pattern, and that it survives Holm.
 *Not established:* the explanation, and whether this is a defect at all.
+*Source:* **nonmoral extension only.**
 *Provenance:* `0dc641b`, `395a9ed`, `710b4c3` —
 `domain_gap_decomposition.csv`, `selection_attrition.csv`,
 `stakes_gradient_check.csv`.
@@ -247,6 +290,8 @@ This is generalizable and, as far as we know, undiscussed: anyone screening
 stimuli with an LLM reviewer on a valence-asymmetric question will hit it,
 and the failure is silent unless per-cell survival is inspected.
 
+*Source:* **both Ngo extensions** — the contrast between their two selection
+rules is the finding.
 *Provenance:* `395a9ed` — `selection_attrition.csv`.
 
 ### 11. The main run's moral/nonmoral comparison is confounded by stimulus design
@@ -258,6 +303,7 @@ by valence. No regression term fixes a manipulation that was never matched;
 this is a design finding, not a statistical one, and it is why that
 comparison is not reported as a result.
 
+*Source:* **v1.1 main run only.**
 *Provenance:* pre-existing — `RQ1_MECHANISM_ANALYSIS_v1.1.md` §1.
 
 ---
