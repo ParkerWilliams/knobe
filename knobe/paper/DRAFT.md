@@ -1,5 +1,28 @@
 # How You Score a Rating Decides What You Find: Outcome-Valence Asymmetries in Instruction-Tuned Language Models
 
+> # ⚠️ OUTDATED — do not cite or circulate
+>
+> **Written 2026-09-13. Marked outdated 2026-09-14.**
+>
+> Superseded by `docs/submission_plan/CLAIMS.md`, which was restructured
+> from a paper-claim set into an inventory of supported claims. This draft
+> states things that inventory now withdraws. Known stale points:
+>
+> - **§4.4** carries the "an agent who brings about a good outcome is blamed
+>   more" framing, which misreads what is being judged, and describes the
+>   stakes rival reading as "largely ruled out" when the prudential/procedural
+>   gradient does not adjudicate it. That claim is downgraded and rewritten
+>   as inventory claim 9.
+> - **Claim IDs C1–C6 throughout** refer to the superseded numbering. Mapping
+>   table at the bottom of `CLAIMS.md`.
+> - **Nothing here reflects inventory claim 3** (the cross-question
+>   dissociation), which is arguably the best-identified result in the set.
+> - The abstract and §6 lean on human comparison in places where no human
+>   data on these items exists.
+>
+> Structure and the §3 method section are still broadly usable. Rework from
+> the inventory rather than editing this in place.
+
 **Draft v0.1 — 2026-09-13. Target: TMLR.**
 
 > **Drafting conventions for this file.**
