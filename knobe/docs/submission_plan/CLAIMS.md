@@ -99,52 +99,65 @@ harm cell (p=.0305) would not.
 *Note:* point 1's original "6/6" was six split-sample fits compared by eye.
 This is the first actual test of the difference.
 
-### C3 (Tier A−) — The moral/nonmoral difference lives entirely in the good-outcome cell
+### C3 (Tier B) — Outcome moves blame far less in moral than nonmoral scenarios
 
-For **both** blame and praise, in **all three** families, the domain
-difference is concentrated in good-outcome items; bad-outcome items barely
-differ across domains.
+**Rewritten 2026-09-14 after review. The previous version overstated this in
+three ways; they are recorded below rather than deleted.**
 
-| | moral good | nonmoral good | good gap | bad gap | ratio |
-|---|---:|---:|---:|---:|---:|
-| blame, gemma | 7.10 | 2.09 | **+5.02** | +1.21 | 4.2× |
-| blame, llama | 6.92 | 2.66 | **+4.27** | +1.14 | 3.7× |
-| blame, mistral | 7.00 | 4.07 | **+2.93** | +0.67 | 4.4× |
-| praise, gemma | 1.27 | 3.15 | **−1.87** | −0.22 | 8.4× |
-| praise, llama | 0.96 | 3.15 | **−2.18** | −0.41 | 5.4× |
-| praise, mistral | 4.37 | 6.18 | **−1.80** | −0.28 | 6.5× |
+**What is established.** The moral-vs-nonmoral × sign interaction is
+significant in all three families for blame and two of three for praise.
+Decomposed by sign, the domain gap is 3.7–4.4× larger in the good-outcome
+cell than the bad one (5.4–8.4× for praise). Equivalently, stated as
+within-domain sensitivity:
 
-An agent who brings about a *good* outcome while professing indifference is
-blamed more and praised less when the domain is moral. Bad-outcome agents are
-treated alike regardless of domain.
+| | moral: good → bad | swing | nonmoral: good → bad | swing |
+|---|---|---:|---|---:|
+| blame, gemma | 7.10 → 8.92 | 1.81 | 2.09 → 7.71 | 5.62 |
+| blame, llama | 6.92 → 8.53 | 1.61 | 2.66 → 7.39 | 4.73 |
+| blame, mistral | 7.00 → 8.48 | 1.48 | 4.07 → 7.81 | 3.74 |
 
-This is one phenomenon, not two diverging constructs: blame and praise point
-the same way. It is also the most direct support yet for the
-indifference-tracking reading (an agent indifferent to *others'* welfare
-reads as culpable; one indifferent to *their own* interests does not).
+That is the finding: **within moral scenarios blame is relatively
+insensitive to how the outcome turned out; within nonmoral scenarios it is
+not.** Everything past that sentence is interpretation.
 
-*Strength:* high on the pattern; the leading rival explanation is now tested.
-*Rival reading, largely ruled out (`710b4c3`):* that this tracks **stakes**
-rather than moral domain — indifference about babies vs. about a report's
-font. The nonmoral arm's own prudential (matters to the agent) vs. procedural
-(trivial) split measures the stakes gradient directly. For **blame** the
-gradient is real but small (+0.99/+1.06/+1.07) while the moral jump over
-prudential is 4.38/3.67/2.36 — **2.2 to 4.4 gradient-steps**, so moral is not
-one step further along the same line. For **praise** there is no coherent
-gradient at all (+0.41 ns, −0.97 *wrong direction*, +0.09 ns) while the full
-moral effect is present. A stakes account has to explain why praise shows the
-effect without showing the gradient. Residual, blame only: the argument is
-ordinal, since the stakes *distance* from prudential to moral is unmeasured.
-A stakes rating would sharpen this, not rescue it.
-*Caveat — mandatory, and it is the remaining one:* the moral-good cell is the one that
-lost **65% of its items to curation** (14/40 surviving vs. 97.5% for
-moral-bad and 82.5–95% for all nonmoral cells). The surviving items were
-selected for scoring highest on moral relevance. Differential selection
-predicts exactly this pattern. **The effect is concentrated in the one cell
-whose composition is compromised.** This must be stated in the same
-paragraph as the result, not in a limitations section.
-*Provenance:* `0dc641b` (decomposition), `395a9ed` (attrition). Tables:
-`domain_gap_decomposition.csv`, `selection_attrition.csv`.
+**What is not established — three live readings, none ruled out.**
+
+1. *Indifference-tracking.* Blame follows the agent's stated mental state,
+   which is held constant across sign by design, so it stays flat where the
+   indifference is culpable.
+2. *Content asymmetry.* Moral-good items contain reckless indifference about
+   serious third-party consequences; nonmoral-good items contain indifference
+   about a style guide or a seating chart. Blaming the first and not the
+   second may simply be correct, in which case there is no bias here at all.
+3. *Differential selection.* The moral-good cell lost **65% of its items to
+   curation** (14/40 vs. 97.5% for moral-bad and 82.5–95% for all nonmoral
+   cells), retaining those that scored highest on moral relevance. This
+   predicts the pattern directly, and it is the cell the whole interaction
+   rests on.
+
+**Correction — the stakes test does less than previously claimed.** An
+earlier version of this entry said a stakes reading was "largely ruled out"
+by the prudential/procedural gradient (`710b4c3`). That test varies who bears
+the consequence *among self-directed and conventional outcomes* — prudential
+items are about the agent's own job security or retirement account. It never
+varies third-party stakes, because by construction no arm has serious
+third-party consequences without being moral. **Moral domain and
+serious-third-party-consequence are confounded in this design and cannot be
+separated by it.** The gradient result still stands on its own terms; it just
+does not adjudicate what it was said to adjudicate.
+
+**Two further corrections to the earlier entry.** It described this as "an
+agent who brings about a good outcome being blamed more," which misreads what
+is judged — the agent is being rated on conduct that includes professed
+indifference, not on the good outcome. And it called the pattern "the most
+direct support yet for the indifference-tracking reading," which asserts
+reading 1 over readings 2 and 3 without evidence.
+
+*Strength:* the pattern is solid and survives Holm; the explanation is open,
+and the cell carrying it is the compromised one. **Tier B, not A−.**
+*Provenance:* `0dc641b` (decomposition), `395a9ed` (attrition),
+`710b4c3` (stakes gradient). Tables: `domain_gap_decomposition.csv`,
+`selection_attrition.csv`, `stakes_gradient_check.csv`.
 
 ### C4 (Tier A) — Blame-vs-praise sensitivity is family-dependent
 
