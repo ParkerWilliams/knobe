@@ -3,7 +3,9 @@ does the sign effect (bad > good foreseen-side-effect intentionality) hold
 for non-harm-structured moral violations, or is it harm-specific?
 
 Fits, per subject family (gemma/llama/mistral) x tuning status
-(pretrained/finetuned), q_intentionality (the only question elicited):
+(pretrained/finetuned), one question type at a time (`--question`, default
+q_intentionality -- the only question until the 2026-09-25 blame/praise
+extension):
 
 - PRIMARY: `ev_rating ~ sign_c` split-sample within the harm-control arm
   and within the four non-harm foundations pooled, plus the direct
@@ -42,6 +44,7 @@ magnitudes, exactly as item 11 did.
 Run from the knobe repo root:
     .venv/bin/python analysis/ngo_extensions/moral_foundations_pilot/analyze_sign_wcb.py
     .venv/bin/python analysis/ngo_extensions/moral_foundations_pilot/analyze_sign_wcb.py --score parsed
+    .venv/bin/python analysis/ngo_extensions/moral_foundations_pilot/analyze_sign_wcb.py --question q_blame --score parsed
 
 Reads outputs/elicit_results.jsonl + outputs/mf_pilot_dataset_selected.csv
 (both local-only); writes outputs/sign_wcb.csv (small summary table,
@@ -83,10 +86,21 @@ MODEL_KEYS = [
 ]
 
 
-def load_frame() -> pd.DataFrame:
+def load_frame(question: str | None = "q_intentionality") -> pd.DataFrame:
+    """Rows for ONE question type by default. Until 2026-09-25 this pilot's
+    results held q_intentionality only and this function did no question
+    filtering; once the blame/praise extension is merged into the same
+    elicit_results.jsonl, an unfiltered frame would silently pool three
+    questions (praise with the opposite sign) into every caller --
+    foundation_gradient_wcb.py and ../tuning_contrast_wcb.py included. The
+    default keeps every existing caller's frame identical. question=None
+    returns all questions, with a `question` column to split on."""
     df = pd.read_json(HERE / "outputs" / "elicit_results.jsonl", lines=True)
     sel = pd.read_csv(HERE / "outputs" / "mf_pilot_dataset_selected.csv")
     df["variant_id"] = df["prompt_id"].str.split("::").str[0]
+    df["question"] = df["prompt_id"].str.split("::").str[1]
+    if question is not None:
+        df = df[df["question"] == question].reset_index(drop=True)
     df["ev_rating"] = df["logprobs_0_10"].apply(_logit_ev_rating)
     d = df.merge(sel[["variant_id", "pair_id", "condition", "sign"]], on="variant_id")
     assert len(d) == len(df), "elicit rows dropped in join -- selected CSV out of sync"
@@ -115,6 +129,8 @@ def fit_or_skip(s: pd.DataFrame, formula: str, term: str, **meta) -> dict:
 
 def main() -> None:
     p = argparse.ArgumentParser()
+    p.add_argument("--question", default="q_intentionality",
+                    choices=["q_intentionality", "q_blame", "q_praise"])
     p.add_argument("--score", default="ev", choices=["ev", "parsed"],
                     help="ev (default) = the spec section-4.4 logit-fallback EV score "
                          "the committed tables use. parsed = the model's own numeric "
@@ -124,7 +140,7 @@ def main() -> None:
     args = p.parse_args()
 
     resp = "ev_rating" if args.score == "ev" else "parsed_rating"
-    d = load_frame()
+    d = load_frame(args.question)
     if args.score == "parsed":
         d = d[d["parse_ok"] & d["parsed_rating"].notna()]
 
@@ -143,8 +159,9 @@ def main() -> None:
 
     out = pd.DataFrame(rows)
     print(out.to_string(index=False))
-    suffix = "" if args.score == "ev" else "_parsed"
-    out_path = HERE / "outputs" / f"sign_wcb{suffix}.csv"
+    q_suffix = "" if args.question == "q_intentionality" else f"_{args.question.removeprefix('q_')}"
+    score_suffix = "" if args.score == "ev" else "_parsed"
+    out_path = HERE / "outputs" / f"sign_wcb{q_suffix}{score_suffix}.csv"
     out.to_csv(out_path, index=False)
     print(f"\nwrote {out_path}")
 

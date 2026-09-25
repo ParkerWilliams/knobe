@@ -97,7 +97,7 @@ def main() -> None:
     rows = []
     for pilot, _, arms in PILOTS:
         d = load(pilot)
-        if "question" in d.columns:                 # nonmoral pilot only
+        if "question" in d.columns:                 # MF load_frame already defaults to it
             d = d[d["question"] == "q_intentionality"]
         if args.score == "parsed":
             d = d[d["parse_ok"] & d["parsed_rating"].notna()]
