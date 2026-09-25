@@ -221,6 +221,12 @@ rival readings survives test.
    only way to compare the 26 dropped moral-good items against the 14 that
    survived. Blocked on a person, so send the request before drafting rather
    than after.
+   **Done 2026-09-25** (`1673b90`, `810b18d`): all four committed; the
+   reconstruction matches the selection rule re-run on the actual scores
+   exactly. Dropped moral-good items score 0–3 on moral relevance, kept ones
+   6–10, with one (moral-09-good) never scored because the reviewer's answer
+   failed to parse. The comparison itself — whether that property drives
+   blame — is not yet run.
 
 3. **Holm-correct the tuning contrast.** `tuning_contrast_wcb_parsed.csv`
    sits outside `holm_correct_pilots.py`'s scope and is the one C2 table with
@@ -328,11 +334,12 @@ parallel; only collection waits.
 
 ## 7. Open provenance gaps
 
-- The four curation files in item 5. Until they arrive, the 196/240 and
-  126/152 selected-item sets are reconstructed by inference — verified against
-  logged counts and bit-identical WCB reproduction, but not against the actual
-  per-item scores, and with no way to check why any specific item was
-  excluded.
+- ~~The four curation files in item 5.~~ **Closed 2026-09-25**
+  (`810b18d`): committed, and `verify_curation_provenance.py` confirms the
+  196/240 and 126/152 reconstructions are exact. It also shows that 5
+  nonmoral items and 3 MF pairs were excluded on reviewer parse failures
+  rather than scores (listed in `results/ANALYSIS_LOG.md`); the MF ones are
+  missing from `selection_report.md`'s failure-by-reason lists.
 - `analyze_sign_wcb.py`'s `--question` flag is documented only in the script
   docstring and `ALIGNMENT_DISCUSSION_ngo_pilots.md`, not in either pilot's
   README or HANDOFF.

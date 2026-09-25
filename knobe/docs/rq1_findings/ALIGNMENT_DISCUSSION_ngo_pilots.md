@@ -388,5 +388,9 @@ point 2a. Every finetuned-cell claim in points 1, 3, 4, 5, and 6 survives.
   item was excluded, or how close borderline items were to threshold. These
   files would also be the natural starting point for the severity-matching
   check above, if curation scores turn out to correlate with severity.
+  **Resolved 2026-09-25** (`1673b90`, `810b18d`): all four files are now
+  committed, and the reconstruction matches the selection rule re-run on
+  the actual scores exactly. No borderline items: dropped moral-good items
+  score 0–3, kept ones 6–10.
 
 — Draft sketch, 2026-08-22.
