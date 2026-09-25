@@ -23,9 +23,11 @@ ground).
   is not a confound between harm and non-harm conditions.
 - **Primary contrast**: harm-control vs. all four non-harm foundations
   pooled. **Secondary, exploratory**: each foundation alone, with honest
-  per-foundation cluster counts. **Out of scope**: q_blame/q_praise, and a
-  purpose-built equally-powered four-foundation comparison (design doc
-  section 2).
+  per-foundation cluster counts. **Out of scope**: a purpose-built
+  equally-powered four-foundation comparison (design doc section 2).
+  q_blame/q_praise were originally out of scope too; added 2026-09-25 as an
+  opt-in extension (`elicit.py --questions q_blame,q_praise`, per
+  SUBMISSION_GAMEPLAN.md section 5 item 6) -- see `build_dataset.py`.
 - **Sourcing**: 30 of Ngo's 40 storylines as shared scaffolds (the 3
   unadaptable pairs -- bombing/terrorism/cult -- skipped as in the sibling
   pilot, plus 7 more that didn't hold up under drafting). Loyalty/

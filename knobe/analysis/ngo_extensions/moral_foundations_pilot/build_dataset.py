@@ -19,17 +19,28 @@ columns:
     scenario        -- the 4-clause setup (no question)
     q_intentionality -- the intentionality question (targets the foreseen
                        SIDE EFFECT only, never the main action)
+    q_blame         -- constants.QUESTIONS["q_blame"], agent phrase pulled
+                       from q_intentionality
+    q_praise        -- constants.QUESTIONS["q_praise"], same agent phrase
 
-Unlike the sibling nonmoral pilot's builder, no q_blame/q_praise columns:
-blame/praise is explicitly out of scope for this pilot (design doc section
-2 -- the asymmetry's existence for these foundations isn't established
-yet, so the mechanism question isn't earned).
+q_blame/q_praise added 2026-09-25 (SUBMISSION_GAMEPLAN.md section 5 item
+6). The design doc (section 2) originally scoped them out because the
+asymmetry's existence for these foundations wasn't established; the pilot
+has since established it, and the blame-vs-praise comparison (CLAIMS.md
+claim 4) is the strongest claim in the set, so extending it across
+foundations is now earned. Wording and agent extraction are REUSED from
+the sibling nonmoral pilot's builder (`extract_agent_phrase`, the frozen
+`constants.QUESTIONS` templates), not reimplemented, so the two pilots'
+blame/praise prompts are built identically. The original columns are
+unchanged byte-for-byte.
 
 Pure text merge -- no API access needed. Run:
     .venv/bin/python analysis/ngo_extensions/moral_foundations_pilot/build_dataset.py
 """
 from __future__ import annotations
 
+import importlib.util
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -42,6 +53,20 @@ from purity_variants import PURITY_PAIRS, PURPOSE_WRITTEN_PAIR_IDS
 
 HERE = Path(__file__).parent
 OUT_PATH = HERE / "outputs" / "mf_pilot_dataset.csv"
+
+REPO_SRC = Path(__file__).resolve().parents[3] / "src"
+sys.path.insert(0, str(REPO_SRC))
+from knobe import constants  # noqa: E402
+
+# The sibling's builder is also named build_dataset.py, so load it under a
+# distinct module name; its own sibling imports need its dir on sys.path.
+_NONMORAL_DIR = HERE.parent / "nonmoral_pilot"
+sys.path.insert(0, str(_NONMORAL_DIR))
+_spec = importlib.util.spec_from_file_location(
+    "nonmoral_build_dataset", _NONMORAL_DIR / "build_dataset.py")
+_nonmoral_build = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_nonmoral_build)
+extract_agent_phrase = _nonmoral_build.extract_agent_phrase
 
 CONDITIONS: dict[str, tuple[str, dict[int, dict[str, tuple[str, str]]]]] = {
     # condition -> (variant_id slug, pairs dict)
@@ -59,6 +84,7 @@ def main() -> None:
         for pair_id in sorted(pairs):
             for sign in ("bad", "good"):
                 scenario, question = pairs[pair_id][sign]
+                agent = extract_agent_phrase(question)
                 rows.append(dict(
                     variant_id=f"{slug}-{pair_id:02d}-{sign}",
                     pair_id=pair_id,
@@ -67,6 +93,8 @@ def main() -> None:
                     sign=sign,
                     scenario=scenario,
                     q_intentionality=question,
+                    q_blame=constants.QUESTIONS["q_blame"].format(agent_lower=agent),
+                    q_praise=constants.QUESTIONS["q_praise"].format(agent_lower=agent),
                 ))
 
     out = pd.DataFrame(rows)

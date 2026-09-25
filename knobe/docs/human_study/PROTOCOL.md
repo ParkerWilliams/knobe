@@ -259,4 +259,6 @@ usually faster than a new application. Worth checking before filing fresh.
 4. **Ratings per item** — set from the pilot, not from the default of 10.
 5. **Foundations blame/praise** — not collected here, since the LLM side
    never collected it either. Adding it to the human study would create an
-   asymmetry the paper would have to explain.
+   asymmetry the paper would have to explain. **Revisit (2026-09-25):** the
+   LLM-side foundations blame/praise elicitation is now staged (gameplan
+   item 6); once it runs, this reasoning inverts.
