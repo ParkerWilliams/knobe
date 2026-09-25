@@ -30,6 +30,13 @@ build/
 analysis/ngo_extensions/*/outputs/*_raw.jsonl*
 analysis/ngo_extensions/*/outputs/*_selected.csv
 analysis/ngo_extensions/*/outputs/selection_report.md
+# Exception (2026-09-25): the final curation checkpoints and selection
+# reports are published as provenance for the selected-item sets. The
+# pre-retry *.v1.bak checkpoints and the *_selected.csv files stay local
+# (the latter are reproducible via verify_curation_provenance.py).
+!analysis/ngo_extensions/nonmoral_pilot/outputs/moral_relevance_raw.jsonl
+!analysis/ngo_extensions/moral_foundations_pilot/outputs/foundation_relevance_raw.jsonl
+!analysis/ngo_extensions/*/outputs/selection_report.md
 analysis/ngo_extensions/*/outputs/power_check.csv
 analysis/ngo_extensions/*/outputs/elicit_results.jsonl
 
