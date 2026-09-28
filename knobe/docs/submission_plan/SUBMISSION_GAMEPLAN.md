@@ -64,6 +64,22 @@ There is currently no manuscript of any kind in this repo. The distance to a
 submission is mostly writing, not analysis — which is why the worklist in §5
 puts drafting in parallel with the one analysis task that gates everything.
 
+**Paper scope (decided 2026-09-28).** Pilots are the paper; the main run gets
+one short section plus appendix material. Claim numbers are `CLAIMS.md`'s:
+
+| where | claims |
+|---|---|
+| core | 1 (scoring), 2 (tuning), 3 (question dissociation), 4 (blame vs praise by family), 8 (not privileged for harm/morality, Gemma), 10 (curation attrition) |
+| core, framed as open | 9 (moral-scenario blame insensitivity: pattern established, explanation open) |
+| short main-run section | 6 (typicality reversal; finetuned, Gemma + Mistral only, separate stimulus set, compared to the human *literature* not human ratings on these items) |
+| appendix | 5 (asymptotic overconfidence, as the justification for WCB); 11 (why the main run's moral/nonmoral comparison isn't reported) |
+| out, unless the Mistral revision/chat-template check (§5 item 4) runs first | 7 (Raimondi non-replication) |
+
+Rationale: the core claims share one stimulus source and one design and are
+all strongly supported; claim 6 is the project's only human-opposite
+behavioral result and worth showing, but it doesn't feed the core argument
+and rests on a different stimulus set. Outline: `PAPER_OUTLINE.md`.
+
 ---
 
 ## 2. Claim inventory → see `CLAIMS.md`
