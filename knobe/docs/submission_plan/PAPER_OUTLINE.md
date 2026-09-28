@@ -7,10 +7,28 @@ numbers are `CLAIMS.md`'s. Supersedes `paper/DRAFT.md`'s structure.
 accurate, convincing and clear evidence, and would some of its audience be
 interested. It doesn't review on novelty or a single unified story. So the
 paper's job is to state each claim at exactly the strength its evidence
-supports, and make the evidence easy to check. Practical constraints (verify
-against the current author guide before formatting): double-blind, TMLR
-LaTeX template, main text ideally ≤12 pages (longer submissions get a longer
-review period), broader impact statement, code and data release expected.
+supports, and make the evidence easy to check.
+
+**Format rules** (from TMLR's submission page, 2026-09-28):
+- **Length:** any length, but it must be justified by the content, and
+  unusually long main texts (appendices not counted) delay review. The ~11
+  pages budgeted below is a target, not a limit.
+- **Form:** a PDF built from the TMLR LaTeX stylefile and template.
+  Appendices go after the references.
+- **Reviewers aren't required to read the appendix or supplementary
+  material.** So anything a claim rests on must be in the main text. The
+  appendix is for backup, not for load-bearing evidence. This matters most
+  for claim 5: the main text has to say, in a sentence or two with a number,
+  why the bootstrap and not Wald tests, not just point to Appendix A.
+- **Supplementary material:** up to 100MB, PDF or ZIP, anonymized. Code and
+  data are encouraged. `results_dist/` is 31MB, so the full published data
+  fits. Anonymizing means a ZIP without `.git` (commit authors) and without
+  identifying strings. As of today, 5 tracked files contain names or local
+  paths: `data/authoring/v1.1_candidate/apply_patch.py` and four docs under
+  `docs/severity_confound/` and `docs/v1_1_release_process/`. The GitHub
+  repo can't be linked during review.
+- **Not on that page, check separately:** whether a broader impact
+  statement is required.
 
 **Through-line.** Measuring an outcome-valence asymmetry in LLMs depends on
 three choices the literature treats as incidental: how the rating is scored,
@@ -63,7 +81,7 @@ curation finding (10); one line on scope (no human data on these items).
 | 3.2 Curation | LLM reviewer, thresholds, the two selection rules (per-item vs pair-level). Factual here; the finding is §6 | `configs/curation.yaml`, `selection_report.md` ×2 |
 | 3.3 Models, elicitation | Gemma-2-9B, Llama-3.1-8B, Mistral-7B-v0.1, pretrained + instruct; frozen Raimondi frame, raw completion; N=25; sampled temperature; three independent single-turn questions | `elicit.py` ×2, `constants.py` |
 | 3.4 Scoring | Parsed rating vs logprob-EV fallback; parsed primary, and why (forward-ref §4) | `parsing.py` |
-| 3.5 Inference | Sign effect per arm and cell; wild cluster bootstrap, cluster = storyline, B=1999; Holm within (family, tuning, question); equivalence bounds for nulls. Why the bootstrap: forward-ref Appendix A (claim 5) | `lib.py`, `holm_correct_pilots.py`, `equivalence_bounds.py` |
+| 3.5 Inference | Sign effect per arm and cell; wild cluster bootstrap, cluster = storyline, B=1999; Holm within (family, tuning, question); equivalence bounds for nulls. Why the bootstrap: one or two sentences with a number stated here (claim 5), full comparison in Appendix A | `lib.py`, `holm_correct_pilots.py`, `equivalence_bounds.py` |
 
 ## 4. Measurement: scoring decides what you find (~1.5 pages) — claim 1
 
