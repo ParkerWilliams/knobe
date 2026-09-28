@@ -27,8 +27,11 @@ supports, and make the evidence easy to check.
   paths: `data/authoring/v1.1_candidate/apply_patch.py` and four docs under
   `docs/severity_confound/` and `docs/v1_1_release_process/`. The GitHub
   repo can't be linked during review.
-- **Not on that page, check separately:** whether a broader impact
-  statement is required.
+- **Broader impact statement:** required only if the work "carries a
+  significant risk of harm". This paper studies how existing open models'
+  moral-judgment ratings are measured; it releases no model, capability or
+  harmful content. So it isn't required. A short optional statement is still
+  cheap and fits the content (below).
 
 **Through-line.** Measuring an outcome-valence asymmetry in LLMs depends on
 three choices the literature treats as incidental: how the rating is scored,
@@ -145,7 +148,7 @@ are exploratory in the multiplicity sense.
 
 ## 9. Conclusion (~0.25 page)
 
-## Broader impact statement
+## Broader impact statement (optional; see format rules)
 
 LLM moral-judgment audits as evidence for deployment decisions; the risk
 that a scoring choice produces or erases a bias finding.
