@@ -86,7 +86,7 @@ result" under *what we do not claim*.
 | prompt frame | `RAIMONDI_PROMPT_TEMPLATE`, raw completion | identical to MF intentionality and nonmoral blame/praise |
 | question wording | frozen `constants.QUESTIONS` | same; reused not rewritten (`a5e12a6`) |
 | N | 25 | the nonmoral pilot's blame/praise used 25. The main run used 50 for blame/praise, but power here is limited by the number of storylines (G), not samples per item, so 50 buys little |
-| `MAX_TOKENS` | 10 | see 2c: the parse failures aren't truncation, so raising it wouldn't help |
+| `MAX_TOKENS` | 10 | changing it changes which rows parse, relative to both comparison datasets. Most failures aren't truncation (blank output, fill-in blanks), but some are: Gemma-instruct opens with "**Explanation:**" in 7–12% of rows and hits the limit before giving a number (2c). Test a longer limit in the diagnostic pass, not the primary one |
 | `RELEASE`, seeding | unchanged | keeps published rows' seeds; new prompt_ids get their own (verified 0 collisions) |
 | item set | the 126 selected | re-curating would change the items relative to the intentionality rows |
 | scoring | decided at analysis time; parsed primary | per claim 1, and the logprobs are captured either way |
@@ -103,12 +103,33 @@ chat format as a robustness pass, and it has **never been run anywhere in
 the project**. The parse failures look like what instruct models do on
 untemplated input. Examples from the nonmoral pilot's finetuned rows:
 
-- Gemma-instruct: 2,304 of 4,900 blame responses unparsed. The most common
-  responses are `' \n'` (573), `'  \n'` (173) and `' \n\n'` (76). It emits
-  whitespace and stops. It parses 53–58% on every question in both pilots.
-- Llama-instruct: fills in blanks (`' _ _ _ _ _ _ _ _ _ _'`, `' _______'`) or
-  echoes the instruction (`' _______ Read carefully the following scenario…'`).
-- Mistral-instruct: ~98% parsed, so the question barely arises.
+Parse-failure breakdown, instruct models, both pilots pooled, as % of all
+rows (`analysis/ngo_extensions/parse_failure_breakdown.py`, on `results_dist/`):
+
+| model | question | failed | blank output | fill-in blank | starts explaining, cut off | other |
+|---|---|---:|---:|---:|---:|---:|
+| Gemma | blame | 47.0% | 19.7% | 11.1% | 6.9% | 9.3% |
+| Gemma | praise | 45.7% | 16.9% | 7.6% | 9.3% | 11.9% |
+| Gemma | intentionality | 43.4% | 4.7% | 16.1% | 11.8% | 10.8% |
+| Llama | blame | 22.7% | 0.0% | 15.5% | 0.1% | 7.1% |
+| Llama | praise | 20.6% | 0.0% | 16.0% | 0.0% | 4.4% |
+| Llama | intentionality | 29.8% | 0.0% | 26.2% | 0.0% | 3.5% |
+| Mistral | all three | 1.1–1.8% | — | — | — | — |
+
+- **Blank output** (Gemma only): `' \n'`, `'  \n\n'`. A line break, then the
+  model stops. Not truncation.
+- **Fill-in blank:** `' _______'`, `' __\n\n**Explanation:**…'`. The model
+  reads "Answer:" as a worksheet blank to leave for the reader.
+- **Starts explaining, cut off** (mostly Gemma): `'\n\n\n**Explanation:**\n\nThe
+  scenario clearly states that'`. The only truncation-shaped failure: the
+  10-token limit runs out before a number.
+- **Other:** instruction echoes (`'Please remember to justify your answer
+  briefly.'`), yes/no verdicts (Llama, intentionality only), refusals
+  (`'I cannot provide a numerical answer'`), and noise.
+
+The first two are what untemplated instruct models typically do. The third
+is a max-token effect. None is random with respect to item or question:
+Gemma's blank rate is 3.5–4× higher for blame/praise than for intentionality.
 
 Parse failures are systematic, not random: claim 1 shows the fallback score
 doesn't recover them. So "Gemma drops ~45% of its answers" is a selection
@@ -121,9 +142,12 @@ claim 7, where Mistral chat-template handling is an open hypothesis.
   **5,670 rows**
 - identical frame text, sent as one user message (the production
   `render.py` "chat" shape)
+- optionally a third arm: raw format with a longer `MAX_TOKENS` (e.g. 64),
+  which isolates the truncated-explanation failures from the templating
+  ones. Same size again
 
-This answers two questions. Does templating fix Gemma's and Llama's parse
-rates? And do the parsed sign effects move when it does? If they don't
+This answers two questions. Does templating (or a longer limit) fix Gemma's
+and Llama's parse rates? And do the parsed sign effects move when it does? If they don't
 move, that's one sentence in the paper that closes a reviewer objection. If
 they do, we need to know before submission.
 
