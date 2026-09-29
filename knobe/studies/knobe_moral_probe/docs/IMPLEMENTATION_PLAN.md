@@ -19,7 +19,7 @@
 - Run CLIs from the study folder:
   `cd studies/knobe_moral_probe && ../../.venv/bin/python -m kmp.<module> ...`.
 
-## Amendments to DESIGN.md this plan makes (need approval)
+## Amendments to DESIGN.md this plan makes (approved 2026-09-28)
 
 1. **Worked examples are format-only** (DESIGN.md §6 said they "use the same question wording as the real item"). With 14 question types, same-wording examples need 42 hand-judged answers. Most of them, like domain and foundation ratings, have no obvious value, so the examples would teach judgments. This plan uses three counting questions whose answers are unambiguous (0, 5, 9) in front of every prompt. They show the answer format and carry no information about how to judge anything. If you reject this, only the `EXAMPLES` data in Task 3 changes.
 2. **The reviewer's temperature 0 needs a small reimplementation.** `knobe.curate.AnthropicClient.complete` takes no temperature. Task 8 subclasses it and reimplements `complete()` (15 lines) to pass `temperature=0.0`. This is flagged per CLAUDE.md §7. Whether the pinned reviewer model accepts `temperature` is checked on the first real call.

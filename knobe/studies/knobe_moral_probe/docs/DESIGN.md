@@ -8,6 +8,11 @@ are, as the pilot record.
 References: `docs/REFERENCES.md` in this study folder (BibTeX in
 `references.bib`).
 
+**Amended 2026-09-28** by the three approved amendments at the top of
+`IMPLEMENTATION_PLAN.md` (format-only worked examples, a temperature-0
+reviewer client, one power-script exception to the README). Where they
+differ, the amendments win.
+
 ## 1. What the study asks
 
 **Background.** In Ngo et al. (2015), people rate an agent as acting more
