@@ -1,6 +1,6 @@
 # MF pilot blame/praise: is it worth running, and what else to change (2026-09-28)
 
-**Run design superseded by `FINAL_RUN_PLAN.md` (2026-09-28);** the reasoning below still stands.
+**Superseded 2026-09-28**, first by `FINAL_RUN_PLAN.md`, then by `studies/knobe_moral_probe/docs/DESIGN.md`. Kept as the pilot-era record.
 
 Decision memo for `SUBMISSION_GAMEPLAN.md` §5 item 6. The code is staged
 (`a5e12a6`, `df5d8e6`); nothing has been elicited. Claim numbers refer to

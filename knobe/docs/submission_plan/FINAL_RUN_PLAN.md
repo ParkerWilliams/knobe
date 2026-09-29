@@ -1,5 +1,7 @@
 # Final run plan: closing the paper's open gaps (2026-09-28)
 
+**Superseded 2026-09-28 by `studies/knobe_moral_probe/docs/DESIGN.md`.** Kept as the pilot-era plan.
+
 One GPU session, plus a few no-GPU tasks, that closes every gap between the
 paper's claims and its evidence that a TMLR reviewer is likely to raise.
 Scope per `SUBMISSION_GAMEPLAN.md` §1; structure per `PAPER_OUTLINE.md`.
