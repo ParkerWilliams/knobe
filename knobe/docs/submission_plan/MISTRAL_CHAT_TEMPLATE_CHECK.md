@@ -67,7 +67,7 @@ yields token ids starting `[1, 1, ...]`. Raw-format results never pass
 through this code and are unaffected; it would have corrupted the first
 chat-format run.
 
-Fix (`e557466`): `render_chat_prompt()` in `src/knobe/elicit_vllm.py` strips the
+Fix (`3f05c6d`): `render_chat_prompt()` in `src/knobe/elicit_vllm.py` strips the
 template's textual BOS when the tokenizer adds its own, used by both engines,
 with tests in `tests/test_elicit_chat_bos.py` (79/79 elicit tests pass with
 it applied). The run additionally executes an on-node tokenizer-only

@@ -77,6 +77,9 @@ confirms these numbers before launch.
 
 1. **Add `--format raw|chat` to both pilots' `elicit.py`.**
    - Reuse `VllmEngine`'s existing `messages` path; no new engine code.
+     *(2026-09-28, Parker: that path sent every chat prompt with two BOS
+     tokens — the templates write BOS as text and vLLM prepends another.
+     Fixed in `3f05c6d` with tests; arm B needs that commit.)*
    - Chat prompt_ids get the production suffix, `{variant}::{question}::chat`
      (the 3-part convention `src/knobe/power.py` and `src/knobe/analysis/ingest.py`
      already parse). Their seeds therefore derive independently, and job_ids
@@ -97,7 +100,7 @@ confirms these numbers before launch.
    without them.
 4. **Fix `verify_curation_provenance.py`'s** cell-by-cell check to compare
    shared columns. It currently fails on column differences although the item
-   sets match.
+   sets match. *(Done 2026-09-28 — see the commit that adds this note.)*
 5. **Add a `fmt` argument to both `load_frame`s** (default raw, reads the
    matching file), so every existing caller's frame is unchanged.
 6. **Commit the analysis plan (next section) before any real row exists.**

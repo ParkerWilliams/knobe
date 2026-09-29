@@ -102,11 +102,20 @@ def main() -> int:
             if actual_path.exists():
                 actual = pd.read_csv(actual_path)
                 ok &= _compare("A vs C (local selected CSV vs. rerun)", set(actual["variant_id"]), C)
+                # Compare on SHARED columns: a selected CSV reconstructed from
+                # the base dataset (the 2026-08-22 method) carries only the base
+                # columns, not the curation scores the rerun adds, so a
+                # whole-frame comparison fails on a correct reconstruction.
                 a = actual.sort_values("variant_id").reset_index(drop=True)
                 c = rerun.sort_values("variant_id").reset_index(drop=True)
-                same = list(a.columns) == list(c.columns) and a.equals(c)
+                shared = [col for col in c.columns if col in a.columns]
+                same = a[shared].equals(c[shared])
                 ok &= same
-                print(f"  A == C on every column and cell: {same}")
+                only_a = [col for col in a.columns if col not in c.columns]
+                only_c = [col for col in c.columns if col not in a.columns]
+                print(f"  A == C on all {len(shared)} shared columns: {same}"
+                      + (f"  (not compared -- only in A: {only_a}; only in C: {only_c})"
+                         if only_a or only_c else ""))
             else:
                 print(f"  A skipped: {actual_path.name} not present (gitignored, local to curation)")
 
