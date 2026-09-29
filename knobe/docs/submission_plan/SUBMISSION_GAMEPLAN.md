@@ -256,6 +256,10 @@ rival readings survives test.
 4. **Mistral revision / chat-template check** — gates only the Raimondi
    comparison, but it is an afternoon and it turns "we don't replicate" into
    either a methodological explanation or a real finding.
+   **Staged 2026-09-28** — see `MISTRAL_CHAT_TEMPLATE_CHECK.md`. The revision
+   half is settled without new data; the chat half needs a 12,600-row run
+   that was blocked on a double-BOS pipeline defect, now fixed (`e557466`).
+   Also open: asking the Raimondi authors which instruct checkpoint they used.
 
 5. **Point 4a indifference-clause ablation** — vary "did not care at all
    about X" (present / absent / active concern) holding outcome and domain
@@ -263,10 +267,17 @@ rival readings survives test.
    out, indifference-tracking is now the leading explanation for C3 rather
    than one of three, so an ablation would confirm a live hypothesis instead
    of adjudicating a three-way tie. Small elicitation on existing items.
+   **Staged 2026-09-28** — `analysis/ngo_extensions/indifference_ablation/`
+   (`19f99fe`): all 240 authored items x 3 levels, which also tests the
+   selection reading. (Note: `52cd710` has since restored the three-way tie
+   in CLAIMS.md claim 9, so this now adjudicates rather than confirms.)
+   Needs Mer's sign-off on DESIGN.md.
 
 6. **q_blame / q_praise for the MF pilot** — re-elicitation on already-curated
    items. Would extend C4 (the strongest claim) across foundations and merge
    the two pilots into one result rather than two.
+   **Staged 2026-09-25** (`a5e12a6`, `df5d8e6`): 126 items x 2 questions x 6
+   models x N=25 = 37,800 rows.
 
 ### Parallel track — human replication (new 2026-09-13)
 
