@@ -324,6 +324,31 @@ def _resolve_hf_revision(model_id: str, revision: str) -> str:
 RATING_TOKENS: tuple[str, ...] = tuple(str(i) for i in range(11))  # "0".."10"
 
 
+def render_chat_prompt(tokenizer, messages: list[dict]) -> str:
+    """The model's own chat template applied to ``messages``, with the
+    template's leading BOS *text* removed when the tokenizer will add BOS
+    on its own.
+
+    The chat templates of all three instruct families in this project
+    (Mistral-Instruct, Llama-3.1-Instruct, Gemma-2-it) write ``bos_token``
+    into their output, and every consumer of that string here -- vLLM's
+    ``generate()`` on a text prompt, the HF engine's tokenizer call, and
+    ``candidate_tail_ids`` -- tokenizes with ``add_special_tokens=True``,
+    which prepends BOS again. Left alone, every chat-format prompt would
+    reach the model with TWO BOS tokens (vLLM's own ``LLM.chat`` avoids
+    this by tokenizing with ``add_special_tokens=False``). Stripping the
+    textual copy leaves exactly one, and keeps free generation and the
+    forced-candidate scoring pass on the identical token sequence.
+    Found before the first chat-format run (2026-09-25); raw-format
+    results never pass through here and are unaffected."""
+    text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    bos = getattr(tokenizer, "bos_token", None)
+    bos_id = getattr(tokenizer, "bos_token_id", None)
+    auto_bos = bos_id is not None and tokenizer.encode("x", add_special_tokens=True)[:1] == [bos_id]
+    if bos and auto_bos and text.startswith(bos):
+        text = text[len(bos):]
+    return text
+
 
 def candidate_tail_ids(tokenizer, prompt: str, forced: str) -> list[int]:
     """Token ids the tokenizer ACTUALLY realizes for the candidate span of
@@ -430,9 +455,7 @@ class VllmEngine:
 
     def _prompt_text(self, req: EngineRequest) -> str:
         if req.messages is not None:
-            return self._tokenizer.apply_chat_template(
-                req.messages, tokenize=False, add_generation_prompt=True,
-            )
+            return render_chat_prompt(self._tokenizer, req.messages)
         return req.text  # type: ignore[return-value]
 
     def generate(self, batch: Sequence[EngineRequest]) -> list[EngineResponse]:
@@ -569,9 +592,7 @@ class HfEngine:
 
     def _prompt_text(self, req: EngineRequest) -> str:
         if req.messages is not None:
-            return self._tokenizer.apply_chat_template(
-                req.messages, tokenize=False, add_generation_prompt=True,
-            )
+            return render_chat_prompt(self._tokenizer, req.messages)
         return req.text  # type: ignore[return-value]
 
     def generate(self, batch: Sequence[EngineRequest]) -> list[EngineResponse]:
