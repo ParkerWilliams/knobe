@@ -4,7 +4,10 @@ One row is one version (bad or good) of one side effect. Versions pair up
 by (experiment, storyline_id, arm): exactly one bad and one good, same
 agent. storyline_id is the cluster unit for inference; in the foundations
 experiment one storyline carries a harm pair plus one or more foundation
-pairs (shared scaffolds, DESIGN.md section 3.3).
+pairs (shared scaffolds, DESIGN.md section 3.3). The ngo_verbatim
+experiment holds Ngo et al.'s 40 original pairs word for word (arm "moral",
+storyline_id = Ngo's pair number, the same numbering as the adapted nonmoral
+moral storylines); DESIGN.md 2026-10-01 amendment "Ngo goals and verbatim set".
 
 `agent` is the agent as written mid-sentence ("Bill", "the CEO"); `effect`
 is the side effect as a bare verb phrase ("injure children"), so question
@@ -20,7 +23,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-Experiment = Literal["nonmoral", "foundations"]
+Experiment = Literal["nonmoral", "foundations", "ngo_verbatim"]
 Sign = Literal["bad", "good"]
 Source = Literal["ngo", "pilot", "new"]
 ReviewStatus = Literal["draft", "approved", "rejected"]
@@ -28,8 +31,13 @@ ReviewStatus = Literal["draft", "approved", "rejected"]
 ARMS: dict[str, tuple[str, ...]] = {
     "nonmoral": ("moral", "prudential", "procedural"),
     "foundations": ("harm", "fairness", "loyalty", "authority", "purity"),
+    "ngo_verbatim": ("moral",),
 }
-EXPERIMENT_CODE = {"nonmoral": "nm", "foundations": "mf"}
+EXPERIMENT_CODE = {"nonmoral": "nm", "foundations": "mf", "ngo_verbatim": "nv"}
+# Ngo's original text keeps its names and pronouns (which change with the sign),
+# so this experiment is exempt from the same-agent and gendered-pronoun checks,
+# and from nothing else.
+ROLE_NOUN_EXEMPT = frozenset({"ngo_verbatim"})
 ID_PREFIX = "kmp-"
 FIELDS = ["item_id", "experiment", "storyline_id", "arm", "sign", "agent",
           "effect", "scenario", "source", "review_status"]
@@ -64,6 +72,8 @@ class Item(BaseModel):
     def _check(self) -> "Item":
         if self.arm not in ARMS[self.experiment]:
             raise ValueError(f"{self.item_id}: arm {self.arm!r} not in {ARMS[self.experiment]}")
+        if self.experiment == "ngo_verbatim" and self.source != "ngo":
+            raise ValueError(f"{self.item_id}: ngo_verbatim items must have source 'ngo', not {self.source!r}")
         expected = make_item_id(self.experiment, self.storyline_id, self.arm, self.sign)
         if self.item_id != expected:
             raise ValueError(f"item_id {self.item_id!r} should be {expected!r}")
@@ -129,9 +139,11 @@ def design_problems(items: list[Item]) -> list[str]:
         signs = sorted(m.sign for m in members)
         if signs != ["bad", "good"]:
             problems.append(f"pair {key[1:]} has signs {signs}, needs exactly one bad and one good")
-        elif members[0].agent != members[1].agent:
+        elif key[0] not in ROLE_NOUN_EXEMPT and members[0].agent != members[1].agent:
             problems.append(f"pair {key[1:]}: agents differ ({members[0].agent!r} vs {members[1].agent!r})")
     for item in sorted(items, key=lambda i: i.item_id):
+        if item.experiment in ROLE_NOUN_EXEMPT:
+            continue
         found = sorted({w.lower() for name in ("scenario", "agent", "effect")
                         for w in GENDERED_PRONOUNS.findall(getattr(item, name))})
         if found:

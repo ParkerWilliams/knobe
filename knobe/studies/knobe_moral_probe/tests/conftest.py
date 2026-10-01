@@ -36,3 +36,25 @@ def nonmoral_items() -> list[Item]:
 @pytest.fixture
 def foundation_items() -> list[Item]:
     return make_items("foundations")
+
+
+def make_ngo_verbatim_items(n_storylines: int = 2, status: str = "approved") -> list[Item]:
+    """Ngo-style verbatim pairs: the agent's name and pronouns change with the
+    sign (Bill harms, Robyn helps), as in Ngo et al.'s original text. Scenarios
+    carry [moral] [sign] markers like make_items."""
+    items = []
+    for sid in range(1, n_storylines + 1):
+        for sign, agent, pronoun in (("bad", f"Bill{sid}", "he"), ("good", f"Robyn{sid}", "she")):
+            items.append(Item(
+                item_id=make_item_id("ngo_verbatim", sid, "moral", sign),
+                experiment="ngo_verbatim", storyline_id=sid, arm="moral", sign=sign,
+                agent=agent, effect=f"cause a {sign} moral outcome",
+                scenario=f"{agent} pursued a goal, and {pronoun} knew the outcome. [moral] [{sign}]",
+                source="ngo", review_status=status,
+            ))
+    return items
+
+
+@pytest.fixture
+def ngo_verbatim_items() -> list[Item]:
+    return make_ngo_verbatim_items()

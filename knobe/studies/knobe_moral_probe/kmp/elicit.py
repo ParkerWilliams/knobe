@@ -1,4 +1,4 @@
-"""Elicitation (DESIGN.md section 6): every model, both experiments, one script.
+"""Elicitation (DESIGN.md section 6): every model, every experiment, one script.
 
 Reuses knobe's engine (vLLM on the cluster, FakeEngine for tests), model
 registry, seed derivation (sha256 of RELEASE, prompt_id, model_key,

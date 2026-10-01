@@ -134,18 +134,42 @@ def n_samples(qkey: str) -> int:
     return N_PER_WORDING if len(QUESTIONS[qkey]) > 1 else N_SINGLE
 
 
+def unknown_experiment(experiment: str) -> ValueError:
+    """The error every experiment branch raises at its end, so a new or
+    misspelled experiment can never fall into another experiment's branch."""
+    return ValueError(f"unknown experiment {experiment!r}")
+
+
+def adapted_counterpart(experiment: str) -> str:
+    """The experiment whose questions and screening rule an item's experiment
+    uses. ngo_verbatim (Ngo's original text, arm "moral") is asked and screened
+    exactly like the adapted moral items, which live in nonmoral."""
+    if experiment in ("nonmoral", "foundations"):
+        return experiment
+    if experiment == "ngo_verbatim":
+        return "nonmoral"
+    raise unknown_experiment(experiment)
+
+
 def subject_qkeys(item) -> list[str]:
     """What every subject model is asked about one item (DESIGN.md section 5)."""
     qkeys = [*CORE, "significance"]
-    if item.experiment == "nonmoral":
+    experiment = adapted_counterpart(item.experiment)
+    if experiment == "nonmoral":
         return qkeys + list(DOMAIN_CHECKS)
-    qkeys.append("fnd_harm")
-    if item.arm != "harm":
-        qkeys.append(f"fnd_{item.arm}")
-    return qkeys
+    if experiment == "foundations":
+        qkeys.append("fnd_harm")
+        if item.arm != "harm":
+            qkeys.append(f"fnd_{item.arm}")
+        return qkeys
+    raise unknown_experiment(experiment)
 
 
 def screening_qkeys(item) -> list[str]:
     """What the reviewer is asked about one item (DESIGN.md section 4)."""
-    checks = DOMAIN_CHECKS if item.experiment == "nonmoral" else FOUNDATION_CHECKS
-    return ["valence", *checks]
+    experiment = adapted_counterpart(item.experiment)
+    if experiment == "nonmoral":
+        return ["valence", *DOMAIN_CHECKS]
+    if experiment == "foundations":
+        return ["valence", *FOUNDATION_CHECKS]
+    raise unknown_experiment(experiment)

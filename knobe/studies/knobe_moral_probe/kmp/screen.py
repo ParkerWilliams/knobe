@@ -4,6 +4,7 @@ item; pairs pass only if both versions pass.
 Pass rule per item:
   valence              bad <= 3, good >= 7
   nonmoral item        intended domain >= 6 and strictly highest of the three
+                       (ngo_verbatim items are screened exactly like nonmoral moral)
   foundation item      intended foundation >= 6 and strictly higher than harm
   harm control         harm >= 6
 Unparsed reviewer answers are named failures, never silently dropped.
@@ -59,7 +60,12 @@ class ScreeningRawResult(KnobeModel):
 
 
 def intended_check(item: Item) -> str:
-    return f"domain_{item.arm}" if item.experiment == "nonmoral" else f"fnd_{item.arm}"
+    experiment = protocol.adapted_counterpart(item.experiment)
+    if experiment == "nonmoral":
+        return f"domain_{item.arm}"
+    if experiment == "foundations":
+        return f"fnd_{item.arm}"
+    raise protocol.unknown_experiment(experiment)
 
 
 def item_failures(item: Item, scores: dict[str, int | None] | None) -> list[str]:
@@ -83,18 +89,22 @@ def item_failures(item: Item, scores: dict[str, int | None] | None) -> list[str]
     if t < TARGET_MIN:
         failures.append(f"{target_key} {t} < {TARGET_MIN}")
 
-    if item.experiment == "nonmoral":
+    experiment = protocol.adapted_counterpart(item.experiment)
+    if experiment == "nonmoral":
         others = [scores.get(k) for k in protocol.DOMAIN_CHECKS if k != target_key]
         missing = [k for k in protocol.DOMAIN_CHECKS if k != target_key and scores.get(k) is None]
         failures += [f"{k} unparsed" for k in missing]
         if not missing and any(o >= t for o in others):
             failures.append(f"{target_key} is not the highest domain rating")
-    elif item.arm != "harm":
-        h = scores.get("fnd_harm")
-        if h is None:
-            failures.append("fnd_harm unparsed")
-        elif t <= h:
-            failures.append(f"{target_key} {t} not higher than fnd_harm {h}")
+    elif experiment == "foundations":
+        if item.arm != "harm":
+            h = scores.get("fnd_harm")
+            if h is None:
+                failures.append("fnd_harm unparsed")
+            elif t <= h:
+                failures.append(f"{target_key} {t} not higher than fnd_harm {h}")
+    else:
+        raise protocol.unknown_experiment(experiment)
     return failures
 
 
