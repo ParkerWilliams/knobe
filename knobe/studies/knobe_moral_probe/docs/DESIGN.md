@@ -114,7 +114,7 @@ Gemma-2-9B, Llama-3.1-8B and Mistral-7B-v0.1, each pretrained and instruct
 - **Target:** a passing prudential and procedural pair for all 40 storylines,
   so 240 items. Every item, old or new, is re-screened under the new rule
   (§4). As a starting point, rewrite the variants that failed in the pilot
-  (pairs 2, 5, 8, 23, 29, 30 and 31 prudential; 23 and 37 procedural; 27
+  (pairs 2, 5, 8, 29, 30 and 31 prudential; 23 and 37 procedural; 27
   both, per `nonmoral_pilot/outputs/selection_report.md`) and keep the rest
   as drafts.
 - Ngo's moral-good items were dropped in the pilot because the old screening

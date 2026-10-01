@@ -1,11 +1,10 @@
 # knobe_moral_probe: item definitions and review checklist
 
-**Status: DRAFT for researcher review (2026-10-01), revision 2.** This is
-step 1 of the authoring process (DESIGN.md §3.4). No items are drafted
-until it is approved. Revision 2 applies the two 2026-10-01 amendments at
-the top of DESIGN.md (role-noun rule; Ngo goals and verbatim set). Anything
-marked **(proposed)** is not stated in DESIGN.md; accept, change or strike
-it during review. Open decisions are collected in §7.
+**Status: approved by the researcher (2026-10-01), revision 3.** This is
+step 1 of the authoring process (DESIGN.md §3.4). The researcher approved it on 2026-10-01; items may now be drafted. Revision 2 applies the two 2026-10-01 amendments at
+the top of DESIGN.md (role-noun rule; Ngo goals and verbatim set). Rules that are not
+stated in DESIGN.md were marked "proposed" in revision 2 and were all accepted
+on 2026-10-01. Decisions are collected in §7.
 
 ## 1. Purpose and how to use it
 
@@ -34,7 +33,7 @@ it during review. Open decisions are collected in §7.
 6. Plain, concrete wording. No graphic content beyond what the side effect
    requires.
 7. Each good version upholds the same foundation its bad version violates
-   (§3.3; applied to nonmoral domains too, **proposed**).
+   (§3.3; applied to nonmoral domains too).
 
 ### 2.1 Role nouns (2026-10-01 amendment)
 
@@ -43,14 +42,14 @@ it during review. Open decisions are collected in §7.
   arm.
 - Plain, everyday roles: "the manager", "the contractor", "the clerk", "the
   farmer". Avoid loaded roles that carry their own blame or praise ("the
-  CEO", "the politician", "the volunteer") **(proposed list)**.
+  CEO", "the politician", "the volunteer").
 - Gender-neutral roles: "the chair", not "the chairman"; "the council
-  member", not "the councilwoman" **(proposed)**.
+  member", not "the councilwoman".
 - No pronouns for the agent. Repeat the role noun, or restructure ("the
   plan" for "her plan"). Avoid singular "they" where it reads awkwardly.
 - Other people in the story are also named by role ("the roommate", "the
-  neighbor"), not by name, and take no gendered pronouns **(proposed for
-  new items; for Ngo pairs see §7, decision L)**.
+  neighbor"), not by name, and take no gendered pronouns (for Ngo
+  pairs see §7, decision L).
 
 ## 3. Templates and item fields
 
@@ -85,10 +84,10 @@ The [role] knew [the action] would [violate / uphold the norm].
   a confound (§3.3).
 - The background clause states the norm neutrally, so the side effect can
   break it (bad) or uphold it (good). It is identical in both versions
-  **(proposed; follows rule 5)**.
+  (follows rule 5).
 - For harm controls the "norm" is a background fact that sets up who could
   be hurt or helped ("One older member, who has a bad knee, gardens in the
-  plot by the gate.") **(proposed; see §7, decision D)**.
+  plot by the gate.") (See §7, decision D.)
 
 ### 3.3 Shared scaffolds (§3.3, pilot option B)
 
@@ -395,9 +394,8 @@ Which checks apply to Ngo's pairs:
   all about the effect this would have on [X]." X is neutral, not the
   outcome.
 - **A4.** The last clause states the side effect as foreseen ("knew ...
-  would ..."), and the side effect is the last thing in the scenario
-  **(proposed: so that "for this" in the blame and praise wordings points
-  to it)**.
+  would ..."), and the side effect is the last thing in the scenario,
+  so that "for this" in the blame and praise wordings points to it.
 - **A5.** The side effect is not the goal and not a means to it.
 - **A6.** The side effect fits the arm's definition (§4) and none of its
   "Out" cases.
@@ -483,7 +481,7 @@ Which checks apply to Ngo's pairs:
   foundations, about 26 drafted storylines per foundation (20 target ×
   1.3) and 30–40 harm pairs (§3.3).
 - **D3.** No role noun is reused across storylines within a file, so each
-  storyline is easy to tell apart **(proposed)**.
+  storyline is easy to tell apart.
 
 ## 7. Open decisions for the researcher
 
@@ -624,3 +622,30 @@ and pronouns only.
   pronouns with that role, as part of the name-and-pronoun adaptation.
   Gendered kinship nouns (uncle, aunt, mother) stay, since changing them
   changes the story.
+
+**M. Verbatim agent where Ngo's question differs from the scenario. RESOLVED 2026-10-01 (recommendation accepted):**
+the scenario's subject (items 12, 53, 57, 69, 70; `tools/ngo_source.py` AGENT_OVERRIDES), since the question line is not used.
+
+**N. Typography in the verbatim set. RESOLVED 2026-10-01 (recommendation accepted):**
+strip only the surrounding whitespace on each line, join the three clauses with one space, and keep every character inside a line, curly apostrophes included. The adapted pairs use the straight `'`. Recorded once in NOTES.md as a file-wide convention; the B8 lint treats ’ and ' as equal.
+
+**O. Role nouns for Ngo pairs that already use role nouns. RESOLVED 2026-10-01 (recommendation accepted):**
+use the bad version's role noun (as for the goal, decision B2), with three exceptions: gendered roles become neutral (chairman to chair, councilwoman to council member); roles that R3 names ("the CEO") are replaced with a plain role; a D3 collision gets a distinct plain role. Roles that are the story itself ("the terrorist", "the cult leader", "the bomber pilot") are kept and listed in NOTES.md as R3 exceptions. Every choice goes in the role-noun table.
+
+**P. Loaded roles carried into the nonmoral arms. RESOLVED 2026-10-01 (recommendation accepted):**
+accept it, since holding the role constant across arms is the reason for the rule. Flag the storylines with loaded roles in NOTES.md; the analysis plan adds a sensitivity fit that excludes them.
+
+**Q. `source` values for rewritten text. RESOLVED 2026-10-01 (recommendation accepted):**
+`ngo` only for Ngo's own pairs (adapted or verbatim); `pilot` when a pilot variant's text was the starting draft, even if rewritten for role nouns and the template; `new` for everything written fresh, including rewrites of pilot failures and foundations items built on an Ngo storyline. The Ngo-storyline origin is recorded in the scaffold roster.
+
+**R. DESIGN.md §3.2's list of failed pilot variants. RESOLVED 2026-10-01 (recommendation accepted):**
+go by `nonmoral_pilot/outputs/selection_report.md`: prudential 23 passed, so it is removed from the prudential list in DESIGN.md §3.2 (corrected in the same commit). Prudential 23 is still rewritten for role nouns like every other variant.
+
+**S. Who commits applied decisions. RESOLVED 2026-10-01 (recommendation accepted):**
+the researcher runs `tools.review apply`. The agent then commits the resulting CSV and decisions file unchanged, on the researcher's word, after lint is clean. The commit message says the decisions are the researcher's.
+
+**T. Reviewer model for screening. RESOLVED 2026-10-01 (already resolved):**
+`claude-sonnet-4-6` (DESIGN.md amendment "reviewer pin", commits d35b59b and 534738d; `protocol.REVIEWER_MODEL`). It differs from the drafting model. Both IDs are recorded in NOTES.md.
+
+**U. Purpose-written storyline numbering. RESOLVED 2026-10-01 (recommendation accepted):**
+shared scaffolds use storyline IDs 1-36 and purpose-written purity storylines 101-120. For readability only; the `scaffold` field stays authoritative (decision A).
