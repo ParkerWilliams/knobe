@@ -1,3 +1,4 @@
+import hashlib
 import json
 
 import numpy as np
@@ -6,7 +7,7 @@ import pytest
 from knobe.schemas import ResultRecord, append_jsonl
 
 from conftest import make_items, make_ngo_verbatim_items
-from kmp import checks, elicit
+from kmp import checks, elicit, protocol
 from kmp.items import write_items
 
 COLS = ["model_key", "tuning_status", "family", "experiment", "item_id", "qkey", "wording_key", "reversed",
@@ -136,7 +137,44 @@ def test_validity_raises_on_unknown_experiment():
         checks.validity(_frame(rows))
 
 
-# --- main: provenance in the report (amendment C) ---------------------------
+# --- per-experiment grouping, no_data for unrated pairs --------------------
+
+def test_number_rates_are_per_experiment_and_block_a_poorly_parsed_one():
+    m = "gemma-2-9b-instruct"
+    rows = [_row(m, f"n{k}", "blame", "w1", False, "moral", "bad", 5) for k in range(9)]
+    rows.append(_row(m, "v1", "blame", "w1", False, "moral", "bad", None, "ngo_verbatim"))
+    # pooled the cell would be 9/10 = 0.90 and pass; per experiment ngo_verbatim is 0/1
+    nr = checks.number_rates(_frame(rows)).set_index("experiment")
+    assert nr.loc["nonmoral", "passes"] and not nr.loc["ngo_verbatim", "passes"]
+    gate = checks.gate_summary(checks.run_checks(_frame(rows), [], []))
+    assert any(b.startswith("number_rate:") and "ngo_verbatim" in b for b in gate["blocking"])
+
+
+def test_validity_gives_no_data_for_a_model_experiment_without_ratings_and_it_blocks_finetuned():
+    m = "llama-3.1-8b-instruct"
+    rows = _blame_praise_rows(m, "nonmoral", "moral")
+    rows += [_row(m, "f1", q, "w1", False, "loyalty", "bad", None, "foundations") for q in ("blame", "praise")]
+    table = checks.validity(_frame(rows))
+    fnd = table[table["experiment"] == "foundations"].set_index("check")["status"]
+    assert fnd["blame_bad_minus_good"] == "no_data" and fnd["praise_good_minus_bad"] == "no_data"
+    assert fnd["significance_moral_minus_procedural"] == "not_applicable"
+    gate = checks.gate_summary(checks.run_checks(_frame(rows), [], []))
+    blocked = [b for b in gate["blocking"] if b.startswith("validity:") and "foundations" in b]
+    assert len(blocked) == 2 and not any("nan" in b for b in blocked)
+
+
+def test_example_copying_and_anchor_agreement_are_per_experiment_and_question():
+    m = "gemma-2-9b-pretrained"
+    rows = [_row(m, "i1", "blame", "w1", False, "moral", "bad", v) for v in (0, 5, 9, 3)]
+    rows += [_row(m, "i1", "praise", "w1", False, "moral", "bad", v) for v in (1, 2, 3, 4)]
+    rows += [_row(m, "v1", "blame", "w1", False, "moral", "bad", v, "ngo_verbatim") for v in (1, 2)]
+    out = checks.example_copying(_frame(rows)).set_index(["experiment", "qkey"])
+    assert out.loc[("nonmoral", "blame"), "flag"] and not out.loc[("nonmoral", "praise"), "flag"]
+    assert out.loc[("ngo_verbatim", "blame"), "share_example_values"] == 0.0
+    assert {"experiment", "qkey"} <= set(checks.anchor_agreement(_frame(rows)).columns)
+
+
+# --- main: coverage, gates, provenance ---------------------------------------
 
 def _write_results(path, rows):
     with open(path, "w", encoding="utf-8") as fh:
@@ -145,6 +183,25 @@ def _write_results(path, rows):
                 job_id=f"{pid}::{mk}::0", prompt_id=pid, model_key=mk, sample_idx=0, temperature=1.0, seed=1,
                 raw_response="x" if value is None else str(value), parsed_rating=value, parse_ok=value is not None,
                 parse_method="regex", logprobs_0_10=None, model_revision="r", runner_version="t", timestamp=0.0), fh)
+
+
+def _full_rows(items, mk, blame=(8, 2), praise=(1, 7), other=3):
+    """One row per item x subject qkey x wording. blame/praise = (bad, good) ratings on
+    the normal scale; reversed wordings get the written value 10 - x."""
+    fmt = "raw" if mk.endswith("pretrained") else "chat"
+    rows = []
+    for item in items:
+        for qkey in protocol.subject_qkeys(item):
+            for w in protocol.QUESTIONS[qkey]:
+                pair = {"blame": blame, "praise": praise}.get(qkey)
+                v = other if pair is None else pair[0 if item.sign == "bad" else 1]
+                rows.append((f"{item.item_id}::{qkey}::{w.key}::{fmt}", mk, 10 - v if w.reversed else v))
+    return rows
+
+
+def _manifest(model_keys):
+    return {"release": "knobe_moral_probe", "runner_version": "v", "max_tokens": 10, "engine": "fake",
+            "model_keys": sorted(model_keys), "prompts": {"p": "sha"}}
 
 
 def _run_main(tmp_path, items, rows, manifest=None):
@@ -157,20 +214,28 @@ def _run_main(tmp_path, items, rows, manifest=None):
     return code, out_dir
 
 
-def test_main_records_dropped_items_and_manifest(tmp_path, capsys):
+def _gate(out_dir):
+    return json.loads((out_dir / "provenance.json").read_text())["gate"]
+
+
+def test_main_records_dropped_items_manifest_and_provenance(tmp_path, capsys):
     mk = "gemma-2-9b-instruct"
-    rows = [(f"kmp-nv-001-moral-{s}::{q}::w1::chat", mk, v)
-            for q, s, v in (("blame", "bad", 8), ("blame", "good", 2), ("praise", "bad", 1), ("praise", "good", 7))]
-    rows.append(("kmp-nv-099-moral-bad::blame::w1::chat", mk, 5))
-    manifest = {"release": "knobe_moral_probe", "runner_version": "v", "max_tokens": 10, "engine": "fake",
-                "model_keys": [mk], "prompts": {"p": "sha"}}
-    code, out_dir = _run_main(tmp_path, make_ngo_verbatim_items(1), rows, manifest)
+    items = make_ngo_verbatim_items(1)
+    rows = _full_rows(items, mk) + [("kmp-nv-099-moral-bad::blame::w1::chat", mk, 5)]
+    manifest = _manifest([mk])
+    code, out_dir = _run_main(tmp_path, items, rows, manifest)
     assert code == 0
     prov = json.loads((out_dir / "provenance.json").read_text())
     assert prov["n_dropped_unknown_items"] == 1
     assert prov["dropped_unknown_item_ids"] == ["kmp-nv-099-moral-bad"]
     assert prov["experiments"] == ["ngo_verbatim"]
     assert prov["manifest"] == {k: manifest[k] for k in elicit.RUN_FIELDS}
+    assert prov["results_sha256"] == hashlib.sha256((tmp_path / "r.jsonl").read_bytes()).hexdigest()
+    assert prov["items_sha256"] == hashlib.sha256((tmp_path / "items.csv").read_bytes()).hexdigest()
+    assert prov["number_rate_min"] == protocol.NUMBER_RATE_MIN and prov["copy_share_max"] == protocol.COPY_SHARE_MAX
+    assert prov["argv"][0] == "--results" and prov["timestamp_utc"].endswith("+00:00")
+    assert "git_commit" in prov and "git_dirty" in prov
+    assert prov["gate"] == {"blocking": [], "findings": []}
     validity = pd.read_csv(out_dir / "validity.csv").set_index("check")
     assert validity.loc["significance_moral_minus_procedural", "status"] == "not_applicable"
     out = capsys.readouterr()
@@ -188,15 +253,6 @@ def test_main_warns_when_manifest_absent_and_fails_low_number_rate(tmp_path, cap
     assert "no manifest" in err and "number-rate minimum" in err
 
 
-# --- blocking vs non-blocking (DESIGN.md section 8) --------------------------
-
-def _ngo_rows(mk, blame=(8, 2), praise=(1, 7)):
-    """blame/praise = (bad, good) ratings for one ngo_verbatim pair."""
-    fmt = "raw" if mk.endswith("pretrained") else "chat"
-    return [(f"kmp-nv-001-moral-{s}::{q}::w1::{fmt}", mk, v)
-            for q, vals in (("blame", blame), ("praise", praise)) for s, v in zip(("bad", "good"), vals)]
-
-
 @pytest.mark.parametrize("mk, kwargs, code, blocked", [
     ("gemma-2-9b-instruct", dict(blame=(2, 8)), 1, "validity"),         # finetuned validity fail blocks
     ("gemma-2-9b-pretrained", dict(blame=(2, 8)), 0, None),              # pretrained: a finding
@@ -204,27 +260,43 @@ def _ngo_rows(mk, blame=(8, 2), praise=(1, 7)):
     ("gemma-2-9b-pretrained", dict(blame=(9, 0), praise=(0, 9)), 0, None),
 ])
 def test_main_blocks_on_finetuned_problems_only(tmp_path, capsys, mk, kwargs, code, blocked):
-    got, out_dir = _run_main(tmp_path, make_ngo_verbatim_items(1), _ngo_rows(mk, **kwargs))
+    items = make_ngo_verbatim_items(1)
+    got, out_dir = _run_main(tmp_path, items, _full_rows(items, mk, **kwargs), _manifest([mk]))
     assert got == code
-    gate = json.loads((out_dir / "provenance.json").read_text())["gate"]
-    err = capsys.readouterr().err
-    assert "gate summary" in err
+    gate = _gate(out_dir)
+    assert "gate summary" in capsys.readouterr().err
     if blocked:
-        assert len(gate["blocking"]) == 1 and gate["blocking"][0].startswith(blocked)
+        assert gate["blocking"] and all(b.startswith(blocked) for b in gate["blocking"])
     else:
-        assert gate["blocking"] == [] and len(gate["findings"]) == 1
-        assert gate["findings"][0].startswith(("validity", "example_copying"))
+        assert gate["blocking"] == [] and gate["findings"]
+        assert all(f.startswith(("validity", "example_copying")) for f in gate["findings"])
 
 
 def test_main_blocks_on_finetuned_no_data(tmp_path):
-    rows = [r for r in _ngo_rows("gemma-2-9b-instruct") if "::praise::" not in r[0]]
-    code, out_dir = _run_main(tmp_path, make_ngo_verbatim_items(1), rows)
+    items = make_ngo_verbatim_items(1)
+    rows = [(pid, mk, None if "::praise::" in pid else v) for pid, mk, v in _full_rows(items, "gemma-2-9b-instruct")]
+    code, out_dir = _run_main(tmp_path, items, rows, _manifest(["gemma-2-9b-instruct"]))
     assert code == 1
-    gate = json.loads((out_dir / "provenance.json").read_text())["gate"]
-    assert len(gate["blocking"]) == 1 and "no_data" in gate["blocking"][0]
+    assert any(b.startswith("validity:") and "no_data" in b for b in _gate(out_dir)["blocking"])
 
 
-def test_main_clean_run_has_no_blocking_or_findings(tmp_path):
-    code, out_dir = _run_main(tmp_path, make_ngo_verbatim_items(1), _ngo_rows("gemma-2-9b-instruct"))
-    assert code == 0
-    assert json.loads((out_dir / "provenance.json").read_text())["gate"] == {"blocking": [], "findings": []}
+def test_main_blocks_on_manifest_model_with_no_rows(tmp_path):
+    items = make_ngo_verbatim_items(1)
+    rows = _full_rows(items, "gemma-2-9b-instruct")
+    code, out_dir = _run_main(tmp_path, items, rows, _manifest(["gemma-2-9b-instruct", "gemma-2-9b-pretrained"]))
+    assert code == 1
+    assert _gate(out_dir)["blocking"] == ["coverage: gemma-2-9b-pretrained has no rows"]
+
+
+def test_main_blocks_on_missing_expected_cell(tmp_path):
+    items = make_ngo_verbatim_items(1)
+    rows = [r for r in _full_rows(items, "gemma-2-9b-instruct") if "::intentionality::w2::" not in r[0]]
+    code, out_dir = _run_main(tmp_path, items, rows, _manifest(["gemma-2-9b-instruct"]))
+    assert code == 1
+    assert _gate(out_dir)["blocking"] == ["coverage: gemma-2-9b-instruct ngo_verbatim intentionality w2 has no rows"]
+
+
+def test_main_without_manifest_covers_the_models_present(tmp_path):
+    items = make_ngo_verbatim_items(1)
+    code, out_dir = _run_main(tmp_path, items, _full_rows(items, "gemma-2-9b-instruct"))
+    assert code == 0 and _gate(out_dir)["blocking"] == []
