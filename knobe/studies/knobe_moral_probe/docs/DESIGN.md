@@ -28,7 +28,9 @@ supersedes the same-day exemption of Ngo pairs from the same-agent check.
 
 **Amended 2026-10-01 (Ngo goals and verbatim set):** the adaptation also
 aligns the goal where Ngo's two versions differ ("buy a house" / "buy a
-car"), so every adapted pair meets §3.1 in full. Ngo's 40 pairs are also
+car"). Some pairs still differ in the action, its object or who is
+affected (gadget/invention, babies/toddlers); see the open decision on this
+in `DEFINITIONS_AND_CHECKLIST.md`. Ngo's 40 pairs are also
 kept word for word as a separate set, experiment `ngo_verbatim` (IDs
 `kmp-nv-…`, arm `moral`), asked the same questions as the adapted moral
 items. It is exempt from the role-noun and same-agent checks and nothing
