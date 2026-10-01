@@ -83,3 +83,41 @@ def test_text_sha256_propagates_to_every_job():
     jobs = elicit.build_jobs(specs, KEYS)
     assert jobs and all(j.text_sha256 == want[j.prompt_id.rsplit("::", 1)[0]] for j in jobs)
     assert all(j.text_sha256 == prompts.sha256_for_text(j.text) for j in jobs)
+
+
+import pytest  # noqa: E402
+
+from knobe.schemas import ResultRecord, read_jsonl  # noqa: E402
+from kmp.items import write_items  # noqa: E402
+
+
+def _run(tmp_path, items, *extra):
+    items_path, out = tmp_path / "items.csv", tmp_path / "out.jsonl"
+    write_items(items, items_path)
+    code = elicit.main(["--items", str(items_path), "--out", str(out), "--engine", "fake",
+                        "--model-keys", ",".join(KEYS), *extra])
+    return code, out
+
+
+def test_main_writes_every_job_and_resumes(tmp_path):
+    items = make_items("nonmoral", 1)[:2]
+    code, out = _run(tmp_path, items)
+    rows = read_jsonl(out, ResultRecord)
+    assert code == 0
+    assert len(rows) == len(elicit.build_jobs(prompts.build_subject_prompts(items), KEYS))
+    assert all(r.parse_ok for r in rows)                       # FakeEngine always writes a number
+    code, _ = _run(tmp_path, items)
+    assert code == 0 and len(read_jsonl(out, ResultRecord)) == len(rows)
+
+
+def test_main_refuses_unapproved_items(tmp_path):
+    code, _ = _run(tmp_path, make_items("nonmoral", 1, status="draft")[:2])
+    assert code == 2
+
+
+def test_main_refuses_unknown_model_key(tmp_path):
+    items_path = tmp_path / "items.csv"
+    write_items(make_items("nonmoral", 1)[:2], items_path)
+    with pytest.raises(SystemExit):
+        elicit.main(["--items", str(items_path), "--out", str(tmp_path / "o.jsonl"), "--model-keys", "gpt-x"])
+
