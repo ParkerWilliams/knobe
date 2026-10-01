@@ -1,5 +1,14 @@
 # knobe_moral_probe pipeline: implementation plan
 
+> **Executed 2026-10-01; the code has moved past this text.** Code reviews and
+> design amendments (top of `DESIGN.md`) changed many details, e.g. the
+> screening runner lives in `kmp/screen_run.py`, the frame uses
+> `tuning_status`/`cluster_id`/`parsed_rating_raw`, copying is measured
+> against a no-examples run (`COPY_EXCESS_MAX`, not `COPY_SHARE_MAX`), and
+> there is a third experiment, `ngo_verbatim`. The module docstrings and the
+> commit history on branch `knobe_moral_probe` are the current record; this
+> plan is kept as written for provenance.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build the study's pipeline, from items to screening to prompts to elicitation to checks to the analysis frame, and verify it end to end with the fake engine and a scripted reviewer. Real stimuli can then go straight through it.
