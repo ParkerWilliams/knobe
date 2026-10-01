@@ -294,3 +294,49 @@ def test_progress_counts_done_within_current_job_set(tmp_path, capsys):
     capsys.readouterr()
     code, _ = _run(tmp_path, items)
     assert code == 0 and f"{n_jobs} done, 0 remaining of {n_jobs} jobs" in capsys.readouterr().out
+
+
+# --- --no-examples (DESIGN.md section 8, gate 3) ----------------------------
+
+def test_no_examples_run_omits_the_examples_and_records_it(tmp_path):
+    items = make_items("nonmoral", 1)[:2]
+    code, out = _run(tmp_path, items, "--no-examples")
+    assert code == 0 and _manifest(out)["examples"] is False
+    jobs = elicit.build_jobs(prompts.build_subject_prompts(items, ()), KEYS)
+    assert _manifest(out)["prompts"] == {j.prompt_id: j.text_sha256 for j in jobs}
+    example_scenario = protocol.EXAMPLES[0][0]
+    assert all(example_scenario not in j.text for j in jobs)
+    assert {r.job_id for r in read_jsonl(out, ResultRecord)} == {j.job_id for j in jobs}
+
+
+def test_fresh_run_records_examples_true(tmp_path):
+    _, out = _run(tmp_path, make_items("nonmoral", 1)[:2])
+    assert _manifest(out)["examples"] is True
+
+
+@pytest.mark.parametrize("first, second", [((), ("--no-examples",)), (("--no-examples",), ())])
+def test_resume_refuses_switching_examples(tmp_path, capsys, first, second):
+    items = make_items("nonmoral", 1)[:2]
+    _, out = _run(tmp_path, items, *first)
+    n = len(read_jsonl(out, ResultRecord))
+    code, _ = _run(tmp_path, items, *second)
+    assert code == 2 and len(read_jsonl(out, ResultRecord)) == n
+    assert "examples" in capsys.readouterr().err
+
+
+def _drop_examples_field(out):
+    m = _manifest(out)
+    del m["examples"]
+    elicit.manifest_path(out).write_text(json.dumps(m), encoding="utf-8")
+
+
+def test_manifest_without_examples_field_counts_as_a_with_examples_run(tmp_path, capsys):
+    # Manifests written before the flag existed came from with-examples runs.
+    items = make_items("nonmoral", 1)[:2]
+    _, out = _run(tmp_path, items)
+    _drop_examples_field(out)
+    code, _ = _run(tmp_path, items)
+    assert code == 0 and _manifest(out)["examples"] is True
+    _drop_examples_field(out)
+    code, _ = _run(tmp_path, items, "--no-examples")
+    assert code == 2 and "examples" in capsys.readouterr().err

@@ -8,10 +8,16 @@ forced-scoring passes per prompt.
 
 main() appends to --out and resumes by job_id. A sidecar run manifest
 (<out>.manifest.json: release, runner_version, max_tokens, engine,
-model_keys, prompt_id -> text_sha256) is written before generating; a
+model_keys, examples, prompt_id -> text_sha256) is written before generating; a
 resume whose run fields or already-run prompt texts differ is refused
-(exit 2), as is a resume with rows but no manifest. Jobs the engine
+(exit 2), as is a resume with rows but no manifest. A manifest written
+before the examples field existed counts as examples=true (every earlier
+run had the worked examples). Jobs the engine
 returns no response for make the run exit 1; re-running resumes them.
+
+--no-examples (DESIGN.md section 8, example check) renders the prompts
+without the worked examples. Job IDs match a normal run, so it needs its
+own --out; the manifest's examples field refuses a resume across the two.
 
 Concurrency: the whole run holds an exclusive non-blocking fcntl.flock on
 <out>.lock; a second run on the same --out exits 2. Use one --out per
@@ -109,7 +115,14 @@ def to_result(job: Job, request: EngineRequest, response: EngineResponse, model_
 # were produced under; a resume that would mix versions is refused.
 # ---------------------------------------------------------------------------
 
-RUN_FIELDS = ("release", "runner_version", "max_tokens", "engine", "model_keys")
+RUN_FIELDS = ("release", "runner_version", "max_tokens", "engine", "model_keys", "examples")
+# Values for run fields a manifest predates: every run before --no-examples had the examples.
+RUN_FIELD_DEFAULTS = {"examples": True}
+
+
+def run_field(manifest: dict, key: str):
+    """A manifest's run field, falling back to RUN_FIELD_DEFAULTS for older manifests."""
+    return manifest.get(key, RUN_FIELD_DEFAULTS.get(key))
 
 
 def manifest_path(out: Path) -> Path:
@@ -118,21 +131,23 @@ def manifest_path(out: Path) -> Path:
     return out.with_name(out.name + ".manifest.json")
 
 
-def build_manifest(jobs: list[Job], engine: str, model_keys: list[str], max_tokens: int) -> dict:
+def build_manifest(jobs: list[Job], engine: str, model_keys: list[str], max_tokens: int,
+                   examples: bool = True) -> dict:
     return {
         "release": protocol.RELEASE,
         "runner_version": protocol.RUNNER_VERSION,
         "max_tokens": max_tokens,
         "engine": engine,
         "model_keys": sorted(model_keys),
+        "examples": examples,
         "prompts": {j.prompt_id: j.text_sha256 for j in jobs},
     }
 
 
 def manifest_problems(old: dict, new: dict, done_prompt_ids: set[str], limit: int = 5) -> list[str]:
     """Why ``new`` can't resume rows produced under ``old``. Empty = safe."""
-    problems = [f"{k}: manifest has {old.get(k)!r}, this run has {new[k]!r}"
-                for k in RUN_FIELDS if old.get(k) != new[k]]
+    problems = [f"{k}: manifest has {run_field(old, k)!r}, this run has {new[k]!r}"
+                for k in RUN_FIELDS if run_field(old, k) != new[k]]
     old_prompts = old.get("prompts", {})
     bad = sorted(pid for pid in done_prompt_ids
                  if pid in new["prompts"] and old_prompts.get(pid) != new["prompts"][pid])
@@ -195,6 +210,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--registry", type=Path, help="models.yaml (default: the repo's configs/models.yaml)")
     p.add_argument("--batch-size", type=int, default=64)
     p.add_argument("--max-tokens", type=int, default=protocol.MAX_TOKENS)
+    p.add_argument("--no-examples", action="store_true",
+                   help="omit the worked examples (DESIGN.md section 8 example check). "
+                        "Job IDs match a normal run, so use a separate --out file.")
     args = p.parse_args(argv)
 
     model_keys = (sorted(dict.fromkeys(k.strip() for k in args.model_keys.split(",")))
@@ -210,7 +228,8 @@ def main(argv: list[str] | None = None) -> int:
         print("refusing to run:\n  " + "\n  ".join(problems), file=sys.stderr)
         return 2
 
-    jobs = build_jobs(prompts.build_subject_prompts(items), model_keys)
+    examples = () if args.no_examples else protocol.EXAMPLES
+    jobs = build_jobs(prompts.build_subject_prompts(items, examples), model_keys)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     lpath = lock_path(args.out)
     with open(lpath, "a") as lock_fh:
@@ -226,7 +245,7 @@ def _run_locked(args: argparse.Namespace, jobs: list[Job], model_keys: list[str]
     # Missing/empty file -> []; a torn trailing line (crash mid-write) is
     # dropped and the file repaired in place, so that job is simply re-run.
     done_rows = read_results_tolerating_torn_tail(args.out)
-    manifest = build_manifest(jobs, args.engine, model_keys, args.max_tokens)
+    manifest = build_manifest(jobs, args.engine, model_keys, args.max_tokens, examples=not args.no_examples)
     problems = _reconcile_manifest(args.out, manifest, done_rows)
     if problems:
         print(f"refusing to resume {args.out}:\n  " + "\n  ".join(problems), file=sys.stderr)

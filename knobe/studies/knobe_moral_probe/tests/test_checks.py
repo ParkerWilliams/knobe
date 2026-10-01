@@ -15,7 +15,7 @@ COLS = ["model_key", "tuning_status", "family", "experiment", "item_id", "qkey",
 
 
 def _frame(rows):
-    return pd.DataFrame(rows, columns=COLS)
+    return pd.DataFrame(rows, columns=COLS).assign(timestamp=0.0)
 
 
 def _row(model_key, item_id, qkey, wording_key, reversed_, arm, sign, raw, experiment="nonmoral"):
@@ -201,7 +201,7 @@ def _full_rows(items, mk, blame=(8, 2), praise=(1, 7), other=3):
 
 def _manifest(model_keys):
     return {"release": "knobe_moral_probe", "runner_version": "v", "max_tokens": 10, "engine": "fake",
-            "model_keys": sorted(model_keys), "prompts": {"p": "sha"}}
+            "model_keys": sorted(model_keys), "examples": True, "prompts": {"p": "sha"}}
 
 
 def _run_main(tmp_path, items, rows, manifest=None):
@@ -359,3 +359,50 @@ def test_git_failure_leaves_git_fields_none_and_run_completes(tmp_path, monkeypa
     assert code == 0
     prov = json.loads((out_dir / "provenance.json").read_text())
     assert prov["git_commit"] is None and prov["git_dirty"] is None
+
+
+# --- gate 3 (example effect) and gate 5 (throughput) -------------------------
+
+from kmp import frame  # noqa: E402
+
+
+def test_example_effect_is_zero_for_identical_runs():
+    rows = [_row("mistral-7b-v0.1-instruct", f"i{k}", "blame", "w1", False, "moral", "bad", v)
+            for k, v in enumerate([1, 4, 8])]
+    out = checks.example_effect(_frame(rows), _frame(rows))
+    assert out.loc[0, "mean_diff"] == 0.0 and out.loc[0, "r"] == pytest.approx(1.0)
+    assert out.loc[0, "n_items"] == 3 and out.loc[0, "experiment"] == "nonmoral"
+    assert out.loc[0, "tuning_status"] == "finetuned"
+
+
+def test_example_effect_is_per_experiment_and_uses_recoded_ratings():
+    m = "mistral-7b-v0.1-instruct"
+    with_ = [_row(m, f"i{k}", "blame", "w3r", True, "moral", "bad", 10 - v) for k, v in enumerate([2, 5, 8])]
+    with_ += [_row(m, f"v{k}", "blame", "w1", False, "moral", "bad", v, "ngo_verbatim") for k, v in enumerate([1, 2, 3])]
+    without = [_row(m, f"i{k}", "blame", "w1", False, "moral", "bad", v - 1) for k, v in enumerate([2, 5, 8])]
+    out = checks.example_effect(_frame(with_), _frame(without)).set_index("experiment")
+    assert list(out.index) == ["nonmoral"]          # ngo_verbatim has no baseline items
+    assert out.loc["nonmoral", "mean_diff"] == 1.0 and out.loc["nonmoral", "r"] == pytest.approx(1.0)
+
+
+def test_no_examples_run_and_throughput(tmp_path):
+    items = make_items("nonmoral", 1)[:2]
+    items_path = tmp_path / "items.csv"
+    write_items(items, items_path)
+    common = ["--items", str(items_path), "--engine", "fake", "--model-keys", "mistral-7b-v0.1-instruct"]
+    assert elicit.main([*common, "--out", str(tmp_path / "with.jsonl")]) == 0
+    assert elicit.main([*common, "--out", str(tmp_path / "without.jsonl"), "--no-examples"]) == 0
+    with_f = frame.load_frame(tmp_path / "with.jsonl", items)
+    without = frame.load_frame(tmp_path / "without.jsonl", items)
+    assert len(with_f) == len(without)
+    assert set(checks.example_effect(with_f, without)["qkey"]) >= {"blame", "praise", "intentionality"}
+    tp = checks.throughput(with_f)
+    assert list(tp["model_key"]) == ["mistral-7b-v0.1-instruct"] and tp.loc[0, "rows"] == len(with_f)
+    assert tp.loc[0, "tuning_status"] == "finetuned" and tp.loc[0, "seconds"] >= 0
+
+
+def test_throughput_rows_per_second():
+    rows = [_row("gemma-2-9b-pretrained", f"i{k}", "blame", "w1", False, "moral", "bad", 5) for k in range(5)]
+    f = _frame(rows).assign(timestamp=[100.0, 101.0, 102.0, 103.0, 104.0])
+    tp = checks.throughput(f)
+    assert tp.loc[0, "seconds"] == 4.0 and tp.loc[0, "rows_per_second"] == 1.25

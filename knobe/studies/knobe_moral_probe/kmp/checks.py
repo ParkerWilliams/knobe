@@ -19,8 +19,9 @@ main() exits 1 (gate_summary) if anything blocks:
 Section 8's "a finding, not a blocker" covers pretrained models only: their
 validity and copying problems are reported as findings and do not change
 the exit code. Anchor agreement (gate 4) has no threshold in DESIGN.md, so
-it is reported only. Gates 3 (example check) and 5 (throughput) live in
-Task 12, not here.
+it is reported only. Gate 3's example effect (example_effect: item-mean
+ratings with vs without the worked examples) and gate 5's throughput (rows
+per second per model) are reported only: DESIGN.md gives them no threshold.
 
 Every table is split by experiment: experiments differ in items and arms,
 so pooling them can hide one that parses or behaves badly. Validity is per
@@ -50,7 +51,7 @@ import numpy as np
 import pandas as pd
 
 from kmp import protocol
-from kmp.elicit import RUN_FIELDS, manifest_path
+from kmp.elicit import RUN_FIELDS, manifest_path, run_field
 from kmp.frame import analysis_rows, load_frame
 from kmp.items import Item, load_items
 
@@ -186,6 +187,37 @@ def example_copying(frame: pd.DataFrame) -> pd.DataFrame:
     return _with_model_cols(share, frame)
 
 
+def example_effect(with_examples: pd.DataFrame, without_examples: pd.DataFrame) -> pd.DataFrame:
+    """Gate 3, per model x experiment x question: item-mean ratings (after
+    recoding) with vs without the worked examples, over items rated in both.
+    Format-only examples should leave these unchanged: r near 1, mean_diff
+    (with - without) near 0. Reported only (no DESIGN.md threshold)."""
+    keys = ["model_key", "experiment", "qkey"]
+
+    def item_means(f: pd.DataFrame) -> pd.Series:
+        return analysis_rows(f).groupby([*keys, "item_id"])["rating"].mean()
+    both = pd.concat({"with": item_means(with_examples), "without": item_means(without_examples)},
+                     axis=1).dropna()
+    rows = []
+    for (model_key, experiment, qkey), d in both.groupby(level=keys):
+        a, b = d["with"].to_numpy(), d["without"].to_numpy()
+        rows.append(dict(model_key=model_key, experiment=experiment, qkey=qkey, n_items=len(d),
+                         r=_pearson(a, b), mean_diff=float((a - b).mean())))
+    out = pd.DataFrame(rows, columns=[*keys, "n_items", "r", "mean_diff"])
+    return _with_model_cols(out, with_examples)
+
+
+def throughput(frame: pd.DataFrame) -> pd.DataFrame:
+    """Gate 5, per model: rows per second from the result timestamps, to
+    confirm the cost estimate (CLAUDE.md section 4). seconds is first to last
+    row, so a resumed run's pause counts as run time and lowers the rate."""
+    g = frame.groupby("model_key")["timestamp"].agg(["min", "max", "size"]).reset_index()
+    seconds = g["max"] - g["min"]
+    out = pd.DataFrame({"model_key": g["model_key"], "rows": g["size"], "seconds": seconds,
+                        "rows_per_second": g["size"] / seconds.clip(lower=1e-9)})
+    return _with_model_cols(out, frame)
+
+
 def expected_cells(items: list[Item]) -> set[tuple[str, str, str]]:
     """(experiment, qkey, wording_key) cells the items should produce for every model."""
     return {(item.experiment, qkey, w.key)
@@ -217,7 +249,7 @@ def read_manifest(results: Path) -> dict | None:
               f"engine and model_keys are unrecorded, and coverage uses the model_keys present", file=sys.stderr)
         return None
     full = json.loads(mpath.read_text(encoding="utf-8"))
-    return {k: full.get(k) for k in RUN_FIELDS}
+    return {k: run_field(full, k) for k in RUN_FIELDS}
 
 
 def _sha256(path: Path) -> str:
@@ -264,7 +296,7 @@ def provenance(frame: pd.DataFrame, results: Path, items: Path, manifest: dict |
 def run_checks(frame: pd.DataFrame, items: list[Item], model_keys: list[str]) -> dict[str, pd.DataFrame]:
     return {"coverage": coverage(frame, items, model_keys), "number_rates": number_rates(frame),
             "anchor_agreement": anchor_agreement(frame), "validity": validity(frame),
-            "example_copying": example_copying(frame)}
+            "example_copying": example_copying(frame), "throughput": throughput(frame)}
 
 
 def gate_summary(tables: dict[str, pd.DataFrame]) -> dict[str, list[str]]:
