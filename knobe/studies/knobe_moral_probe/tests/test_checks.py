@@ -300,3 +300,62 @@ def test_main_without_manifest_covers_the_models_present(tmp_path):
     items = make_ngo_verbatim_items(1)
     code, out_dir = _run_main(tmp_path, items, _full_rows(items, "gemma-2-9b-instruct"))
     assert code == 0 and _gate(out_dir)["blocking"] == []
+
+
+# --- foundations coverage, unexpected models, provenance details -------------
+
+def test_foundations_expected_cells_follow_the_arms_present():
+    items = [i for i in make_items("foundations", 1) if i.arm != "loyalty"]
+    cells = checks.expected_cells(items)
+    assert not any(q == "fnd_loyalty" for _, q, _ in cells)
+    assert ("foundations", "fnd_purity", "w1") in cells and ("foundations", "fnd_harm", "w1") in cells
+
+
+def test_main_blocks_on_missing_foundations_cell(tmp_path):
+    mk = "llama-3.1-8b-instruct"
+    items = [i for i in make_items("foundations", 1) if i.arm != "loyalty"]
+    rows = [r for r in _full_rows(items, mk) if "::fnd_purity::" not in r[0]]
+    code, out_dir = _run_main(tmp_path, items, rows, _manifest([mk]))
+    assert code == 1
+    assert _gate(out_dir)["blocking"] == [f"coverage: {mk} foundations fnd_purity w1 has no rows"]
+
+
+def test_main_blocks_on_model_not_in_manifest(tmp_path):
+    items = make_ngo_verbatim_items(1)
+    rows = _full_rows(items, "gemma-2-9b-instruct") + _full_rows(items, "gemma-2-9b-pretrained")
+    code, out_dir = _run_main(tmp_path, items, rows, _manifest(["gemma-2-9b-instruct"]))
+    assert code == 1
+    assert _gate(out_dir)["blocking"] == ["coverage: unexpected model gemma-2-9b-pretrained "
+                                          "(in the results but not in the manifest's model_keys)"]
+
+
+def test_provenance_details(tmp_path, monkeypatch):
+    mk = "gemma-2-9b-instruct"
+    items = make_ngo_verbatim_items(1)
+    monkeypatch.chdir(tmp_path)
+    code, out_dir = _run_main(tmp_path, items, _full_rows(items, mk), _manifest([mk]))
+    assert code == 0
+    prov = json.loads((out_dir / "provenance.json").read_text())
+    assert prov["example_answers"] == [0, 5, 9]
+    assert prov["manifest_sha256"] == hashlib.sha256(
+        elicit.manifest_path(tmp_path / "r.jsonl").read_bytes()).hexdigest()
+    assert prov["cwd"] == str(tmp_path.resolve())
+    assert prov["results"] == str((tmp_path / "r.jsonl").resolve())
+    assert prov["items"] == str((tmp_path / "items.csv").resolve())
+
+
+def test_provenance_without_manifest_has_no_manifest_hash(tmp_path):
+    items = make_ngo_verbatim_items(1)
+    _, out_dir = _run_main(tmp_path, items, _full_rows(items, "gemma-2-9b-instruct"))
+    assert json.loads((out_dir / "provenance.json").read_text())["manifest_sha256"] is None
+
+
+def test_git_failure_leaves_git_fields_none_and_run_completes(tmp_path, monkeypatch):
+    def boom(*args, **kwargs):
+        raise FileNotFoundError("git")
+    monkeypatch.setattr(checks.subprocess, "run", boom)
+    items = make_ngo_verbatim_items(1)
+    code, out_dir = _run_main(tmp_path, items, _full_rows(items, "gemma-2-9b-instruct"))
+    assert code == 0
+    prov = json.loads((out_dir / "provenance.json").read_text())
+    assert prov["git_commit"] is None and prov["git_dirty"] is None

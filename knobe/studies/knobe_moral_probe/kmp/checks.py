@@ -6,8 +6,12 @@ gate summary).
 
 main() exits 1 (gate_summary) if anything blocks:
   - coverage: a model_key (from the manifest, else the models present) with
-    no rows, or an expected model x experiment x question x wording cell
-    (items x protocol.subject_qkeys) with no rows;
+    no rows; a model in the results but not in the manifest's model_keys
+    (a run must match its manifest); or an expected model x experiment x
+    question x wording cell (items x protocol.subject_qkeys) with no rows.
+    Coverage is cell-level, not item-level: a cell counts as covered if any
+    item has a row in it, so an item missing from an otherwise covered cell
+    is not caught here;
   - gate 1: a model x experiment x question x wording cell below the
     number-rate minimum;
   - gate 2, finetuned models: an applicable validity check that fails or
@@ -24,6 +28,9 @@ model x experiment, not per wording: its contrasts average over a
 question's wordings (after recoding), since a sign or arm contrast needs
 the whole item set and per-wording cells would be too small to read.
 Example copying is per model x experiment x question.
+
+provenance.json's git_dirty covers the whole repo, so untracked scratch
+files count as dirty too; it errs on the safe side.
 
 Number rates count parse_ok over every row (an unparsed answer is a miss).
 Everything computed from ratings runs on frame.analysis_rows (NaN-free).
@@ -186,15 +193,20 @@ def expected_cells(items: list[Item]) -> set[tuple[str, str, str]]:
 
 
 def coverage(frame: pd.DataFrame, items: list[Item], model_keys: list[str]) -> pd.DataFrame:
-    """Rows per expected model x experiment x qkey x wording cell (n_rows 0 = missing)."""
+    """Rows per model x expected experiment x qkey x wording cell (n_rows 0 =
+    missing). Models are model_keys plus any model in the frame;
+    expected_model is False for the latter (not in the manifest)."""
     cols = ["model_key", "experiment", "qkey", "wording_key"]
     cells = pd.DataFrame(sorted(expected_cells(items)), columns=cols[1:])
-    models = pd.DataFrame({"model_key": sorted(set(model_keys))})
-    grid = models.merge(cells, how="cross") if len(cells) else pd.DataFrame(columns=cols)
+    expected = set(model_keys)
+    all_models = sorted(expected | set(frame["model_key"]))
+    models = pd.DataFrame({"model_key": all_models, "expected_model": [m in expected for m in all_models]})
+    grid = (models.merge(cells, how="cross") if len(cells)
+            else pd.DataFrame({c: pd.Series(dtype=object) for c in ["model_key", "expected_model", *cols[1:]]}))
     counts = frame.groupby(cols).size().rename("n_rows").reset_index()
     out = grid.merge(counts, on=cols, how="left")
     out["n_rows"] = out["n_rows"].fillna(0).astype(int)
-    return out[[*cols, "n_rows"]]
+    return out[[*cols, "expected_model", "n_rows"]]
 
 
 def read_manifest(results: Path) -> dict | None:
@@ -229,16 +241,19 @@ def provenance(frame: pd.DataFrame, results: Path, items: Path, manifest: dict |
     """What the tables were computed from: inputs and hashes, code state,
     thresholds, the frame's dropped rows and the run manifest (None if absent)."""
     commit = _git("rev-parse", "HEAD")
-    status = _git("status", "--porcelain")
+    status = _git("status", "--porcelain")   # whole repo, untracked files included
+    mpath = manifest_path(results).resolve()
     return {
         "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "argv": list(argv),
+        "argv": list(argv), "cwd": str(Path.cwd().resolve()),
         "git_commit": commit.strip() if commit else None,
         "git_dirty": bool(status.strip()) if status is not None else None,
-        "results": str(results), "results_sha256": _sha256(results),
-        "items": str(items), "items_sha256": _sha256(items),
+        "results": str(Path(results).resolve()), "results_sha256": _sha256(results),
+        "items": str(Path(items).resolve()), "items_sha256": _sha256(items),
         "number_rate_min": protocol.NUMBER_RATE_MIN, "copy_share_max": protocol.COPY_SHARE_MAX,
-        "manifest_path": str(manifest_path(results)), "manifest": manifest,
+        "example_answers": sorted(protocol.EXAMPLE_ANSWERS),
+        "manifest_path": str(mpath), "manifest": manifest,
+        "manifest_sha256": _sha256(mpath) if mpath.exists() else None,
         "experiments": sorted(frame["experiment"].unique()),
         "n_rows": len(frame), "n_rated_rows": len(analysis_rows(frame)),
         "n_dropped_unknown_items": frame.attrs.get("n_dropped_unknown_items"),
@@ -260,11 +275,15 @@ def gate_summary(tables: dict[str, pd.DataFrame]) -> dict[str, list[str]]:
     blocking: list[str] = []
     findings: list[str] = []
     cov = tables["coverage"]
+    unexpected = set(cov.loc[~cov["expected_model"].astype(bool), "model_key"])
+    for model_key in sorted(unexpected):
+        blocking.append(f"coverage: unexpected model {model_key} (in the results but not in the manifest's model_keys)")
     per_model = cov.groupby("model_key")["n_rows"].sum()
     absent = set(per_model[per_model == 0].index)
     for model_key in sorted(absent):
         blocking.append(f"coverage: {model_key} has no rows")
-    for r in cov[(cov["n_rows"] == 0) & ~cov["model_key"].isin(absent)].itertuples():
+    skip = absent | unexpected
+    for r in cov[(cov["n_rows"] == 0) & ~cov["model_key"].isin(skip)].itertuples():
         blocking.append(f"coverage: {r.model_key} {r.experiment} {r.qkey} {r.wording_key} has no rows")
     nr = tables["number_rates"]
     for r in nr[~nr["passes"]].itertuples():
