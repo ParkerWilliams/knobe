@@ -120,6 +120,8 @@ def design_problems(items: list[Item]) -> list[str]:
         signs = sorted(m.sign for m in members)
         if signs != ["bad", "good"]:
             problems.append(f"pair {key[1:]} has signs {signs}, needs exactly one bad and one good")
-        elif members[0].agent != members[1].agent:
+        elif members[0].agent != members[1].agent and not all(m.source == "ngo" for m in members):
+            # Ngo et al.'s original pairs are kept verbatim (DESIGN.md section 3.2) and
+            # use different agents per version, so they are exempt from this check.
             problems.append(f"pair {key[1:]}: agents differ ({members[0].agent!r} vs {members[1].agent!r})")
     return problems

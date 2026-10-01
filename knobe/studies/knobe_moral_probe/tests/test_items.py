@@ -106,3 +106,28 @@ def test_design_problems_duplicate_and_mixed(nonmoral_items):
     problems = design_problems(mixed)
     assert any("duplicate item_id" in p for p in problems)
     assert any("mixed experiments" in p for p in problems)
+
+
+def _ngo_pair(source="ngo", good_source=None):
+    bad = _item(item_id="kmp-nm-001-moral-bad", storyline_id=1, arm="moral", sign="bad",
+                agent="Bill", source=source)
+    good = _item(item_id="kmp-nm-001-moral-good", storyline_id=1, arm="moral", sign="good",
+                 agent="Robyn", source=good_source or source)
+    return bad, good
+
+
+def test_design_problems_ngo_pair_exempt_from_same_agent():
+    assert design_problems(list(_ngo_pair())) == []
+
+
+def test_design_problems_non_ngo_pair_still_needs_same_agent():
+    assert any("agents differ" in p for p in design_problems(list(_ngo_pair(source="new"))))
+
+
+def test_design_problems_mixed_source_pair_still_needs_same_agent():
+    assert any("agents differ" in p for p in design_problems(list(_ngo_pair(good_source="new"))))
+
+
+def test_design_problems_ngo_pair_missing_partner_still_reported():
+    problems = design_problems([_ngo_pair()[0]])
+    assert any("needs exactly one bad and one good" in p for p in problems)
