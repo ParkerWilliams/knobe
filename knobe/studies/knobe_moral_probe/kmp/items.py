@@ -144,8 +144,24 @@ def write_items(items: list[Item], path: str | Path) -> None:
             writer.writerow(item.model_dump())
 
 
-def design_problems(items: list[Item]) -> list[str]:
-    """Every structural problem, as readable strings. Empty list = clean."""
+Stage = Literal["authoring", "selected"]
+STAGES: tuple[str, ...] = ("authoring", "selected")
+
+
+def design_problems(items: list[Item], stage: Stage = "authoring") -> list[str]:
+    """Every structural problem, as readable strings. Empty list = clean.
+
+    stage="authoring" (the default, strict): an authored items file, before
+    screening (kmp.screen_run checks its input this way).
+    stage="selected": screening's selected_items.csv (kmp.elicit). Skips only
+    the shared-storyline completeness rules (harm pair + non-harm pair),
+    because decision A keeps the surviving pairs of a shared storyline that
+    lost one side (kmp.screen.shared_without_harm / shared_without_nonharm).
+    Everything else still applies: duplicates, mixed experiments, pair
+    completeness, same agent, pronouns, one scaffold value per storyline and
+    no harm item in a purpose-written storyline."""
+    if stage not in STAGES:
+        raise ValueError(f"unknown stage {stage!r}; expected one of {STAGES}")
     problems = [f"duplicate item_id {k}" for k, n in sorted(Counter(i.item_id for i in items).items()) if n > 1]
     experiments = sorted({i.experiment for i in items})
     if len(experiments) > 1:
@@ -159,7 +175,7 @@ def design_problems(items: list[Item]) -> list[str]:
             problems.append(f"pair {key[1:]} has signs {signs}, needs exactly one bad and one good")
         elif key[0] not in ROLE_NOUN_EXEMPT and members[0].agent != members[1].agent:
             problems.append(f"pair {key[1:]}: agents differ ({members[0].agent!r} vs {members[1].agent!r})")
-    problems += _scaffold_problems(items)
+    problems += _scaffold_problems(items, require_complete=stage == "authoring")
     for item in sorted(items, key=lambda i: i.item_id):
         if item.experiment in ROLE_NOUN_EXEMPT:
             continue
@@ -178,10 +194,11 @@ def _complete_arms(members: list[Item]) -> set[str]:
     return {arm for arm, s in signs.items() if s == {"bad", "good"}}
 
 
-def _scaffold_problems(items: list[Item]) -> list[str]:
+def _scaffold_problems(items: list[Item], require_complete: bool = True) -> list[str]:
     """Foundations storylines (decision A): one scaffold value per storyline;
-    a shared storyline has a harm pair and at least one non-harm pair; a
-    purpose-written storyline has no harm item at all."""
+    a purpose-written storyline has no harm item at all; and, when
+    require_complete (authoring), a shared storyline has a harm pair and at
+    least one non-harm pair."""
     problems = []
     storylines: dict[int, list[Item]] = defaultdict(list)
     for item in items:
@@ -194,6 +211,8 @@ def _scaffold_problems(items: list[Item]) -> list[str]:
             continue
         arms = _complete_arms(members)
         if scaffolds == ["shared"]:
+            if not require_complete:
+                continue
             if "harm" not in arms:
                 problems.append(f"storyline {sid}: shared scaffold needs a harm pair (one bad, one good)")
             if not arms - {"harm"}:

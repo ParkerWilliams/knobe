@@ -257,7 +257,7 @@ def main(argv: list[str] | None = None) -> int:
         p.error(f"unknown model key(s) {unknown}")
 
     items = load_items(args.items)
-    problems = design_problems(items) + [f"{i.item_id} is {i.review_status}, not approved"
+    problems = design_problems(items, stage="selected") + [f"{i.item_id} is {i.review_status}, not approved"
                                          for i in items if i.review_status != "approved"]
     if problems:
         print("refusing to run:\n  " + "\n  ".join(problems), file=sys.stderr)

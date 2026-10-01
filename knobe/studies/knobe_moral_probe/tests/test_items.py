@@ -252,3 +252,47 @@ def test_purpose_storyline_must_not_have_a_harm_pair(foundation_items):
 def test_scaffold_rules_do_not_touch_other_experiments(nonmoral_items):
     assert design_problems(nonmoral_items) == []
     assert design_problems(make_ngo_verbatim_items(2)) == []
+
+
+# ---- check stages: authoring (strict, default) vs selected (screening output) ----
+
+def _lost_harm(foundation_items):
+    return [i for i in foundation_items if not (i.storyline_id == 1 and i.arm == "harm")]
+
+
+def test_default_stage_is_authoring(foundation_items):
+    items = _lost_harm(foundation_items)
+    assert design_problems(items) == design_problems(items, stage="authoring")
+    assert any("harm pair" in p for p in design_problems(items))
+
+
+def test_selected_stage_accepts_storylines_that_lost_one_side(foundation_items):
+    assert design_problems(_lost_harm(foundation_items), stage="selected") == []
+    harm_only = [i for i in foundation_items if i.storyline_id == 1 and i.arm == "harm"]
+    assert design_problems(harm_only, stage="selected") == []
+
+
+def test_selected_stage_keeps_the_structural_checks(foundation_items, nonmoral_items):
+    items = _lost_harm(foundation_items)
+    assert any("needs exactly one bad and one good" in p
+               for p in design_problems(_drop(items, "kmp-mf-001-purity-good"), stage="selected"))
+    mixed_scaffold = [i.model_copy(update={"scaffold": "purpose"}) if i.item_id == "kmp-mf-001-purity-bad" else i
+                      for i in items]
+    assert any("mixed scaffold" in p for p in design_problems(mixed_scaffold, stage="selected"))
+    harm = [i.model_copy(update={"scaffold": "purpose", "storyline_id": 9,
+                                 "item_id": i.item_id.replace("-001-", "-009-")})
+            for i in foundation_items if i.storyline_id == 1 and i.arm == "harm"]
+    assert any("purpose" in p for p in design_problems(make_purpose_storyline(9) + harm, stage="selected"))
+    assert any("duplicate item_id" in p for p in design_problems(items + items[:1], stage="selected"))
+    assert any("mixed experiments" in p for p in design_problems(items + nonmoral_items, stage="selected"))
+    agents = [i.model_copy(update={"agent": "Someone"}) if i.item_id == "kmp-nm-001-moral-good" else i
+              for i in nonmoral_items]
+    assert any("agents differ" in p for p in design_problems(agents, stage="selected"))
+    pronoun = [i.model_copy(update={"scenario": "She left."}) if i.item_id == "kmp-nm-001-moral-good" else i
+               for i in nonmoral_items]
+    assert any("gendered pronoun" in p for p in design_problems(pronoun, stage="selected"))
+
+
+def test_unknown_stage_raises(nonmoral_items):
+    with pytest.raises(ValueError, match="stage"):
+        design_problems(nonmoral_items, stage="final")

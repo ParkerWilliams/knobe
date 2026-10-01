@@ -270,7 +270,7 @@ def main(argv: list[str] | None = None) -> int:
     started = _utc_now()
 
     items = load_items(args.items)
-    problems = design_problems(items)
+    problems = design_problems(items, stage="authoring")
     if problems:
         print("refusing to screen:\n  " + "\n  ".join(problems), file=sys.stderr)
         return 2
