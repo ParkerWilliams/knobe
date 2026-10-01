@@ -120,3 +120,90 @@ def test_report_has_pair_key_and_scores(nonmoral_items):
     assert report[0]["pair_key"] == report[1]["pair_key"] == "nonmoral|1|prudential"
     assert report[0]["scores"]["valence"] == 1 and report[1]["scores"] == {}
     assert report[1]["failures"] == "not rated"
+
+
+import asyncio  # noqa: E402
+
+from knobe.schemas import CurationRawResult, read_jsonl  # noqa: E402
+from pydantic import ValidationError  # noqa: E402
+from kmp import prompts  # noqa: E402
+from kmp.items import load_items, write_items  # noqa: E402
+
+
+class ScriptedClient:
+    """Answers by rule from the [arm] [sign] markers in make_items' scenarios.
+    `flaky` holds (item_id, qkey) keys that answer 'unclear' on first call."""
+
+    def __init__(self, items, flaky=()):
+        self.lookup = {p.text: (p.item_id, p.qkey) for p in prompts.build_screening_prompts(items)}
+        self.items = {i.item_id: i for i in items}
+        self.flaky = set(flaky)
+        self.calls = []
+
+    async def complete(self, prompt, max_tokens):
+        item_id, qkey = self.lookup[prompt]
+        self.calls.append((item_id, qkey))
+        if (item_id, qkey) in self.flaky:
+            self.flaky.discard((item_id, qkey))
+            return "unclear"
+        item = self.items[item_id]
+        if qkey == "valence":
+            return "1" if item.sign == "bad" else "9"
+        return "8" if qkey == screen.intended_check(item) else "2"
+
+
+def test_run_screening_resumes_and_retries_unparsed_once(tmp_path, nonmoral_items):
+    out = tmp_path / "raw.jsonl"
+    ps = prompts.build_screening_prompts(nonmoral_items)
+    flaky_key = (ps[0].item_id, ps[0].qkey)
+    client = ScriptedClient(nonmoral_items, flaky=[flaky_key])
+    asyncio.run(screen.run_screening(ps, client, "scripted", out))
+    rows = read_jsonl(out, screen.ScreeningRawResult)
+    assert len(rows) == len(ps) + 1                                  # one retry
+    assert screen.scores_from_raw(rows)[flaky_key[0]][flaky_key[1]] is not None
+    asyncio.run(screen.run_screening(ps, client, "scripted", out))
+    assert len(read_jsonl(out, screen.ScreeningRawResult)) == len(rows)       # resume: nothing re-asked
+
+
+def test_all_pairs_pass_under_scripted_reviewer(tmp_path, foundation_items):
+    out = tmp_path / "raw.jsonl"
+    ps = prompts.build_screening_prompts(foundation_items)
+    asyncio.run(screen.run_screening(ps, ScriptedClient(foundation_items), "scripted", out))
+    selected, _ = screen.select_pairs(foundation_items, screen.scores_from_raw(read_jsonl(out, screen.ScreeningRawResult)))
+    assert len(selected) == len(foundation_items)
+
+
+def test_main_mock_writes_outputs(tmp_path, nonmoral_items):
+    items_path = tmp_path / "items.csv"
+    write_items(nonmoral_items, items_path)
+    code = screen.main(["--items", str(items_path), "--out-dir", str(tmp_path / "s"), "--mock"])
+    assert code == 0
+    assert (tmp_path / "s" / "screening_raw.jsonl").exists()
+    assert (tmp_path / "s" / "selection_report.csv").exists()
+    load_items(tmp_path / "s" / "selected_items.csv")                 # valid, possibly empty
+
+
+def _raw_row(field):
+    return screen.ScreeningRawResult(variant_id="kmp-x", field=field, value=3, ok=True, raw="3",
+                                     reviewer_model="scripted", timestamp=0.0, text_sha256="0" * 64)
+
+
+def test_screening_raw_result_round_trips_kmp_qkeys_and_rejects_unknown():
+    for qkey in sorted(screen.SCREENING_QKEYS):
+        row = _raw_row(qkey)
+        assert screen.ScreeningRawResult.model_validate_json(row.model_dump_json()) == row
+    for bad in ("blame", "moral_relevance", "nonsense"):
+        with pytest.raises(ValidationError):
+            _raw_row(bad)
+
+
+def test_screening_raw_result_fields_cover_curation_raw_result():
+    assert set(CurationRawResult.model_fields) <= set(screen.ScreeningRawResult.model_fields)
+
+
+def test_raw_rows_carry_prompt_hash(tmp_path, nonmoral_items):
+    out = tmp_path / "raw.jsonl"
+    ps = prompts.build_screening_prompts(nonmoral_items)
+    asyncio.run(screen.run_screening(ps, ScriptedClient(nonmoral_items), "scripted", out))
+    want = {(p.item_id, p.qkey): p.text_sha256 for p in ps}
+    assert {(r.variant_id, r.field): r.text_sha256 for r in read_jsonl(out, screen.ScreeningRawResult)} == want
