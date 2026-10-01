@@ -83,7 +83,9 @@ the same command to resume.
 **Elicitation.** One `--out` per experiment × model set; a second run on the
 same `--out` is refused. Each `--out` gets a run manifest,
 `<out>.manifest.json`, which is committable provenance; the `.lock` and
-`.starts.jsonl` sidecars are gitignored, like the results. Every model is
+`.starts.jsonl` sidecars and any `.manifest.json.*.tmp` left by an
+interrupted manifest write are gitignored, like the results. `--engine` is
+required (`vllm` on the cluster; `fake` only for tests). Every model is
 run twice: with the worked examples, and with `--no-examples` into its own
 `--out`. The copying check needs the no-examples run as its baseline. This
 roughly doubles pilot elicitation, so count it in the cost estimate.
@@ -106,5 +108,7 @@ above `protocol.COPY_EXCESS_MAX` (missing baseline counts). Reported as
 findings only: the same validity and copying problems for pretrained
 models, anchor agreement, the example effect and throughput. The tables and
 `provenance.json` (inputs and hashes, git state, thresholds, manifests,
-gate summary) go to `--out-dir`. A run on `--engine fake` can legitimately
-exit 1: random answers can fail the instruct validity checks.
+gate summary) go to `--out-dir`; they are small summary tables and are
+committed (repo CLAUDE.md §3). A run on `--engine fake` prints a WARNING and
+records `fake_engine: true` in `provenance.json`; it can legitimately exit 1,
+since random answers can fail the instruct validity checks.

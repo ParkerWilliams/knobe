@@ -390,6 +390,7 @@ def provenance(frame: pd.DataFrame, results: Path, items: Path, manifest: dict |
         "number_rate_min": protocol.NUMBER_RATE_MIN, "copy_excess_max": protocol.COPY_EXCESS_MAX,
         "example_answers": sorted(protocol.EXAMPLE_ANSWERS),
         "manifest_path": str(mpath), "manifest": manifest,
+        "fake_engine": (manifest.get("engine") == "fake") if manifest is not None else None,
         "manifest_sha256": _sha256(mpath) if mpath.exists() else None,
         "baseline": str(Path(baseline).resolve()) if baseline is not None else None,
         "baseline_sha256": _sha256(baseline) if baseline is not None else None,
@@ -469,6 +470,10 @@ def main(argv: list[str] | None = None) -> int:
     items = load_items(args.items)
     frame = load_frame(args.results, items)
     manifest = read_manifest(args.results)
+    if manifest is not None and manifest.get("engine") == "fake":
+        print("checks: " + "!" * 70 + f"\nchecks: WARNING: these results come from the FAKE engine "
+              f"(manifest engine='fake'), not a model.\nchecks: The tables are for testing the pipeline "
+              f"only; recorded as fake_engine=true in provenance.json.\nchecks: " + "!" * 70, file=sys.stderr)
     problems = []
     if manifest is not None and manifest.get("examples") is False:
         problems.append(f"{args.results} is a no-examples run (its manifest has examples=false); "

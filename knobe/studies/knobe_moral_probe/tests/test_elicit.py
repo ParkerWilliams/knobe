@@ -119,7 +119,8 @@ def test_main_refuses_unknown_model_key(tmp_path):
     items_path = tmp_path / "items.csv"
     write_items(make_items("nonmoral", 1)[:2], items_path)
     with pytest.raises(SystemExit):
-        elicit.main(["--items", str(items_path), "--out", str(tmp_path / "o.jsonl"), "--model-keys", "gpt-x"])
+        elicit.main(["--items", str(items_path), "--out", str(tmp_path / "o.jsonl"), "--engine", "fake",
+                     "--model-keys", "gpt-x"])
 
 
 # --- Run manifest (amendment A) and missing responses (amendment B) -------

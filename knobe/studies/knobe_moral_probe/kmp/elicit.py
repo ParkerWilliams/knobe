@@ -240,7 +240,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--out", required=True, type=Path,
                    help="results JSONL (appended; resumable); one --out per model set; "
                         "concurrent runs on the same --out are refused")
-    p.add_argument("--engine", default="fake", choices=["fake", "vllm", "hf"])
+    # Required, no default: a cluster command that forgot --engine used to get
+    # the fake engine and write random answers into a real --out.
+    p.add_argument("--engine", required=True, choices=["fake", "vllm", "hf"],
+                   help="vllm on the cluster; fake only for tests and dry runs")
     p.add_argument("--model-keys", help=f"comma-separated subset of {', '.join(MODEL_KEYS)}")
     p.add_argument("--registry", type=Path, help="models.yaml (default: the repo's configs/models.yaml)")
     p.add_argument("--batch-size", type=int, default=64)

@@ -1,8 +1,11 @@
-# Per-response elicitation dumps are regenerable from committed code + the
-# release string; they are published to results_dist/, not committed here
-# (repo CLAUDE.md section 3). Screening raw files ARE committed: they are
-# small and are the provenance the pilots lacked.
+# Per-response elicitation dumps (and their .starts.jsonl sidecars) are
+# regenerable from committed code + the release string; they are published to
+# results_dist/, not committed here (repo CLAUDE.md section 3). Committed:
+# each run's <out>.manifest.json, the screening outputs (small, and the
+# provenance the pilots lacked) and the checks outputs in outputs/checks/
+# (gate tables and provenance.json: small summary tables, CLAUDE.md section 3).
 outputs/elicit/*.jsonl
-outputs/checks/*/
-__pycache__/
 outputs/elicit/*.lock
+# Leftovers of an interrupted atomic manifest write (kmp.elicit.write_manifest).
+outputs/elicit/*.manifest.json.*.tmp
+__pycache__/
