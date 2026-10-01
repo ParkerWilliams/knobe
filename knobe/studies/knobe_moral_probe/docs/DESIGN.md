@@ -13,12 +13,18 @@ References: `docs/REFERENCES.md` in this study folder (BibTeX in
 reviewer client, one power-script exception to the README). Where they
 differ, the amendments win.
 
-**Amended 2026-10-01:** Ngo's original pairs are exempt from §3.1's "same
-agent" rule. §3.2 keeps them verbatim, and Ngo's bad and good versions use
-different agents (Bill/Robyn, Roger/Renee, the CEO/the chairman), sometimes
-with different goals. `kmp.items.design_problems` skips the agent check
-only when both members of a pair have `source=ngo`; every other check still
-applies to them. New and pilot-derived pairs follow §3.1 in full.
+**Amended 2026-10-01 (role-noun rule):** every item names its agent by a
+role noun ("the manager", "the contractor"), never a personal name, and uses
+no gendered pronouns. One role noun per storyline, shared by both versions
+and every arm. Names and pronouns carry gender, ethnicity, age and class
+cues that models respond to; in Ngo's pairs they also changed with the sign
+(Bill harms, Robyn helps), confounding agent with sign, and mixed
+conventions across arms would confound agent with arm. Ngo's 40 pairs are
+therefore minimally adapted: names and pronouns become one shared role
+noun, and nothing else changes. The paper discloses this as an adaptation.
+`kmp.items.design_problems` checks same-agent for every pair and flags
+gendered pronouns; personal names are a review-checklist item. This
+supersedes the same-day exemption of Ngo pairs from the same-agent check.
 
 ## 1. What the study asks
 
@@ -50,6 +56,7 @@ Gemma-2-9B, Llama-3.1-8B and Mistral-7B-v0.1, each pretrained and instruct
 ### 3.1 Shared authoring rules (every pair)
 
 - Same agent, same main action, same unrelated goal in both versions.
+- The agent is a role noun, never a personal name; no gendered pronouns.
 - An indifference clause: "[Agent] did not care at all about the effect this
   would have on X."
 - A foreseen side effect. The questions are about the side effect, never
@@ -63,7 +70,8 @@ Gemma-2-9B, Llama-3.1-8B and Mistral-7B-v0.1, each pretrained and instruct
 
 ### 3.2 Nonmoral experiment (Ngo's 3-clause template)
 
-- **Moral:** Ngo's 40 original pairs, unchanged. The side effect affects
+- **Moral:** Ngo's 40 original pairs, unchanged except for the role-noun
+  adaptation (amendment above). The side effect affects
   other people's welfare or rights.
 - **Prudential:** the side effect affects only the agent's own interests
   (health, money, reputation, safety). No one else is affected.
