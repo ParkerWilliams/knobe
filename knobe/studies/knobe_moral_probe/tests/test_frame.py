@@ -31,8 +31,23 @@ def test_load_frame_recodes_reversed_and_joins_items(tmp_path):
     assert d.loc["w1", "arm"] == "moral" and d.loc["w1", "storyline_id"] == 1
 
 
-def test_load_frame_rejects_unknown_items(tmp_path):
+def test_reversed_recode_uses_protocol_and_keeps_missing(tmp_path):
+    iid = "kmp-nm-001-moral-bad"
     path = tmp_path / "r.jsonl"
-    _write(path, [("kmp-nm-099-moral-bad::blame::w1::raw", "gemma-2-9b-pretrained", 3)])
-    with pytest.raises(ValueError, match="not in the items file"):
-        frame.load_frame(path, make_items("nonmoral", 1))
+    _write(path, [(f"{iid}::blame::w1::chat", "gemma-2-9b-instruct", 2),
+                  (f"{iid}::blame::w3r::chat", "gemma-2-9b-instruct", 2),
+                  (f"{iid}::blame::w3r::raw", "gemma-2-9b-pretrained", None)])
+    d = frame.load_frame(path, make_items("nonmoral", 1))
+    r = d.set_index(["wording_key", "fmt"])["rating"]
+    assert r[("w1", "chat")] == 2 and r[("w3r", "chat")] == 8
+    assert math.isnan(r[("w3r", "raw")])
+
+
+def test_load_frame_drops_rows_for_unknown_items_and_reports(tmp_path, capsys):
+    path = tmp_path / "r.jsonl"
+    _write(path, [("kmp-nm-099-moral-bad::blame::w1::raw", "gemma-2-9b-pretrained", 3),
+                  ("kmp-nm-001-moral-bad::blame::w1::raw", "gemma-2-9b-pretrained", 4)])
+    d = frame.load_frame(path, make_items("nonmoral", 1))
+    assert list(d["item_id"]) == ["kmp-nm-001-moral-bad"]
+    assert d.attrs["n_dropped_unknown_items"] == 1
+    assert "dropped 1" in capsys.readouterr().err
