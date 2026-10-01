@@ -158,6 +158,7 @@ def shared_without_nonharm(items: list[Item], selected: list[Item]) -> list[int]
     shared, with_harm, with_other = _shared_survivors(items, selected)
     return sorted((shared & with_harm) - with_other)
 
+
 if __name__ == "__main__":
     from kmp.screen_run import main
 

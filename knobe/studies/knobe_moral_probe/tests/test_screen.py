@@ -580,3 +580,22 @@ def test_main_records_shared_without_nonharm(tmp_path, foundation_items, monkeyp
     err = capsys.readouterr().err
     assert "shared storylines without a surviving non-harm pair: [2]" in err
     assert "excluded from the primary pooled contrast" in err
+
+
+def test_main_records_argv_concurrency_and_git_state(tmp_path, nonmoral_items):
+    argv = ["--items", str(_write(nonmoral_items, tmp_path)), "--out-dir", str(tmp_path / "s"), "--mock",
+            "--concurrency", "3"]
+    assert screen_run.main(argv) == 0
+    meta = json.loads((tmp_path / "s" / "screening_meta.json").read_text())
+    assert meta["argv"] == argv and meta["concurrency"] == 3
+    assert isinstance(meta["git_dirty"], bool) and meta["git_commit"]
+
+
+def test_main_git_failure_leaves_git_fields_none(tmp_path, nonmoral_items, monkeypatch):
+    def boom(*args, **kwargs):
+        raise FileNotFoundError("git")
+    monkeypatch.setattr(screen_run.subprocess, "run", boom)
+    assert screen_run.main(["--items", str(_write(nonmoral_items, tmp_path)), "--out-dir", str(tmp_path / "s"),
+                            "--mock"]) == 0
+    meta = json.loads((tmp_path / "s" / "screening_meta.json").read_text())
+    assert meta["git_commit"] is None and meta["git_dirty"] is None

@@ -226,12 +226,26 @@ def file_sha256(path: Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def _git_commit() -> str | None:
+def _git(*args: str) -> str | None:
+    """git output run from this package's folder, or None if git fails.
+    Same as kmp.checks._git; kept separate because kmp.checks' tests patch
+    that module's subprocess."""
     try:
-        return subprocess.run(["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parent,
-                              capture_output=True, text=True, check=True).stdout.strip() or None
-    except (OSError, subprocess.CalledProcessError):
+        return subprocess.run(["git", *args], cwd=Path(__file__).resolve().parent, capture_output=True,
+                              text=True, check=True, timeout=30).stdout
+    except (OSError, subprocess.SubprocessError):
         return None
+
+
+def _git_commit() -> str | None:
+    out = _git("rev-parse", "HEAD")
+    return (out.strip() or None) if out is not None else None
+
+
+def _git_dirty() -> bool | None:
+    """Whole repo, untracked files included (like kmp.checks' provenance)."""
+    out = _git("status", "--porcelain")
+    return bool(out.strip()) if out is not None else None
 
 
 def _utc_now() -> str:
@@ -254,6 +268,7 @@ def pin_problems(reviewer_model: str | None) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    argv = sys.argv[1:] if argv is None else list(argv)
     p = argparse.ArgumentParser(
         description="knobe_moral_probe screening",
         epilog="An error that survives the retries aborts the run; re-run the same command to resume.")
@@ -327,6 +342,9 @@ def main(argv: list[str] | None = None) -> int:
         "started_utc": started,
         "finished_utc": _utc_now(),
         "git_commit": _git_commit(),
+        "git_dirty": _git_dirty(),
+        "argv": argv,
+        "concurrency": args.concurrency,
         "items_path": str(args.items),
         "items_sha256": file_sha256(args.items),
         "reviewer_model": reviewer,

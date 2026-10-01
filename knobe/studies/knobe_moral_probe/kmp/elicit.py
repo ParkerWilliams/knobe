@@ -72,7 +72,7 @@ class Job:
     text: str
     fmt: Literal["raw", "chat"]
     # sha256 of the exact prompt text, carried from PromptSpec so a resume
-    # (Task 6) can detect that a done job was produced from different text.
+    # can detect that a done job was produced from different text.
     text_sha256: str
 
     @property
