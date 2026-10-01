@@ -123,10 +123,13 @@ def test_report_has_pair_key_and_scores(nonmoral_items):
 
 
 import asyncio  # noqa: E402
+import json  # noqa: E402
+
+import pandas as pd  # noqa: E402
 
 from knobe.schemas import CurationRawResult, read_jsonl  # noqa: E402
 from pydantic import ValidationError  # noqa: E402
-from kmp import prompts  # noqa: E402
+from kmp import prompts, protocol  # noqa: E402
 from kmp.items import load_items, write_items  # noqa: E402
 
 
@@ -207,3 +210,36 @@ def test_raw_rows_carry_prompt_hash(tmp_path, nonmoral_items):
     asyncio.run(screen.run_screening(ps, ScriptedClient(nonmoral_items), "scripted", out))
     want = {(p.item_id, p.qkey): p.text_sha256 for p in ps}
     assert {(r.variant_id, r.field): r.text_sha256 for r in read_jsonl(out, screen.ScreeningRawResult)} == want
+
+
+def _scripted_scores(tmp_path, items):
+    out = tmp_path / "raw.jsonl"
+    asyncio.run(screen.run_screening(prompts.build_screening_prompts(items), ScriptedClient(items), "scripted", out))
+    return screen.scores_from_raw(read_jsonl(out, screen.ScreeningRawResult))
+
+
+def test_pair_summary_counts_singleton_pairs_by_pair_key(tmp_path, nonmoral_items):
+    approved = [i for i in nonmoral_items if i.item_id != _get(nonmoral_items, "moral", "good").item_id]
+    _, report = screen.select_pairs(approved, _scripted_scores(tmp_path, approved))
+    summary = screen.pair_summary(report)
+    assert summary["moral"] == {"pairs": 2, "pairs_passed": 1}            # rows // 2 would give 1 pair
+    assert summary["prudential"] == summary["procedural"] == {"pairs": 2, "pairs_passed": 2}
+
+
+def test_main_records_thresholds_pair_counts_and_json_scores(tmp_path, nonmoral_items):
+    singleton = _get(nonmoral_items, "moral", "good")
+    items = [i.model_copy(update={"review_status": "draft"}) if i.item_id == singleton.item_id else i
+             for i in nonmoral_items]
+    items_path = tmp_path / "items.csv"
+    write_items(items, items_path)
+    assert screen.main(["--items", str(items_path), "--out-dir", str(tmp_path / "s"), "--mock"]) == 0
+    meta = json.loads((tmp_path / "s" / "screening_meta.json").read_text())
+    assert meta["reviewer_model"] == "mock" and meta["reviewer_temperature"] is None
+    assert (meta["valence_bad_max"], meta["valence_good_min"], meta["target_min"]) == (
+        screen.VALENCE_BAD_MAX, screen.VALENCE_GOOD_MIN, screen.TARGET_MIN)
+    assert {arm: c["pairs"] for arm, c in meta["pairs_by_arm"].items()} == {
+        "moral": 2, "procedural": 2, "prudential": 2}
+    report = pd.read_csv(tmp_path / "s" / "selection_report.csv")
+    assert set(report["pair_key"]) and len(report) == len(nonmoral_items) - 1
+    for cell in report["scores"]:
+        assert set(json.loads(cell)) == {"valence", *protocol.DOMAIN_CHECKS}

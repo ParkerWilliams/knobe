@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 import sys
 import time
 from collections import defaultdict
@@ -41,6 +42,7 @@ VALENCE_GOOD_MIN = 7
 # Starting value from configs/curation.yaml moral_min=6 (the main study's instrument).
 # Deliberately NOT read from that config, so main-pipeline edits can't silently change kmp screening.
 TARGET_MIN = 6
+REVIEWER_TEMPERATURE = 0.0                         # DESIGN.md section 4
 
 
 SCREENING_QKEYS = frozenset(("valence", *protocol.DOMAIN_CHECKS, *protocol.FOUNDATION_CHECKS))
@@ -143,7 +145,7 @@ class ScreeningClient(AnthropicClient):
     async def complete(self, prompt: str, max_tokens: int) -> str:
         try:
             resp = await self._client.messages.create(
-                model=self.model, max_tokens=max_tokens, temperature=0.0,
+                model=self.model, max_tokens=max_tokens, temperature=REVIEWER_TEMPERATURE,
                 thinking={"type": "disabled"},
                 messages=[{"role": "user", "content": prompt}],
             )
@@ -195,6 +197,31 @@ async def run_screening(prompts: list[ScreeningPrompt], client, reviewer_model: 
             await asyncio.gather(*(ask(p) for p in todo))
 
 
+def pair_summary(report: list[dict]) -> dict[str, dict[str, int]]:
+    """Pairs and passed pairs per arm, counted by unique pair_key (a pair with
+    one approved member is still one pair, and never passes)."""
+    out: dict[str, dict[str, int]] = {}
+    for arm in sorted({r["arm"] for r in report}):
+        keys = {r["pair_key"]: r["pair_passed"] for r in report if r["arm"] == arm}
+        out[arm] = {"pairs": len(keys), "pairs_passed": sum(keys.values())}
+    return out
+
+
+def screening_meta(reviewer_model: str, temperature: float | None, n_prompts: int,
+                   summary: dict[str, dict[str, int]]) -> dict:
+    """The settings that produced this selection, so a later threshold change shows in the record."""
+    return {
+        "reviewer_model": reviewer_model,
+        "reviewer_temperature": temperature,
+        "review_max_tokens": protocol.REVIEW_MAX_TOKENS,
+        "valence_bad_max": VALENCE_BAD_MAX,
+        "valence_good_min": VALENCE_GOOD_MIN,
+        "target_min": TARGET_MIN,
+        "n_prompts": n_prompts,
+        "pairs_by_arm": summary,
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="knobe_moral_probe screening")
     p.add_argument("--items", required=True, type=Path, help="authored items CSV")
@@ -214,20 +241,26 @@ def main(argv: list[str] | None = None) -> int:
     print(f"screening {len(approved)} approved of {len(items)} items")
 
     if args.mock:
-        client, reviewer = MockClient(unparseable_rate=0.0), "mock"
+        client, reviewer, temperature = MockClient(unparseable_rate=0.0), "mock", None
     else:
         check_reviewer_not_subject(args.reviewer_model, load_registry(default_registry_path()))
         client, reviewer = ScreeningClient(args.reviewer_model), args.reviewer_model
+        temperature = REVIEWER_TEMPERATURE
 
     raw_path = args.out_dir / "screening_raw.jsonl"
-    asyncio.run(run_screening(build_screening_prompts(approved), client, reviewer, raw_path,
-                              concurrency=args.concurrency))
+    screening_prompts = build_screening_prompts(approved)
+    asyncio.run(run_screening(screening_prompts, client, reviewer, raw_path, concurrency=args.concurrency))
     selected, report = select_pairs(approved, scores_from_raw(_read_raw(raw_path)))
     write_items(selected, args.out_dir / "selected_items.csv")
-    report_df = pd.DataFrame(report, columns=["item_id", "storyline_id", "arm", "sign", "pair_passed", "failures"])
+    report_df = pd.DataFrame(report, columns=["item_id", "pair_key", "storyline_id", "arm", "sign",
+                                              "pair_passed", "failures", "scores"])
+    report_df["scores"] = [json.dumps(sc, sort_keys=True) for sc in report_df["scores"]]
     report_df.to_csv(args.out_dir / "selection_report.csv", index=False)
-    summary = report_df.assign(pairs=1).groupby("arm")[["pair_passed", "pairs"]].sum() // 2
-    print(summary.rename(columns={"pair_passed": "pairs_passed"}).to_string())
+    summary = pair_summary(report)
+    meta = screening_meta(reviewer, temperature, len(screening_prompts), summary)
+    (args.out_dir / "screening_meta.json").write_text(json.dumps(meta, indent=2, sort_keys=True) + "\n",
+                                                       encoding="utf-8")
+    print(pd.DataFrame.from_dict(summary, orient="index").to_string())
     return 0
 
 
