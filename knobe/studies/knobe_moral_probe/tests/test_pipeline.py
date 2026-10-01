@@ -91,7 +91,8 @@ def test_pipeline(tmp_path, experiment):
     # pretrained finding), and the exit code follows gate_summary. Coverage and
     # number rates are fully determined by the pipeline and must never block.
     assert checks.number_rates(d)["passes"].all()
-    tables = checks.run_checks(d, load_items(selected_path), KEYS, baseline)
+    tables = checks.run_checks(d, load_items(selected_path), KEYS, baseline, elicit.read_model_starts(out))
+    assert tables["throughput"]["start_recorded"].all()
     assert (tables["coverage"]["n_rows"] > 0).all()
     assert set(tables["example_copying"]["status"]) <= {"pass", "fail"}       # the baseline covers every cell
     assert set(tables["example_effect"]["model_key"]) == set(KEYS)

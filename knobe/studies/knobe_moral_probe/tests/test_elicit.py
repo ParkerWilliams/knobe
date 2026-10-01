@@ -340,3 +340,35 @@ def test_manifest_without_examples_field_counts_as_a_with_examples_run(tmp_path,
     _drop_examples_field(out)
     code, _ = _run(tmp_path, items, "--no-examples")
     assert code == 2 and "examples" in capsys.readouterr().err
+
+
+# --- per-model start times (throughput, DESIGN.md section 8 gate 5) ----------
+
+def test_run_records_a_start_per_model_before_its_first_row(tmp_path):
+    items = make_items("nonmoral", 1)[:2]
+    _, out = _run(tmp_path, items)
+    starts = elicit.read_model_starts(out)
+    rows = read_jsonl(out, ResultRecord)
+    assert set(starts) == set(KEYS)
+    for k in KEYS:
+        assert starts[k] <= min(r.timestamp for r in rows if r.model_key == k)
+
+
+def test_resume_appends_starts_and_reading_keeps_the_earliest(tmp_path):
+    items = make_items("nonmoral", 1)[:2]
+    _, out = _run(tmp_path, items)
+    first = elicit.read_model_starts(out)
+    lines = out.read_text(encoding="utf-8").splitlines(keepends=True)
+    out.write_text("".join(lines[:-3]), encoding="utf-8")      # last model's tail needs re-running
+    _run(tmp_path, items)
+    entries = elicit.starts_path(out).read_text(encoding="utf-8").splitlines()
+    assert len(entries) == len(KEYS) + 1 and elicit.read_model_starts(out) == first
+    _run(tmp_path, items)                                       # nothing left: no new entry
+    assert len(elicit.starts_path(out).read_text(encoding="utf-8").splitlines()) == len(KEYS) + 1
+
+
+def test_read_model_starts_skips_a_torn_line_and_tolerates_absence(tmp_path):
+    out = tmp_path / "o.jsonl"
+    assert elicit.read_model_starts(out) == {}
+    elicit.starts_path(out).write_text('{"model_key": "m", "start": 5.0}\n{"model_key": "m", "st', encoding="utf-8")
+    assert elicit.read_model_starts(out) == {"m": 5.0}

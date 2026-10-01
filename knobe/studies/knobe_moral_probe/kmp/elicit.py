@@ -19,6 +19,11 @@ returns no response for make the run exit 1; re-running resumes them.
 without the worked examples. Job IDs match a normal run, so it needs its
 own --out; the manifest's examples field refuses a resume across the two.
 
+Throughput (DESIGN.md section 8, gate 5): just before a model's first batch
+in each invocation, one line {"model_key", "start"} (time.time()) is
+appended to <out>.starts.jsonl. Append-only and written under the lock, so
+resumes add lines; read_model_starts keeps each model's earliest start.
+
 Concurrency: the whole run holds an exclusive non-blocking fcntl.flock on
 <out>.lock; a second run on the same --out exits 2. Use one --out per
 model set. flock on NFS/Lustre depends on mount options (e.g. Lustre
@@ -157,6 +162,36 @@ def manifest_problems(old: dict, new: dict, done_prompt_ids: set[str], limit: in
     return problems
 
 
+def starts_path(out: Path) -> Path:
+    """``<out>.starts.jsonl``: per-model start times, one line per model per invocation."""
+    out = Path(out)
+    return out.with_name(out.name + ".starts.jsonl")
+
+
+def record_model_start(out: Path, model_key: str) -> None:
+    with open(starts_path(out), "a", encoding="utf-8") as fh:
+        fh.write(json.dumps({"model_key": model_key, "start": time.time()}) + "\n")
+        fh.flush()
+        os.fsync(fh.fileno())
+
+
+def read_model_starts(out: Path) -> dict[str, float]:
+    """Each model's earliest recorded start; {} if the sidecar is absent.
+    Unreadable lines (a torn last write) are skipped."""
+    path = starts_path(out)
+    if not path.exists():
+        return {}
+    starts: dict[str, float] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            entry = json.loads(line)
+            model_key, start = entry["model_key"], float(entry["start"])
+        except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+            continue
+        starts[model_key] = min(start, starts.get(model_key, start))
+    return starts
+
+
 def lock_path(out: Path) -> Path:
     """``<out>.lock``, held (flock) for the whole run."""
     out = Path(out)
@@ -270,6 +305,7 @@ def _run_locked(args: argparse.Namespace, jobs: list[Job], model_keys: list[str]
             model_id, _family, pinned = resolve_model_id(model_key, registry)
             revision = engine.load(model_id, revision=pinned)
             print(f"[elicit] {model_key} ({model_id}@{revision}): {len(model_jobs)} jobs")
+            record_model_start(args.out, model_key)
             for start in range(0, len(model_jobs), args.batch_size):
                 batch = model_jobs[start:start + args.batch_size]
                 requests = [to_request(j, args.max_tokens) for j in batch]

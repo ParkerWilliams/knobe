@@ -15,7 +15,13 @@ COLS = ["model_key", "tuning_status", "family", "experiment", "item_id", "qkey",
 
 
 def _frame(rows):
-    return pd.DataFrame(rows, columns=COLS).assign(timestamp=0.0)
+    """job_id = the row's cell plus its position in it, so the k-th row of a cell in
+    a with-examples frame pairs with the k-th row of that cell in a baseline frame."""
+    df = pd.DataFrame(rows, columns=COLS).assign(timestamp=0.0)
+    cell = ["model_key", "item_id", "qkey", "wording_key"]
+    pos = df.groupby(cell).cumcount().astype(str)
+    df["job_id"] = df[cell].astype(str).agg("::".join, axis=1) + "::" + pos
+    return df
 
 
 def _row(model_key, item_id, qkey, wording_key, reversed_, arm, sign, raw, experiment="nonmoral"):
@@ -83,11 +89,27 @@ def test_example_copying_natural_answers_in_both_runs_are_not_copying():
 
 def test_example_copying_counts_the_written_number_not_the_recoded_one():
     # Written 9 under a reversed wording is recoded to 1 but is still a copied example
-    # answer, in both runs; unparsed rows are left out of both shares.
-    with_ = _blame_rows((9, 9, 3, 4), wording="w3r", reversed_=True) + _blame_rows((None,))
-    without = _blame_rows((9, 1, 3, 4), wording="w3r", reversed_=True) + _blame_rows((None, None))
-    out = checks.example_copying(_frame(with_), _frame(without))
-    assert (out.loc[0, "share_with"], out.loc[0, "share_without"], out.loc[0, "excess"]) == (0.5, 0.25, 0.25)
+    # answer, in both runs. Both shares are over job_ids rated in both runs, so a job
+    # unparsed in either run is left out of both.
+    with_ = _blame_rows((9, 9, 3, 4), wording="w3r", reversed_=True) + _blame_rows((None, 0))
+    without = _blame_rows((9, 1, 3, 4), wording="w3r", reversed_=True) + _blame_rows((5, None))
+    r = checks.example_copying(_frame(with_), _frame(without)).iloc[0]
+    assert (r["share_with"], r["share_without"], r["excess"]) == (0.5, 0.25, 0.25)
+    assert (r["n_with"], r["n_without"], r["n_paired"]) == (5, 5, 4)
+
+
+def test_example_copying_pairs_jobs_so_differing_parse_failures_do_not_mislead():
+    # Unpaired: with = 2/3 example values, without = 0/2 -> excess 0.67, a fail.
+    # Paired, only the third job is rated in both runs: 0 vs 0.
+    out = checks.example_copying(_frame(_blame_rows((0, 0, 3, None))), _frame(_blame_rows((None, None, 3, 3))))
+    r = out.iloc[0]
+    assert (r["n_with"], r["n_without"], r["n_paired"]) == (3, 2, 1)
+    assert r["excess"] == 0.0 and r["status"] == "pass"
+
+
+def test_example_copying_with_no_paired_jobs_is_no_data():
+    r = checks.example_copying(_frame(_blame_rows((0, None))), _frame(_blame_rows((None, 0)))).iloc[0]
+    assert (r["n_with"], r["n_without"], r["n_paired"]) == (1, 1, 0) and r["status"] == "no_data"
 
 
 def test_example_copying_threshold_edge(monkeypatch):
@@ -104,8 +126,9 @@ def test_copy_excess_max_is_the_proposed_value():
 
 def test_example_copying_without_a_baseline_is_no_data():
     out = checks.example_copying(_frame(_blame_rows((0, 5, 9, 3))))
-    assert out.loc[0, "share_with"] == 0.75 and np.isnan(out.loc[0, "share_without"])
+    assert np.isnan(out.loc[0, "share_with"]) and np.isnan(out.loc[0, "share_without"])   # paired: none
     assert out.loc[0, "status"] == "no_data" and np.isnan(out.loc[0, "excess"])
+    assert (out.loc[0, "n_with"], out.loc[0, "n_without"], out.loc[0, "n_paired"]) == (4, 0, 0)
 
 
 def test_example_copying_is_no_data_where_the_baseline_lacks_the_cell():
@@ -482,11 +505,43 @@ def test_no_examples_run_and_throughput(tmp_path):
     assert tp.loc[0, "tuning_status"] == "finetuned" and tp.loc[0, "seconds"] >= 0
 
 
-def test_throughput_rows_per_second():
-    rows = [_row("gemma-2-9b-pretrained", f"i{k}", "blame", "w1", False, "moral", "bad", 5) for k in range(5)]
-    f = _frame(rows).assign(timestamp=[100.0, 101.0, 102.0, 103.0, 104.0])
-    tp = checks.throughput(f)
+def _tp_frame(timestamps):
+    rows = [_row("gemma-2-9b-pretrained", f"i{k}", "blame", "w1", False, "moral", "bad", 5)
+            for k in range(len(timestamps))]
+    return _frame(rows).assign(timestamp=list(timestamps))
+
+
+def test_throughput_without_a_recorded_start_uses_the_row_span():
+    tp = checks.throughput(_tp_frame([100.0, 101.0, 102.0, 103.0, 104.0]))
     assert tp.loc[0, "seconds"] == 4.0 and tp.loc[0, "rows_per_second"] == 1.25
+    assert not tp.loc[0, "start_recorded"]
+
+
+def test_throughput_uses_the_recorded_start():
+    tp = checks.throughput(_tp_frame([100.0, 101.0, 102.0, 103.0, 104.0]), {"gemma-2-9b-pretrained": 99.0})
+    assert tp.loc[0, "seconds"] == 5.0 and tp.loc[0, "rows_per_second"] == 1.0 and tp.loc[0, "start_recorded"]
+
+
+def test_throughput_zero_span_without_a_start_is_nan():
+    tp = checks.throughput(_tp_frame([7.0, 7.0]))
+    assert tp.loc[0, "seconds"] == 0.0 and np.isnan(tp.loc[0, "rows_per_second"])
+
+
+def test_main_throughput_reads_the_elicit_start_times(tmp_path):
+    items = make_items("nonmoral", 1)[:2]
+    items_path, out = tmp_path / "items.csv", tmp_path / "with.jsonl"
+    write_items(items, items_path)
+    assert elicit.main(["--items", str(items_path), "--engine", "fake", "--model-keys",
+                        "mistral-7b-v0.1-instruct", "--out", str(out)]) == 0
+    starts = elicit.read_model_starts(out)
+    code = checks.main(["--results", str(out), "--items", str(items_path), "--out-dir", str(tmp_path / "c")])
+    assert code == 1                                            # copying no_data: no baseline
+    tp = pd.read_csv(tmp_path / "c" / "throughput.csv")
+    assert tp.loc[0, "start_recorded"]
+    assert tp.loc[0, "seconds"] == pytest.approx(frame.load_frame(out, items)["timestamp"].max()
+                                                 - starts["mistral-7b-v0.1-instruct"])
+    prov = json.loads((tmp_path / "c" / "provenance.json").read_text())
+    assert prov["model_starts"] == starts
 
 
 # --- copying against a no-examples baseline (DESIGN.md amendment 2026-10-01) --
@@ -530,6 +585,38 @@ def test_main_refuses_mismatched_baseline_manifest(tmp_path, capsys, change, mes
     assert code == 2 and not out_dir.exists()
     err = capsys.readouterr().err
     assert "baseline" in err and message in err
+
+
+def test_main_refuses_baseline_with_a_different_prompt_set(tmp_path, capsys):
+    mk = "gemma-2-9b-instruct"
+    items = make_ngo_verbatim_items(1)
+    manifest = {**_manifest([mk]), "prompts": {"a": "1", "b": "2"}}
+    code, _ = _run_main(tmp_path, items, _full_rows(items, mk), manifest,
+                        baseline_manifest={**manifest, "examples": False, "prompts": {"a": "9", "c": "3"}})
+    err = capsys.readouterr().err
+    assert code == 2 and "prompt_id" in err and "b" in err and "c" in err
+
+
+def test_main_accepts_baseline_prompts_with_different_hashes(tmp_path):
+    # The texts differ (no examples), so hashes differ; only the id sets must match.
+    mk = "gemma-2-9b-instruct"
+    items = make_ngo_verbatim_items(1)
+    manifest = _manifest([mk])
+    code, _ = _run_main(tmp_path, items, _full_rows(items, mk), manifest,
+                        baseline_manifest={**manifest, "examples": False, "prompts": {"p": "different"}})
+    assert code == 0
+
+
+def test_main_records_the_baseline_dropped_items(tmp_path):
+    mk = "gemma-2-9b-instruct"
+    items = make_ngo_verbatim_items(1)
+    rows = _full_rows(items, mk)
+    code, out_dir = _run_main(tmp_path, items, rows, _manifest([mk]),
+                              baseline_rows=rows + [("kmp-nv-099-moral-bad::blame::w1::chat", mk, 5)])
+    prov = json.loads((out_dir / "provenance.json").read_text())
+    assert code == 0 and prov["n_dropped_unknown_items"] == 0
+    assert prov["baseline_n_dropped_unknown_items"] == 1
+    assert prov["baseline_dropped_unknown_item_ids"] == ["kmp-nv-099-moral-bad"]
 
 
 def test_main_refuses_baseline_without_manifest(tmp_path, capsys):
