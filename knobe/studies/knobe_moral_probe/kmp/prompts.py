@@ -12,8 +12,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from knobe.registry import model_key_for
+from knobe.schemas import sha256_for_text
+
 from kmp import protocol
 from kmp.items import Item
+
+_INSTRUCT_SUFFIX = model_key_for("", "finetuned")
+_PRETRAINED_SUFFIX = model_key_for("", "pretrained")
 
 
 @dataclass(frozen=True)
@@ -25,6 +31,7 @@ class PromptSpec:
     reversed: bool
     text: str
     n_samples: int
+    text_sha256: str     # sha256 of the exact rendered text
 
 
 @dataclass(frozen=True)
@@ -32,6 +39,7 @@ class ScreeningPrompt:
     item_id: str
     qkey: str
     text: str
+    text_sha256: str
 
 
 def render_question(item: Item, template: str) -> str:
@@ -50,26 +58,34 @@ def build_subject_prompts(items: list[Item], examples=protocol.EXAMPLES) -> list
     for item in items:
         for qkey in protocol.subject_qkeys(item):
             for w in protocol.QUESTIONS[qkey]:
+                text = render_text(item.scenario, render_question(item, w.template), examples)
                 specs.append(PromptSpec(
                     stem=f"{item.item_id}::{qkey}::{w.key}", item_id=item.item_id, qkey=qkey,
-                    wording_key=w.key, reversed=w.reversed,
-                    text=render_text(item.scenario, render_question(item, w.template), examples),
-                    n_samples=protocol.n_samples(qkey),
+                    wording_key=w.key, reversed=w.reversed, text=text,
+                    n_samples=protocol.n_samples(qkey), text_sha256=sha256_for_text(text),
                 ))
     return specs
 
 
 def build_screening_prompts(items: list[Item]) -> list[ScreeningPrompt]:
-    return [
-        ScreeningPrompt(item.item_id, qkey,
-                        render_text(item.scenario, render_question(item, protocol.QUESTIONS[qkey][0].template),
-                                    examples=()))
-        for item in items for qkey in protocol.screening_qkeys(item)
-    ]
+    out = []
+    for item in items:
+        for qkey in protocol.screening_qkeys(item):
+            text = render_text(item.scenario, render_question(item, protocol.QUESTIONS[qkey][0].template),
+                               examples=())
+            out.append(ScreeningPrompt(item.item_id, qkey, text, sha256_for_text(text)))
+    return out
 
 
 def format_for_model(model_key: str) -> str:
-    return "chat" if model_key.endswith("-instruct") else "raw"
+    """"chat" for instruct keys, "raw" for pretrained keys; anything else is
+    an error (a silent raw default is how instruct models got prompted raw)."""
+    if model_key.endswith(_INSTRUCT_SUFFIX):
+        return "chat"
+    if model_key.endswith(_PRETRAINED_SUFFIX):
+        return "raw"
+    raise ValueError(
+        f"model_key {model_key!r} ends in neither {_INSTRUCT_SUFFIX!r} nor {_PRETRAINED_SUFFIX!r}")
 
 
 def prompt_id(stem: str, fmt: str) -> str:

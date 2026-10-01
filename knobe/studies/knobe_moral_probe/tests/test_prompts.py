@@ -1,4 +1,6 @@
+import pytest
 from knobe import constants
+from knobe.schemas import sha256_for_text
 
 from conftest import make_items
 from kmp import prompts, protocol
@@ -54,3 +56,24 @@ def test_formats_and_prompt_ids():
     assert prompts.format_for_model("gemma-2-9b-pretrained") == "raw"
     pid = prompts.prompt_id("kmp-nm-001-moral-bad::blame::w3r", "chat")
     assert prompts.parse_prompt_id(pid) == ("kmp-nm-001-moral-bad", "blame", "w3r", "chat")
+
+
+@pytest.mark.parametrize("key", ["gemma-2-9b-it", "llama-3.1-8b-Instruct", "llama-3.1-8b"])
+def test_format_for_model_rejects_unknown_keys(key):
+    with pytest.raises(ValueError, match=key):
+        prompts.format_for_model(key)
+
+
+def test_text_sha256_matches_rendered_text(nonmoral_items):
+    specs = prompts.build_subject_prompts(nonmoral_items[:1])
+    assert all(s.text_sha256 == sha256_for_text(s.text) for s in specs)
+    sp = prompts.build_screening_prompts(nonmoral_items[:1])
+    assert all(p.text_sha256 == sha256_for_text(p.text) for p in sp)
+
+
+def test_scenario_change_changes_hash_not_stem(nonmoral_items):
+    item = nonmoral_items[0]
+    a = prompts.build_subject_prompts([item])
+    b = prompts.build_subject_prompts([item.model_copy(update={"scenario": item.scenario + " Extra."})])
+    assert [s.stem for s in a] == [s.stem for s in b]
+    assert all(x.text_sha256 != y.text_sha256 for x, y in zip(a, b))
