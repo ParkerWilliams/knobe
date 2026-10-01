@@ -46,7 +46,17 @@ each instruct model × experiment × question, copying = share of answers in
 excess exceeds `protocol.COPY_EXCESS_MAX` (proposed 0.10, revisited against
 the pilot and recorded). The §8 example check therefore runs with and
 without examples for every instruct model in the pilot, not only Mistral.
-Without a no-examples run, copying is "no data" and blocks instruct models.
+The no-examples run is a pilot-only cost (decided 2026-10-01): in the
+pilot, a missing no-examples run means copying is "no data" and blocks
+instruct models; in the full run, copying is reported as a finding and
+never blocks (`kmp.checks --stage full`).
+
+**Amended 2026-10-01 (reviewer pin):** the screening reviewer is
+`claude-sonnet-4-6` (`protocol.REVIEWER_MODEL`). The reviewer client sends
+temperature 0 with thinking off and 8 output tokens; Opus 5.5, Sonnet 5.5
+and Fable 5.1 reject temperature and disabled thinking, so the current
+generation would need a protocol change. Screening worst case ≈ 6,200 calls,
+≈ $3.50.
 Pretrained models get the same numbers as findings.
 
 ## 1. What the study asks
