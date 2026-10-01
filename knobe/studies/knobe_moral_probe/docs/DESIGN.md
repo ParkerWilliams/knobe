@@ -26,6 +26,15 @@ noun, and nothing else changes. The paper discloses this as an adaptation.
 gendered pronouns; personal names are a review-checklist item. This
 supersedes the same-day exemption of Ngo pairs from the same-agent check.
 
+**Amended 2026-10-01 (Ngo goals and verbatim set):** the adaptation also
+aligns the goal where Ngo's two versions differ ("buy a house" / "buy a
+car"), so every adapted pair meets §3.1 in full. Ngo's 40 pairs are also
+kept word for word as a separate set, experiment `ngo_verbatim` (IDs
+`kmp-nv-…`, arm `moral`), asked the same questions as the adapted moral
+items. It is exempt from the role-noun and same-agent checks and nothing
+else. It is a consistency check: the sign effect on verbatim vs adapted
+text, per model. The main analyses use the adapted items.
+
 ## 1. What the study asks
 
 **Background.** In Ngo et al. (2015), people rate an agent as acting more
