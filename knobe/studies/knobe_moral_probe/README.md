@@ -21,8 +21,10 @@ and carries its name:
 
 ## Relation to earlier work in this repo
 
-This study is new work. It reads none of the earlier outputs and changes
-none of the earlier files.
+This study is new work. It changes none of the earlier files, and reads
+none of their outputs except one: `analysis/power_basis.py`, the
+design-stage power check, reads the MF pilot's committed
+`sign_wcb_parsed.csv`.
 
 - **Ngo-extension pilots**
   (`analysis/ngo_extensions/nonmoral_pilot/`, `moral_foundations_pilot/`,
@@ -47,5 +49,62 @@ format) is imported, not copied.
 | `docs/REFERENCES.md` | what each cited work is cited for |
 | `references.bib` | BibTeX, from official publisher records |
 | `ANALYSIS_LOG.md` | one line per completed run of this study |
+| `docs/IMPLEMENTATION_PLAN.md` | the pipeline build plan |
+| `kmp/` | pipeline: items, protocol, prompts, screen (pass rule, pair selection), screen_run (reviewer runner and CLI), elicit, frame, checks |
+| `tests/` | `.venv/bin/python -m pytest studies/knobe_moral_probe/tests -q` from the repo root |
+| `tools/check_chat_bos.py` | pre-pilot check for a doubled BOS on instruct chat prompts |
+| `analysis/power_basis.py` | DESIGN.md §9 power table → `outputs/power_basis.csv` |
+| `stimuli/` | one items file per experiment: `nonmoral.csv`, `foundations.csv`, `ngo_verbatim.csv` |
 
-Stimuli, code and outputs are added here as the implementation plan proceeds.
+## Commands
+
+From this folder; `../../.venv/bin/python -m kmp.<module> --help` for all
+flags. `<experiment>` is `nonmoral`, `foundations` or `ngo_verbatim`. An
+items file can't mix experiments, so each step runs once per experiment.
+
+**Before the pilot,** on the cluster, from the repo root: check whether
+knobe's `VllmEngine` feeds instruct chat prompts a doubled BOS. Run the
+tokenizer mode, then `--vllm` (GPU), and report both results before any
+real elicitation. Exit 1 means some model gets BOS twice.
+
+    .venv/bin/python studies/knobe_moral_probe/tools/check_chat_bos.py
+    .venv/bin/python studies/knobe_moral_probe/tools/check_chat_bos.py --vllm
+
+**Screening** (`kmp.screen`, which runs `kmp.screen_run`'s CLI). Start with
+`--dry-run`: it prints the call count and a token estimate and asks nothing
+(CLAUDE.md §4). A real run needs `protocol.REVIEWER_MODEL` pinned to an
+exact dated model ID (not `-latest`) and the `anthropic` package installed
+in `.venv`. `--mock` is a deterministic fake reviewer for testing. Re-run
+the same command to resume.
+
+    ../../.venv/bin/python -m kmp.screen --items stimuli/<experiment>.csv --out-dir outputs/screening/<experiment> --dry-run
+    ../../.venv/bin/python -m kmp.screen --items stimuli/<experiment>.csv --out-dir outputs/screening/<experiment> --reviewer-model <pinned id>
+
+**Elicitation.** One `--out` per experiment × model set; a second run on the
+same `--out` is refused. Each `--out` gets a run manifest,
+`<out>.manifest.json`, which is committable provenance; the `.lock` and
+`.starts.jsonl` sidecars are gitignored, like the results. Every model is
+run twice: with the worked examples, and with `--no-examples` into its own
+`--out`. The copying check needs the no-examples run as its baseline. This
+roughly doubles pilot elicitation, so count it in the cost estimate.
+
+    ../../.venv/bin/python -m kmp.elicit --items outputs/screening/<experiment>/selected_items.csv --out outputs/elicit/<experiment>.jsonl --engine vllm --model-keys <keys>
+    ../../.venv/bin/python -m kmp.elicit --items outputs/screening/<experiment>/selected_items.csv --out outputs/elicit/<experiment>_noex.jsonl --engine vllm --model-keys <keys> --no-examples
+
+**Checks** (DESIGN.md §8 and its amendments). `--baseline` is the
+no-examples results file.
+
+    ../../.venv/bin/python -m kmp.checks --results outputs/elicit/<experiment>.jsonl --baseline outputs/elicit/<experiment>_noex.jsonl --items outputs/screening/<experiment>/selected_items.csv --out-dir outputs/checks/<experiment>
+
+Exit 0: nothing blocks. Exit 1: a blocking gate (an uncaught error, such as
+an unreadable results file, also exits 1; read stderr). Exit 2: the inputs were
+refused before anything was written (a missing or mismatched manifest, a
+baseline that isn't a no-examples run of the same models and prompts).
+Blocking: coverage gaps, any cell below the number-rate minimum, and, for
+instruct models, a failed or missing validity check or example copying
+above `protocol.COPY_EXCESS_MAX` (missing baseline counts). Reported as
+findings only: the same validity and copying problems for pretrained
+models, anchor agreement, the example effect and throughput. The tables and
+`provenance.json` (inputs and hashes, git state, thresholds, manifests,
+gate summary) go to `--out-dir`. A run on `--engine fake` can legitimately
+exit 1: random answers can fail the instruct validity checks.
