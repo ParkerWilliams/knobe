@@ -94,3 +94,8 @@ def test_pipeline(tmp_path, experiment):
     assert prov["manifest"]["model_keys"] == sorted(KEYS) and prov["manifest"]["engine"] == "fake"
     assert prov["n_dropped_unknown_items"] == 0
     assert {p.name for p in out_dir.iterdir()} == {f"{t}.csv" for t in tables} | {"provenance.json"}
+
+    # A gate that can block: drop one model's rows but keep the run's full
+    # model_keys, so coverage must name that model.
+    missing = checks.run_checks(d[d["model_key"] != KEYS[0]], load_items(selected_path), KEYS)
+    assert f"coverage: {KEYS[0]} has no rows" in checks.gate_summary(missing)["blocking"]
