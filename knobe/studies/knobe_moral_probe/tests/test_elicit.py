@@ -121,3 +121,104 @@ def test_main_refuses_unknown_model_key(tmp_path):
     with pytest.raises(SystemExit):
         elicit.main(["--items", str(items_path), "--out", str(tmp_path / "o.jsonl"), "--model-keys", "gpt-x"])
 
+
+# --- Run manifest (amendment A) and missing responses (amendment B) -------
+
+import json  # noqa: E402
+
+from knobe.elicit_vllm import FakeEngine  # noqa: E402
+
+
+def _manifest(out):
+    return json.loads(elicit.manifest_path(out).read_text(encoding="utf-8"))
+
+
+def test_fresh_run_writes_manifest(tmp_path):
+    items = make_items("nonmoral", 1)[:2]
+    code, out = _run(tmp_path, items)
+    m = _manifest(out)
+    jobs = elicit.build_jobs(prompts.build_subject_prompts(items), KEYS)
+    assert code == 0 and elicit.manifest_path(out).parent == tmp_path
+    assert (m["release"], m["runner_version"], m["max_tokens"]) == (
+        protocol.RELEASE, protocol.RUNNER_VERSION, protocol.MAX_TOKENS)
+    assert m["engine"] == "fake" and m["model_keys"] == sorted(KEYS)
+    assert m["prompts"] == {j.prompt_id: j.text_sha256 for j in jobs}
+
+
+def test_clean_resume_skips_done_jobs(tmp_path, monkeypatch):
+    items = make_items("nonmoral", 1)[:2]
+    _run(tmp_path, items)
+    calls = []
+    monkeypatch.setattr(elicit, "build_engine", lambda name: calls.append(name) or FakeEngine())
+    code, out = _run(tmp_path, items)
+    assert code == 0 and calls == []                           # nothing left, engine never built
+    n = len(read_jsonl(out, ResultRecord))
+    assert n == len({r.job_id for r in read_jsonl(out, ResultRecord)})
+
+
+def test_resume_adds_new_prompts_to_manifest(tmp_path):
+    items = make_items("nonmoral", 1)
+    first = [i for i in items if i.arm == items[0].arm]
+    _run(tmp_path, first)
+    code, out = _run(tmp_path, items)
+    jobs = elicit.build_jobs(prompts.build_subject_prompts(items), KEYS)
+    assert code == 0 and _manifest(out)["prompts"] == {j.prompt_id: j.text_sha256 for j in jobs}
+    assert len(read_jsonl(out, ResultRecord)) == len(jobs)
+
+
+def test_resume_refuses_changed_scenario(tmp_path, capsys):
+    items = make_items("nonmoral", 1)[:2]
+    _, out = _run(tmp_path, items)
+    n = len(read_jsonl(out, ResultRecord))
+    edited = [items[0].model_copy(update={"scenario": items[0].scenario + " Edited."}), items[1]]
+    code, _ = _run(tmp_path, edited)
+    assert code == 2 and len(read_jsonl(out, ResultRecord)) == n
+    err = capsys.readouterr().err
+    assert "text_sha256" in err and items[0].item_id in err
+
+
+def test_resume_refuses_missing_manifest(tmp_path, capsys):
+    items = make_items("nonmoral", 1)[:2]
+    _, out = _run(tmp_path, items)
+    elicit.manifest_path(out).unlink()
+    code, _ = _run(tmp_path, items)
+    assert code == 2 and "manifest" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("attr,value", [("MAX_TOKENS", 99), ("RUNNER_VERSION", "knobe_moral_probe_elicit-9.9")])
+def test_resume_refuses_changed_run_field(tmp_path, monkeypatch, capsys, attr, value):
+    items = make_items("nonmoral", 1)[:2]
+    _, out = _run(tmp_path, items)
+    monkeypatch.setattr(protocol, attr, value)
+    code, _ = _run(tmp_path, items)
+    assert code == 2 and attr.lower() in capsys.readouterr().err
+
+
+def test_resume_refuses_changed_model_keys(tmp_path, capsys):
+    items = make_items("nonmoral", 1)[:2]
+    _run(tmp_path, items)
+    items_path, out = tmp_path / "items.csv", tmp_path / "out.jsonl"
+    code = elicit.main(["--items", str(items_path), "--out", str(out), "--engine", "fake",
+                        "--model-keys", KEYS[0]])
+    assert code == 2 and "model_keys" in capsys.readouterr().err
+
+
+class _DroppingEngine(FakeEngine):
+    """Returns no response for the first request of every batch."""
+
+    def generate(self, batch):
+        return super().generate(batch)[1:]
+
+
+def test_missing_responses_fail_the_run_and_resume_fills_them(tmp_path, monkeypatch, capsys):
+    items = make_items("nonmoral", 1)[:2]
+    n_jobs = len(elicit.build_jobs(prompts.build_subject_prompts(items), KEYS))
+    monkeypatch.setattr(elicit, "build_engine", lambda name: _DroppingEngine())
+    code, out = _run(tmp_path, items, "--batch-size", "1000")
+    assert code != 0
+    assert len(read_jsonl(out, ResultRecord)) == n_jobs - len(KEYS)   # one dropped per model batch
+    assert f"{len(KEYS)} job(s) got no response" in capsys.readouterr().err
+    monkeypatch.setattr(elicit, "build_engine", lambda name: FakeEngine())
+    code, _ = _run(tmp_path, items)
+    rows = read_jsonl(out, ResultRecord)
+    assert code == 0 and len(rows) == n_jobs == len({r.job_id for r in rows})

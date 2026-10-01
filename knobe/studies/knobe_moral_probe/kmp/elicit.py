@@ -5,10 +5,19 @@ registry, seed derivation (sha256 of RELEASE, prompt_id, model_key,
 sample_idx) and ResultRecord. The readout is the written number only
 (parse_rating); logprobs are not requested, which also skips vLLM's 11
 forced-scoring passes per prompt.
+
+main() appends to --out and resumes by job_id. A sidecar run manifest
+(<out>.manifest.json: release, runner_version, max_tokens, engine,
+model_keys, prompt_id -> text_sha256) is written before generating; a
+resume whose run fields or already-run prompt texts differ is refused
+(exit 2), as is a resume with rows but no manifest. Jobs the engine
+returns no response for make the run exit 1; re-running resumes them.
 """
 from __future__ import annotations
 
 import argparse
+import json
+import os
 import sys
 import time
 from dataclasses import dataclass
@@ -85,6 +94,51 @@ def to_result(job: Job, request: EngineRequest, response: EngineResponse, model_
     )
 
 
+# ---------------------------------------------------------------------------
+# Run manifest. ResultRecord (extra="forbid") has no slot for provenance and
+# resume matches on job_id only, so a sidecar records what the rows in --out
+# were produced under; a resume that would mix versions is refused.
+# ---------------------------------------------------------------------------
+
+RUN_FIELDS = ("release", "runner_version", "max_tokens", "engine", "model_keys")
+
+
+def manifest_path(out: Path) -> Path:
+    """``<out>.manifest.json``, e.g. ``results.jsonl.manifest.json``."""
+    out = Path(out)
+    return out.with_name(out.name + ".manifest.json")
+
+
+def build_manifest(jobs: list[Job], engine: str, model_keys: list[str], max_tokens: int) -> dict:
+    return {
+        "release": protocol.RELEASE,
+        "runner_version": protocol.RUNNER_VERSION,
+        "max_tokens": max_tokens,
+        "engine": engine,
+        "model_keys": sorted(model_keys),
+        "prompts": {j.prompt_id: j.text_sha256 for j in jobs},
+    }
+
+
+def manifest_problems(old: dict, new: dict, done_prompt_ids: set[str], limit: int = 5) -> list[str]:
+    """Why ``new`` can't resume rows produced under ``old``. Empty = safe."""
+    problems = [f"{k}: manifest has {old.get(k)!r}, this run has {new[k]!r}"
+                for k in RUN_FIELDS if old.get(k) != new[k]]
+    old_prompts = old.get("prompts", {})
+    bad = sorted(pid for pid in done_prompt_ids
+                 if pid in new["prompts"] and old_prompts.get(pid) != new["prompts"][pid])
+    if bad:
+        shown = ", ".join(bad[:limit]) + (f" (+{len(bad) - limit} more)" if len(bad) > limit else "")
+        problems.append(f"text_sha256 changed for {len(bad)} prompt_id(s) that already have rows: {shown}")
+    return problems
+
+
+def write_manifest(manifest: dict, path: Path) -> None:
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    os.replace(tmp, path)
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="knobe_moral_probe elicitation")
     p.add_argument("--items", required=True, type=Path, help="selected items CSV (from kmp.screen)")
@@ -110,8 +164,25 @@ def main(argv: list[str] | None = None) -> int:
 
     jobs = build_jobs(prompts.build_subject_prompts(items), model_keys)
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    done = ({r.job_id for r in read_jsonl(args.out, ResultRecord)}
-            if args.out.exists() and args.out.stat().st_size else set())
+    done_rows = (read_jsonl(args.out, ResultRecord)
+                 if args.out.exists() and args.out.stat().st_size else [])
+    done = {r.job_id for r in done_rows}
+
+    mpath = manifest_path(args.out)
+    manifest = build_manifest(jobs, args.engine, model_keys, args.max_tokens)
+    if done_rows:
+        if not mpath.exists():
+            print(f"refusing to resume: {args.out} has {len(done_rows)} rows but no run manifest at {mpath}",
+                  file=sys.stderr)
+            return 2
+        old = json.loads(mpath.read_text(encoding="utf-8"))
+        problems = manifest_problems(old, manifest, {r.prompt_id for r in done_rows})
+        if problems:
+            print(f"refusing to resume {args.out} (rows would mix versions; see {mpath}):\n  "
+                  + "\n  ".join(problems), file=sys.stderr)
+            return 2
+        manifest["prompts"] = {**old.get("prompts", {}), **manifest["prompts"]}
+    write_manifest(manifest, mpath)
 
     remaining = [j for j in jobs if j.job_id not in done]
     print(f"{len(done)} done, {len(remaining)} remaining of {len(jobs)} jobs")
@@ -124,6 +195,7 @@ def main(argv: list[str] | None = None) -> int:
     for job in remaining:
         by_model.setdefault(job.model_key, []).append(job)
 
+    n_missing = 0
     with open(args.out, "a", encoding="utf-8") as fh:
         for model_key, model_jobs in by_model.items():
             model_id, _family, pinned = resolve_model_id(model_key, registry)
@@ -137,9 +209,14 @@ def main(argv: list[str] | None = None) -> int:
                     response = responses.get(job.job_id)
                     if response is None:
                         print(f"ERROR: no response for {job.job_id}", file=sys.stderr)
+                        n_missing += 1
                         continue
                     append_jsonl(to_result(job, request, response, revision), fh)
                 fh.flush()
+    if n_missing:
+        print(f"ERROR: {n_missing} job(s) got no response; re-run the same command to resume them",
+              file=sys.stderr)
+        return 1
     return 0
 
 
