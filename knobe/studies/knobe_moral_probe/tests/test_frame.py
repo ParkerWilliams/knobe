@@ -212,3 +212,20 @@ def test_all_rows_dropped_raises(tmp_path):
     _write(path, [("kmp-nm-099-moral-bad::blame::w1::raw", "gemma-2-9b-pretrained", 3)])
     with pytest.raises(ValueError, match="kmp-nm-099-moral-bad"):
         frame.load_frame(path, make_items("nonmoral", 1))
+
+
+def test_scaffold_is_carried_into_the_frame(tmp_path):
+    from conftest import make_purpose_storyline
+    items = make_items("foundations", 1) + make_purpose_storyline(9)
+    path = tmp_path / "r.jsonl"
+    _write(path, [("kmp-mf-001-harm-bad::blame::w1::raw", "gemma-2-9b-pretrained", 3),
+                  ("kmp-mf-009-purity-bad::blame::w1::raw", "gemma-2-9b-pretrained", 3)])
+    d = frame.load_frame(path, items).set_index("item_id")
+    assert d.loc["kmp-mf-001-harm-bad", "scaffold"] == "shared"
+    assert d.loc["kmp-mf-009-purity-bad", "scaffold"] == "purpose"
+
+
+def test_scaffold_is_missing_outside_foundations(tmp_path):
+    path = tmp_path / "r.jsonl"
+    _write(path, [("kmp-nm-001-moral-bad::blame::w1::raw", "gemma-2-9b-pretrained", 3)])
+    assert frame.load_frame(path, make_items("nonmoral", 1))["scaffold"].isna().all()

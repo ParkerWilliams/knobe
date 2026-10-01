@@ -132,6 +132,20 @@ def select_pairs(items: list[Item], scores_by_item: dict[str, dict[str, int | No
     return selected, report
 
 
+def shared_without_harm(items: list[Item], selected: list[Item]) -> list[int]:
+    """Foundations storylines written on a shared scaffold whose harm pair did
+    not survive selection but which still have at least one selected non-harm
+    pair (decision A, option 1). Their non-harm pairs stay selected; the
+    analysis restricts the primary pooled harm-vs-non-harm contrast to
+    storylines with both a surviving harm pair and a non-harm pair, and puts
+    these in a sensitivity analysis. Storylines with nothing selected, and
+    purpose-written storylines (no harm pair by design), are not listed."""
+    shared = {i.storyline_id for i in items if i.experiment == "foundations" and i.scaffold == "shared"}
+    with_harm = {i.storyline_id for i in selected if i.experiment == "foundations" and i.arm == "harm"}
+    with_other = {i.storyline_id for i in selected if i.experiment == "foundations" and i.arm != "harm"}
+    return sorted((shared & with_other) - with_harm)
+
+
 if __name__ == "__main__":
     from kmp.screen_run import main
 

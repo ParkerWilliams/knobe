@@ -60,7 +60,7 @@ def _write_csv(path, *rows):
     path.write_text("\n".join([header, *rows]) + "\n", encoding="utf-8")
 
 
-GOOD_ROW = "kmp-nm-007-prudential-bad,nonmoral,007,prudential,bad,Bill,ruin his savings,Bill did X.,new,draft"
+GOOD_ROW = "kmp-nm-007-prudential-bad,nonmoral,007,prudential,bad,Bill,ruin his savings,Bill did X.,new,draft,"                     # empty scaffold cell
 
 
 def test_load_items_zero_padded_id_from_csv(tmp_path):
@@ -71,6 +71,12 @@ def test_load_items_zero_padded_id_from_csv(tmp_path):
 def test_load_items_names_line_of_invalid_row(tmp_path):
     _write_csv(tmp_path / "i.csv", GOOD_ROW, GOOD_ROW.replace("nonmoral,007", "nonmoral,0"))
     with pytest.raises(ValueError, match=r"line 3"):
+        load_items(tmp_path / "i.csv")
+
+
+def test_load_items_names_line_of_first_data_row(tmp_path):
+    _write_csv(tmp_path / "i.csv", GOOD_ROW.replace("nonmoral,007", "nonmoral,0"))
+    with pytest.raises(ValueError, match=r"line 2"):
         load_items(tmp_path / "i.csv")
 
 
@@ -157,3 +163,92 @@ def test_design_problems_pronoun_check_ignores_embedded_words():
     text = "the there hero shelf history otherwise cheer"
     bad = bad.model_copy(update={"scenario": text})
     assert design_problems([bad, good]) == []
+
+
+# ---- scaffold (DEFINITIONS_AND_CHECKLIST.md section 7, decision A, option 1) ----
+
+from conftest import make_ngo_verbatim_items, make_purpose_storyline  # noqa: E402
+
+
+def _drop(items, *ids):
+    return [i for i in items if i.item_id not in ids]
+
+
+def test_scaffold_in_fields_and_defaults_to_none():
+    assert FIELDS[-1] == "scaffold"
+    assert _item().scaffold is None
+
+
+def test_foundations_item_requires_scaffold(foundation_items):
+    base = foundation_items[0].model_dump()
+    with pytest.raises(ValidationError, match=f"{base['item_id']}.*scaffold"):
+        Item(**{**base, "scaffold": None})
+    with pytest.raises(ValidationError):
+        Item(**{**base, "scaffold": "other"})
+
+
+@pytest.mark.parametrize("value", ["shared", "purpose"])
+def test_nonmoral_and_ngo_verbatim_reject_a_scaffold(value):
+    with pytest.raises(ValidationError, match="kmp-nm-007-prudential-bad.*scaffold"):
+        _item(scaffold=value)
+    base = make_ngo_verbatim_items(1)[0].model_dump()
+    with pytest.raises(ValidationError, match="kmp-nv-001-moral-bad.*scaffold"):
+        Item(**{**base, "scaffold": value})
+
+
+def test_csv_roundtrip_of_scaffold_values(tmp_path, nonmoral_items, foundation_items):
+    items = nonmoral_items[:2] + foundation_items + make_purpose_storyline(9)
+    path = tmp_path / "items.csv"
+    write_items(items, path)
+    loaded = load_items(path)
+    assert loaded == sorted(items, key=lambda i: i.item_id)
+    assert {i.scaffold for i in loaded} == {None, "shared", "purpose"}
+    nm_line = next(line for line in path.read_text().splitlines() if line.startswith("kmp-nm-001-moral-bad"))
+    assert nm_line.endswith(",")                                   # None is an empty cell
+
+
+def test_load_items_empty_scaffold_cell_is_none_and_value_is_kept(tmp_path):
+    row = "kmp-mf-003-purity-bad,foundations,3,purity,bad,the cook,spoil the shrine,The cook did X.,new,draft"
+    _write_csv(tmp_path / "i.csv", GOOD_ROW, row + ",purpose")
+    nm, mf = load_items(tmp_path / "i.csv")
+    assert nm.scaffold is None and mf.scaffold == "purpose"
+    _write_csv(tmp_path / "j.csv", row + ",")
+    with pytest.raises(ValueError, match="(?s)line 2.*scaffold"):
+        load_items(tmp_path / "j.csv")
+
+
+def test_shared_and_purpose_storylines_are_clean(foundation_items):
+    assert design_problems(foundation_items + make_purpose_storyline(9)) == []
+    assert design_problems(make_purpose_storyline(9, arms=("purity", "fairness"))) == []
+
+
+def test_storyline_with_mixed_scaffolds_is_a_problem(foundation_items):
+    items = [i.model_copy(update={"scaffold": "purpose"}) if i.item_id == "kmp-mf-001-purity-bad" else i
+             for i in foundation_items]
+    assert any("storyline 1" in p and "mixed scaffold" in p for p in design_problems(items))
+
+
+def test_shared_storyline_needs_a_harm_pair(foundation_items):
+    s1 = [i for i in foundation_items if i.storyline_id == 1]
+    no_harm = [i for i in s1 if i.arm != "harm"]
+    assert any("storyline 1" in p and "harm pair" in p for p in design_problems(no_harm))
+    half_harm = _drop(s1, "kmp-mf-001-harm-good")
+    assert any("storyline 1" in p and "harm pair" in p for p in design_problems(half_harm))
+
+
+def test_shared_storyline_needs_a_non_harm_pair(foundation_items):
+    harm_only = [i for i in foundation_items if i.storyline_id == 1 and i.arm == "harm"]
+    assert any("storyline 1" in p and "non-harm" in p for p in design_problems(harm_only))
+
+
+def test_purpose_storyline_must_not_have_a_harm_pair(foundation_items):
+    harm = [i.model_copy(update={"scaffold": "purpose", "storyline_id": 9,
+                                 "item_id": i.item_id.replace("-001-", "-009-")})
+            for i in foundation_items if i.storyline_id == 1 and i.arm == "harm"]
+    problems = design_problems(make_purpose_storyline(9) + harm)
+    assert any("storyline 9" in p and "purpose" in p and "harm" in p for p in problems)
+
+
+def test_scaffold_rules_do_not_touch_other_experiments(nonmoral_items):
+    assert design_problems(nonmoral_items) == []
+    assert design_problems(make_ngo_verbatim_items(2)) == []

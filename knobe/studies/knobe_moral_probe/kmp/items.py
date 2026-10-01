@@ -9,6 +9,12 @@ experiment holds Ngo et al.'s 40 original pairs word for word (arm "moral",
 storyline_id = Ngo's pair number, the same numbering as the adapted nonmoral
 moral storylines); DESIGN.md 2026-10-01 amendment "Ngo goals and verbatim set".
 
+`scaffold` (foundations only, required there; None elsewhere) records how a
+foundations storyline was written (DEFINITIONS_AND_CHECKLIST.md section 7,
+decision A, option 1): "shared" = one harm-neutral scaffold carrying a harm
+pair plus one or more foundation pairs; "purpose" = a purpose-written
+storyline (purity) with no harm pair. In the CSV, None is an empty cell.
+
 `agent` is the agent as written mid-sentence ("Bill", "the CEO"); `effect`
 is the side effect as a bare verb phrase ("injure children"), so question
 wordings can be rendered as "Did {agent} intentionally {effect}?".
@@ -27,6 +33,7 @@ Experiment = Literal["nonmoral", "foundations", "ngo_verbatim"]
 Sign = Literal["bad", "good"]
 Source = Literal["ngo", "pilot", "new"]
 ReviewStatus = Literal["draft", "approved", "rejected"]
+Scaffold = Literal["shared", "purpose"]
 
 ARMS: dict[str, tuple[str, ...]] = {
     "nonmoral": ("moral", "prudential", "procedural"),
@@ -40,7 +47,7 @@ EXPERIMENT_CODE = {"nonmoral": "nm", "foundations": "mf", "ngo_verbatim": "nv"}
 ROLE_NOUN_EXEMPT = frozenset({"ngo_verbatim"})
 ID_PREFIX = "kmp-"
 FIELDS = ["item_id", "experiment", "storyline_id", "arm", "sign", "agent",
-          "effect", "scenario", "source", "review_status"]
+          "effect", "scenario", "source", "review_status", "scaffold"]
 
 
 def make_item_id(experiment: str, storyline_id: int, arm: str, sign: str) -> str:
@@ -60,6 +67,12 @@ class Item(BaseModel):
     scenario: str
     source: Source
     review_status: ReviewStatus = "draft"
+    scaffold: Scaffold | None = None
+
+    @field_validator("scaffold", mode="before")
+    @classmethod
+    def _empty_scaffold_is_none(cls, v):
+        return None if v == "" else v
 
     @field_validator("storyline_id", mode="before")
     @classmethod
@@ -72,6 +85,10 @@ class Item(BaseModel):
     def _check(self) -> "Item":
         if self.arm not in ARMS[self.experiment]:
             raise ValueError(f"{self.item_id}: arm {self.arm!r} not in {ARMS[self.experiment]}")
+        if self.experiment == "foundations" and self.scaffold is None:
+            raise ValueError(f"{self.item_id}: foundations items need a scaffold ('shared' or 'purpose')")
+        if self.experiment != "foundations" and self.scaffold is not None:
+            raise ValueError(f"{self.item_id}: scaffold must be empty outside foundations, not {self.scaffold!r}")
         if self.experiment == "ngo_verbatim" and self.source != "ngo":
             raise ValueError(f"{self.item_id}: ngo_verbatim items must have source 'ngo', not {self.source!r}")
         expected = make_item_id(self.experiment, self.storyline_id, self.arm, self.sign)
@@ -101,6 +118,7 @@ def load_items(path: str | Path) -> list[Item]:
     items = []
     with open(path, newline="", encoding="utf-8") as fh:
         reader = csv.DictReader(fh)
+        reader.fieldnames  # read the header now, so line_num counts it for the first data row
         while True:
             start = reader.reader.line_num + 1
             try:
@@ -141,6 +159,7 @@ def design_problems(items: list[Item]) -> list[str]:
             problems.append(f"pair {key[1:]} has signs {signs}, needs exactly one bad and one good")
         elif key[0] not in ROLE_NOUN_EXEMPT and members[0].agent != members[1].agent:
             problems.append(f"pair {key[1:]}: agents differ ({members[0].agent!r} vs {members[1].agent!r})")
+    problems += _scaffold_problems(items)
     for item in sorted(items, key=lambda i: i.item_id):
         if item.experiment in ROLE_NOUN_EXEMPT:
             continue
@@ -148,4 +167,37 @@ def design_problems(items: list[Item]) -> list[str]:
                         for w in GENDERED_PRONOUNS.findall(getattr(item, name))})
         if found:
             problems.append(f"{item.item_id}: gendered pronoun(s) {found} (use a role noun)")
+    return problems
+
+
+def _complete_arms(members: list[Item]) -> set[str]:
+    """Arms that have both a bad and a good version among members."""
+    signs: dict[str, set[str]] = defaultdict(set)
+    for m in members:
+        signs[m.arm].add(m.sign)
+    return {arm for arm, s in signs.items() if s == {"bad", "good"}}
+
+
+def _scaffold_problems(items: list[Item]) -> list[str]:
+    """Foundations storylines (decision A): one scaffold value per storyline;
+    a shared storyline has a harm pair and at least one non-harm pair; a
+    purpose-written storyline has no harm item at all."""
+    problems = []
+    storylines: dict[int, list[Item]] = defaultdict(list)
+    for item in items:
+        if item.experiment == "foundations":
+            storylines[item.storyline_id].append(item)
+    for sid, members in sorted(storylines.items()):
+        scaffolds = sorted({m.scaffold for m in members})
+        if len(scaffolds) > 1:
+            problems.append(f"storyline {sid}: mixed scaffold values {scaffolds}")
+            continue
+        arms = _complete_arms(members)
+        if scaffolds == ["shared"]:
+            if "harm" not in arms:
+                problems.append(f"storyline {sid}: shared scaffold needs a harm pair (one bad, one good)")
+            if not arms - {"harm"}:
+                problems.append(f"storyline {sid}: shared scaffold needs at least one non-harm foundation pair")
+        elif any(m.arm == "harm" for m in members):
+            problems.append(f"storyline {sid}: purpose-written storyline must not have a harm item")
     return problems

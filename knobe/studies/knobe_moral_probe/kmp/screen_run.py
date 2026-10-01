@@ -16,7 +16,10 @@ already written are kept, so re-running the same command resumes.
 
 Outputs in --out-dir: screening_raw.jsonl, selected_items.csv,
 selection_report.csv, screening_meta.json (snapshot of the latest run) and
-screening_runs.jsonl (one line per invocation).
+screening_runs.jsonl (one line per invocation). The meta's
+shared_without_harm lists shared-scaffold foundations storylines whose harm
+pair did not survive (kmp.screen.shared_without_harm); it is also printed to
+stderr.
 """
 from __future__ import annotations
 
@@ -55,6 +58,7 @@ from kmp.screen import (
     VALENCE_GOOD_MIN,
     ScreeningRawResult,
     select_pairs,
+    shared_without_harm,
 )
 
 REVIEWER_TEMPERATURE = 0.0                         # DESIGN.md section 4
@@ -310,6 +314,10 @@ def main(argv: list[str] | None = None) -> int:
     report_df["scores"] = [json.dumps(sc, sort_keys=True) for sc in report_df["scores"]]
     report_df.to_csv(args.out_dir / "selection_report.csv", index=False)
     summary = pair_summary(report)
+    lost_harm = shared_without_harm(approved, selected)
+    if lost_harm:
+        print(f"shared storylines without a surviving harm pair: {lost_harm} "
+              f"(non-harm pairs kept; sensitivity analysis only)", file=sys.stderr)
 
     meta = {
         "started_utc": started,
@@ -332,6 +340,7 @@ def main(argv: list[str] | None = None) -> int:
         "prompts_asked": len(set(asked)),
         "prompts_reused": n - len(set(asked)),
         "pairs_by_arm": summary,
+        "shared_without_harm": lost_harm,
     }
     (args.out_dir / "screening_meta.json").write_text(json.dumps(meta, indent=2, sort_keys=True) + "\n",
                                                        encoding="utf-8")

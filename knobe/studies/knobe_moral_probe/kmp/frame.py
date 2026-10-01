@@ -8,7 +8,10 @@ lib.wild_cluster_bootstrap run on it unchanged.
 
 Column contract:
   item_id, qkey, wording_key, fmt   parsed from prompt_id (kmp.prompts)
-  experiment, storyline_id, arm, sign   from the items file
+  experiment, storyline_id, arm, sign, scaffold   from the items file
+                    (scaffold: "shared"/"purpose" on foundations rows, missing
+                    elsewhere; see kmp.screen.shared_without_harm for the
+                    primary-contrast storyline rule)
   cluster_id        f"{experiment}-{storyline_id:03d}". The cluster for a
                     fit within one experiment, or pooling experiments whose
                     storyline numbers collide only by accident (nonmoral +
@@ -102,7 +105,8 @@ def load_frame(results_path: str | Path, items: list[Item], registry: dict | Non
     parts = pd.DataFrame([parse_prompt_id(p) for p in df["prompt_id"]],
                          columns=["item_id", "qkey", "wording_key", "fmt"], index=df.index)
     df = pd.concat([df, parts], axis=1)
-    meta = pd.DataFrame([i.model_dump() for i in items])[["item_id", "experiment", "storyline_id", "arm", "sign"]]
+    meta = pd.DataFrame([i.model_dump() for i in items])[["item_id", "experiment", "storyline_id", "arm", "sign",
+                                                 "scaffold"]]
     # Rows for items no longer in the items file (removed after a partial run) are dropped.
     known = df["item_id"].isin(meta["item_id"])
     dropped_ids = sorted(set(df.loc[~known, "item_id"]))

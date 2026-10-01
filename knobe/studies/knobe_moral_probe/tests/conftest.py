@@ -24,8 +24,20 @@ def make_items(experiment: str, n_storylines: int = 2, status: str = "approved")
                     agent=f"Agent{sid}", effect=f"cause a {sign} {arm} outcome",
                     scenario=f"Agent{sid} pursued a goal. [{arm}] [{sign}]",
                     source="new", review_status=status,
+                    scaffold="shared" if experiment == "foundations" else None,
                 ))
     return items
+
+
+def make_purpose_storyline(storyline_id: int, arms=("purity",), status: str = "approved") -> list[Item]:
+    """A purpose-written foundations storyline: no harm pair (DEFINITIONS §3.3, decision A)."""
+    return [Item(
+        item_id=make_item_id("foundations", storyline_id, arm, sign),
+        experiment="foundations", storyline_id=storyline_id, arm=arm, sign=sign,
+        agent=f"Agent{storyline_id}", effect=f"cause a {sign} {arm} outcome",
+        scenario=f"Agent{storyline_id} pursued a goal. [{arm}] [{sign}]",
+        source="new", review_status=status, scaffold="purpose",
+    ) for arm in arms for sign in ("bad", "good")]
 
 
 @pytest.fixture

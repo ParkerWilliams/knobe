@@ -12,7 +12,9 @@ from knobe.schemas import CurationRawResult, read_jsonl
 from pydantic import ValidationError
 
 from kmp import prompts, protocol, screen, screen_run
-from kmp.items import load_items, write_items
+from kmp.items import ARMS, load_items, write_items
+
+ARMS_FND = ARMS["foundations"]
 
 
 
@@ -490,3 +492,54 @@ def test_aborted_run_resumes_with_only_the_remaining_prompts(tmp_path, nonmoral_
     second = ScriptedClient(nonmoral_items)
     _run(ps, second, out)
     assert len(second.calls) == len(ps) - 5 and len(_raw(out)) == len(ps)
+
+
+# ---- shared storylines whose harm pair did not survive (decision A) ----------
+
+from conftest import make_purpose_storyline  # noqa: E402
+
+
+def test_shared_without_harm_lists_storylines_that_lost_only_harm(foundation_items):
+    selected = [i for i in foundation_items if not (i.storyline_id == 1 and i.arm == "harm")]
+    assert screen.shared_without_harm(foundation_items, selected) == [1]
+
+
+def test_shared_without_harm_ignores_intact_purpose_and_fully_dropped(foundation_items):
+    purpose = make_purpose_storyline(9)
+    items = foundation_items + purpose
+    assert screen.shared_without_harm(items, items) == []                 # purpose: no harm by design
+    selected = [i for i in items if i.storyline_id != 2]                  # storyline 2 lost everything
+    assert screen.shared_without_harm(items, selected) == []
+
+
+def test_shared_without_harm_keeps_the_non_harm_pairs_selected(tmp_path, foundation_items):
+    scores = _scripted_scores(tmp_path, foundation_items)
+    for sign in ("bad", "good"):
+        scores[f"kmp-mf-001-harm-{sign}"]["fnd_harm"] = 2
+    selected, _ = screen.select_pairs(foundation_items, scores)
+    assert {i.arm for i in selected if i.storyline_id == 1} == set(ARMS_FND) - {"harm"}
+    assert screen.shared_without_harm(foundation_items, selected) == [1]
+
+
+class _NoHarmFor1(ScriptedClient):
+    async def complete(self, prompt, max_tokens):
+        answer = await super().complete(prompt, max_tokens)
+        item_id, qkey = self.lookup[prompt]
+        return "2" if item_id.startswith("kmp-mf-001-harm-") and qkey == "fnd_harm" else answer
+
+
+def test_main_records_shared_without_harm(tmp_path, foundation_items, monkeypatch, capsys):
+    monkeypatch.setattr(screen_run, "MockClient", lambda **kw: _NoHarmFor1(foundation_items))
+    out_dir = tmp_path / "s"
+    assert screen_run.main(["--items", str(_write(foundation_items, tmp_path)), "--out-dir", str(out_dir),
+                            "--mock"]) == 0
+    meta = json.loads((out_dir / "screening_meta.json").read_text())
+    assert meta["shared_without_harm"] == [1]
+    assert "shared storylines without a surviving harm pair: [1]" in capsys.readouterr().err
+
+
+def test_main_records_empty_shared_without_harm_for_nonmoral(tmp_path, nonmoral_items):
+    out_dir = tmp_path / "s"
+    assert screen_run.main(["--items", str(_write(nonmoral_items, tmp_path)), "--out-dir", str(out_dir),
+                            "--mock"]) == 0
+    assert json.loads((out_dir / "screening_meta.json").read_text())["shared_without_harm"] == []
