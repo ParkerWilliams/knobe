@@ -13,6 +13,13 @@ References: `docs/REFERENCES.md` in this study folder (BibTeX in
 reviewer client, one power-script exception to the README). Where they
 differ, the amendments win.
 
+**Amended 2026-10-01:** Ngo's original pairs are exempt from §3.1's "same
+agent" rule. §3.2 keeps them verbatim, and Ngo's bad and good versions use
+different agents (Bill/Robyn, Roger/Renee, the CEO/the chairman), sometimes
+with different goals. `kmp.items.design_problems` skips the agent check
+only when both members of a pair have `source=ngo`; every other check still
+applies to them. New and pilot-derived pairs follow §3.1 in full.
+
 ## 1. What the study asks
 
 **Background.** In Ngo et al. (2015), people rate an agent as acting more
