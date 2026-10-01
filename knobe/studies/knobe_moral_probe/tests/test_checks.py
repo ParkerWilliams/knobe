@@ -159,7 +159,8 @@ def _run_main(tmp_path, items, rows, manifest=None):
 
 def test_main_records_dropped_items_and_manifest(tmp_path, capsys):
     mk = "gemma-2-9b-instruct"
-    rows = [(f"kmp-nv-001-moral-{s}::blame::w1::chat", mk, v) for s, v in (("bad", 8), ("good", 2))]
+    rows = [(f"kmp-nv-001-moral-{s}::{q}::w1::chat", mk, v)
+            for q, s, v in (("blame", "bad", 8), ("blame", "good", 2), ("praise", "bad", 1), ("praise", "good", 7))]
     rows.append(("kmp-nv-099-moral-bad::blame::w1::chat", mk, 5))
     manifest = {"release": "knobe_moral_probe", "runner_version": "v", "max_tokens": 10, "engine": "fake",
                 "model_keys": [mk], "prompts": {"p": "sha"}}
@@ -185,3 +186,45 @@ def test_main_warns_when_manifest_absent_and_fails_low_number_rate(tmp_path, cap
     assert prov["manifest"] is None and prov["n_dropped_unknown_items"] == 0
     err = capsys.readouterr().err
     assert "no manifest" in err and "number-rate minimum" in err
+
+
+# --- blocking vs non-blocking (DESIGN.md section 8) --------------------------
+
+def _ngo_rows(mk, blame=(8, 2), praise=(1, 7)):
+    """blame/praise = (bad, good) ratings for one ngo_verbatim pair."""
+    fmt = "raw" if mk.endswith("pretrained") else "chat"
+    return [(f"kmp-nv-001-moral-{s}::{q}::w1::{fmt}", mk, v)
+            for q, vals in (("blame", blame), ("praise", praise)) for s, v in zip(("bad", "good"), vals)]
+
+
+@pytest.mark.parametrize("mk, kwargs, code, blocked", [
+    ("gemma-2-9b-instruct", dict(blame=(2, 8)), 1, "validity"),         # finetuned validity fail blocks
+    ("gemma-2-9b-pretrained", dict(blame=(2, 8)), 0, None),              # pretrained: a finding
+    ("gemma-2-9b-instruct", dict(blame=(9, 0), praise=(0, 9)), 1, "example_copying"),
+    ("gemma-2-9b-pretrained", dict(blame=(9, 0), praise=(0, 9)), 0, None),
+])
+def test_main_blocks_on_finetuned_problems_only(tmp_path, capsys, mk, kwargs, code, blocked):
+    got, out_dir = _run_main(tmp_path, make_ngo_verbatim_items(1), _ngo_rows(mk, **kwargs))
+    assert got == code
+    gate = json.loads((out_dir / "provenance.json").read_text())["gate"]
+    err = capsys.readouterr().err
+    assert "gate summary" in err
+    if blocked:
+        assert len(gate["blocking"]) == 1 and gate["blocking"][0].startswith(blocked)
+    else:
+        assert gate["blocking"] == [] and len(gate["findings"]) == 1
+        assert gate["findings"][0].startswith(("validity", "example_copying"))
+
+
+def test_main_blocks_on_finetuned_no_data(tmp_path):
+    rows = [r for r in _ngo_rows("gemma-2-9b-instruct") if "::praise::" not in r[0]]
+    code, out_dir = _run_main(tmp_path, make_ngo_verbatim_items(1), rows)
+    assert code == 1
+    gate = json.loads((out_dir / "provenance.json").read_text())["gate"]
+    assert len(gate["blocking"]) == 1 and "no_data" in gate["blocking"][0]
+
+
+def test_main_clean_run_has_no_blocking_or_findings(tmp_path):
+    code, out_dir = _run_main(tmp_path, make_ngo_verbatim_items(1), _ngo_rows("gemma-2-9b-instruct"))
+    assert code == 0
+    assert json.loads((out_dir / "provenance.json").read_text())["gate"] == {"blocking": [], "findings": []}

@@ -1,10 +1,17 @@
 """Pre-analysis gate (DESIGN.md section 8). Each function takes the
 kmp.frame DataFrame and returns a small table; main() writes them, plus
-provenance.json (the frame's dropped unknown items and the results file's
-run manifest), and exits 1 if any model x question x wording cell falls
-below the number-rate minimum. Validity checks are defined per experiment
-(applicable_checks); failed ones are reported but do not change the exit
-code, since a pretrained model failing them is a finding (DESIGN.md section 8).
+provenance.json (the frame's dropped unknown items, the results file's run
+manifest, and the gate summary).
+
+main() exits 1 (gate_summary) if any model x question x wording cell falls
+below the number-rate minimum (gate 1), or if a finetuned model fails an
+applicable validity check or has no data for one, or is flagged for copying
+the worked examples (gate 2). Section 8's "a finding, not a blocker" covers
+pretrained models only: their validity and copying problems are reported as
+findings and do not change the exit code. Validity checks are defined per
+experiment (applicable_checks). Anchor agreement (gate 4) has no threshold
+in DESIGN.md, so it is reported only. Gates 3 (example check) and 5
+(throughput) live in Task 12, not here.
 
 Number rates count parse_ok over every row (an unparsed answer is a miss).
 Everything computed from ratings runs on frame.analysis_rows (NaN-free).
@@ -160,6 +167,27 @@ def provenance(frame: pd.DataFrame, results: Path, items: Path) -> dict:
     }
 
 
+def gate_summary(tables: dict[str, pd.DataFrame]) -> dict[str, list[str]]:
+    """DESIGN.md section 8: what blocks analysis and what is only reported.
+    Blocking: number-rate cells below the minimum (every model); validity
+    fail/no_data and copying flags for finetuned models. Findings: the same
+    validity and copying problems for pretrained models."""
+    blocking: list[str] = []
+    findings: list[str] = []
+    nr = tables["number_rates"]
+    for r in nr[~nr["passes"]].itertuples():
+        blocking.append(f"number_rate: {r.model_key} {r.qkey} {r.wording_key} "
+                        f"{r.number_rate:.2f} < {protocol.NUMBER_RATE_MIN:.2f}")
+    for r in validity_problems(tables["validity"]).itertuples():
+        (blocking if r.tuning_status == "finetuned" else findings).append(
+            f"validity: {r.model_key} {r.experiment} {r.check} {r.status} (value {r.value:.2f})")
+    ec = tables["example_copying"]
+    for r in ec[ec["flag"]].itertuples():
+        (blocking if r.tuning_status == "finetuned" else findings).append(
+            f"example_copying: {r.model_key} share {r.share_example_values:.2f} > {protocol.COPY_SHARE_MAX:.2f}")
+    return {"blocking": blocking, "findings": findings}
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="knobe_moral_probe pre-analysis checks")
     p.add_argument("--results", required=True, type=Path)
@@ -170,23 +198,25 @@ def main(argv: list[str] | None = None) -> int:
     frame = load_frame(args.results, load_items(args.items))
     args.out_dir.mkdir(parents=True, exist_ok=True)
     prov = provenance(frame, args.results, args.items)
-    (args.out_dir / "provenance.json").write_text(json.dumps(prov, indent=2) + "\n", encoding="utf-8")
-    print(f"== provenance\n{json.dumps(prov, indent=2)}")
     tables = {"number_rates": number_rates(frame), "anchor_agreement": anchor_agreement(frame),
               "validity": validity(frame), "example_copying": example_copying(frame)}
     for name, table in tables.items():
         table.to_csv(args.out_dir / f"{name}.csv", index=False)
         print(f"\n== {name}\n{table.to_string(index=False)}")
-    problems = validity_problems(tables["validity"])
-    if len(problems):
-        # A finding, not a blocker (DESIGN.md section 8): reported, exit code unchanged.
-        print(f"\n{len(problems)} applicable validity check(s) failed or had no data:\n"
-              f"{problems.to_string(index=False)}", file=sys.stderr)
-    failing = tables["number_rates"][~tables["number_rates"]["passes"]]
-    if len(failing):
-        print(f"\n{len(failing)} cell(s) below the {protocol.NUMBER_RATE_MIN:.0%} number-rate minimum", file=sys.stderr)
-        return 1
-    return 0
+    prov["gate"] = gate = gate_summary(tables)
+    (args.out_dir / "provenance.json").write_text(json.dumps(prov, indent=2) + "\n", encoding="utf-8")
+    print(f"\n== provenance\n{json.dumps(prov, indent=2)}")
+
+    lines = ["\n== gate summary (DESIGN.md section 8)"]
+    lines.append(f"BLOCKING ({len(gate['blocking'])}):" if gate["blocking"] else "blocking: none")
+    lines += [f"  {b}" for b in gate["blocking"]]
+    lines.append(f"non-blocking findings, pretrained models ({len(gate['findings'])}):" if gate["findings"]
+                 else "non-blocking findings: none")
+    lines += [f"  {f}" for f in gate["findings"]]
+    if any(b.startswith("number_rate") for b in gate["blocking"]):
+        lines.append(f"cell(s) below the {protocol.NUMBER_RATE_MIN:.0%} number-rate minimum")
+    print("\n".join(lines), file=sys.stderr)
+    return 1 if gate["blocking"] else 0
 
 
 if __name__ == "__main__":
