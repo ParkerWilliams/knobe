@@ -1,4 +1,6 @@
+import pytest
 from knobe.elicit_vllm import EngineResponse
+from knobe.jobs import derive_temperature_and_seed
 
 from conftest import make_items
 from kmp import elicit, prompts, protocol
@@ -37,9 +39,32 @@ def test_to_request_wrappers():
     assert 0.85 <= r.temperature <= 1.15
 
 
-def test_seeds_are_deterministic():
+def test_seed_and_temperature_come_from_knobe_jobs():
+    for j in _jobs()[:5]:
+        temperature, seed = derive_temperature_and_seed(protocol.RELEASE, j.prompt_id, j.model_key, j.sample_idx)
+        req = elicit.to_request(j, 10)
+        assert (req.temperature, req.seed) == (temperature, seed)
+
+
+def test_seed_temperature_pairs_distinct_across_jobs():
+    jobs = _jobs()
+    assert {j.fmt for j in jobs} == {"raw", "chat"}
+    pairs = {(r.seed, r.temperature) for r in (elicit.to_request(j, 10) for j in jobs)}
+    assert len(pairs) == len(jobs)
+
+
+def test_to_request_rejects_unknown_fmt():
     j = _jobs()[0]
-    assert elicit.to_request(j, 10).seed == elicit.to_request(j, 10).seed
+    bad = elicit.Job(j.prompt_id, j.model_key, j.sample_idx, j.text, "completion", j.text_sha256)
+    with pytest.raises(ValueError, match="fmt"):
+        elicit.to_request(bad, 10)
+
+
+def test_to_result_rejects_mismatched_job_id():
+    j = _jobs()[0]
+    req = elicit.to_request(j, 10)
+    with pytest.raises(ValueError, match="job_id"):
+        elicit.to_result(j, req, EngineResponse("other::id::0", " 7", None), "rev")
 
 
 def test_to_result_parses_or_records_failure():

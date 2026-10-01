@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
+from typing import Literal
 
 from knobe.elicit_vllm import EngineRequest, EngineResponse
 from knobe.jobs import derive_temperature_and_seed
@@ -30,7 +31,7 @@ class Job:
     model_key: str
     sample_idx: int
     text: str
-    fmt: str
+    fmt: Literal["raw", "chat"]
     # sha256 of the exact prompt text, carried from PromptSpec so a resume
     # (Task 6) can detect that a done job was produced from different text.
     text_sha256: str
@@ -52,12 +53,19 @@ def build_jobs(specs: list[PromptSpec], model_keys: list[str]) -> list[Job]:
 
 def to_request(job: Job, max_tokens: int) -> EngineRequest:
     temperature, seed = derive_temperature_and_seed(protocol.RELEASE, job.prompt_id, job.model_key, job.sample_idx)
-    wrapper = {"text": job.text} if job.fmt == "raw" else {"messages": [{"role": "user", "content": job.text}]}
+    if job.fmt == "raw":
+        wrapper = {"text": job.text}
+    elif job.fmt == "chat":
+        wrapper = {"messages": [{"role": "user", "content": job.text}]}
+    else:
+        raise ValueError(f"unknown fmt {job.fmt!r} for job {job.job_id}")
     return EngineRequest(job_id=job.job_id, prompt_id=job.prompt_id, temperature=temperature, seed=seed,
                          max_tokens=max_tokens, want_first_token_logprobs=False, **wrapper)
 
 
 def to_result(job: Job, request: EngineRequest, response: EngineResponse, model_revision: str) -> ResultRecord:
+    if response.job_id != job.job_id:
+        raise ValueError(f"response job_id {response.job_id!r} does not match job_id {job.job_id!r}")
     value, ok, raw = parse_rating(response.raw_response)
     return ResultRecord(
         job_id=job.job_id, prompt_id=job.prompt_id, model_key=job.model_key, sample_idx=job.sample_idx,
