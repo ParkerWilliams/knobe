@@ -37,6 +37,18 @@ items. It is exempt from the role-noun and same-agent checks and nothing
 else. It is a consistency check: the sign effect on verbatim vs adapted
 text, per model. The main analyses use the adapted items.
 
+**Amended 2026-10-01 (copying check):** §8's "no copying of the worked
+examples' answers beyond chance" is measured against the same model run
+without the examples, not a fixed share. 0 and 5 are natural answers (no
+blame for a good effect, the midpoint), so a fixed share over-flags. For
+each instruct model × experiment × question, copying = share of answers in
+{0, 5, 9} with examples minus the same share without. It blocks when that
+excess exceeds `protocol.COPY_EXCESS_MAX` (proposed 0.10, revisited against
+the pilot and recorded). The §8 example check therefore runs with and
+without examples for every instruct model in the pilot, not only Mistral.
+Without a no-examples run, copying is "no data" and blocks instruct models.
+Pretrained models get the same numbers as findings.
+
 ## 1. What the study asks
 
 **Background.** In Ngo et al. (2015), people rate an agent as acting more
