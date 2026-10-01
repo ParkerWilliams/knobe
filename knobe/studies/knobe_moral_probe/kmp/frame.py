@@ -9,11 +9,18 @@ lib.wild_cluster_bootstrap run on it unchanged.
 Column contract:
   item_id, qkey, wording_key, fmt   parsed from prompt_id (kmp.prompts)
   experiment, storyline_id, arm, sign   from the items file
-  cluster_id        f"{experiment}-{storyline_id:03d}". Use this, not
-                    storyline_id, as the cluster for any pooled fit:
-                    ngo_verbatim shares nonmoral's storyline numbering by
-                    design (so verbatim and adapted pairs can be matched on
-                    storyline_id), and cluster_id keeps them separate clusters.
+  cluster_id        f"{experiment}-{storyline_id:03d}". The cluster for a
+                    fit within one experiment, or pooling experiments whose
+                    storyline numbers collide only by accident (nonmoral +
+                    foundations): there storyline_id would wrongly merge
+                    unrelated storylines into one cluster.
+  ngo_pair_id       f"ngo-{storyline_id:03d}" on ngo_verbatim rows and
+                    nonmoral arm-moral rows, missing (NaN) elsewhere. The cluster for
+                    a verbatim-vs-adapted fit (ngo_verbatim + nonmoral moral
+                    pooled): both sets render the same Ngo pair by design, so
+                    the verbatim and adapted versions of a pair are one
+                    cluster. Clustering that fit on cluster_id would split
+                    each Ngo pair into two clusters and understate the SE.
   reversed          protocol.is_reversed(qkey, wording_key)
   rating            the written number, recoded 10 - x for reversed-anchor
                     wordings; NaN where parse_ok is False or no number was
@@ -40,8 +47,10 @@ Pilot-script names -> frame names:
   family, tuning_status, sign_c, tuning_c          -> same names, same values
 
 Fails loudly: an empty results file, duplicate job_ids, a model_key not in
-the registry, or two registry families sharing one short `family` name
-raise ValueError. Rows for items no longer in the items file are dropped and
+the registry, two registry families sharing one short `family` name, or a
+file whose rows are all for unknown items raises ValueError. The
+short-family guard is per results file: frames concatenated later are not
+re-checked, so check `model_family` per `family` after any concat. Rows for items no longer in the items file are dropped and
 reported (stderr, plus attrs n_dropped_unknown_items / dropped_unknown_item_ids).
 """
 from __future__ import annotations
@@ -101,9 +110,13 @@ def load_frame(results_path: str | Path, items: list[Item], registry: dict | Non
     if n_dropped:
         print(f"frame: dropped {n_dropped} result row(s) for {len(dropped_ids)} item(s) not in the items file: "
               f"{dropped_ids[:5]}", file=sys.stderr)
+    if not known.any():
+        raise ValueError(f"{results_path}: every row is for an item not in the items file, e.g. {dropped_ids[:5]}")
     df = df[known]
     d = df.merge(meta, on="item_id", how="left", validate="many_to_one")
     d["cluster_id"] = [f"{e}-{s:03d}" for e, s in zip(d["experiment"], d["storyline_id"])]
+    ngo = (d["experiment"] == "ngo_verbatim") | ((d["experiment"] == "nonmoral") & (d["arm"] == "moral"))
+    d["ngo_pair_id"] = [f"ngo-{s:03d}" if is_ngo else None for s, is_ngo in zip(d["storyline_id"], ngo)]
     d["reversed"] = [protocol.is_reversed(q, w) for q, w in zip(d["qkey"], d["wording_key"])]
     raw = pd.to_numeric(d["parsed_rating_raw"], errors="coerce").astype(float).where(d["parse_ok"].astype(bool))
     d["rating"] = np.where(d["reversed"], 10 - raw, raw)

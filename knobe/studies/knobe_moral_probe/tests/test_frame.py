@@ -3,6 +3,7 @@ import math
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import pytest
 from knobe.schemas import ResultRecord, append_jsonl
 
@@ -185,3 +186,29 @@ def test_wild_cluster_bootstrap_runs_on_analysis_rows(tmp_path):
     assert d["rating"].isna().sum() == 1
     out = wcb(frame.analysis_rows(d), "rating ~ sign_c * tuning_c", "sign_c", "cluster_id", B=49, seed=1)
     assert out["n_groups"] == 6 and out["beta_obs"] > 0 and 0 <= out["p_wcb"] <= 1
+
+
+def test_ngo_pair_id_links_verbatim_and_adapted_moral_only(tmp_path):
+    items = make_items("nonmoral", 1) + make_ngo_verbatim_items(1)
+    path = tmp_path / "r.jsonl"
+    _write(path, [("kmp-nm-001-moral-bad::blame::w1::raw", "gemma-2-9b-pretrained", 3),
+                  ("kmp-nm-001-prudential-bad::blame::w1::raw", "gemma-2-9b-pretrained", 3),
+                  ("kmp-nv-001-moral-good::blame::w1::raw", "gemma-2-9b-pretrained", 4)])
+    d = frame.load_frame(path, items).set_index("item_id")
+    assert d.loc["kmp-nm-001-moral-bad", "ngo_pair_id"] == "ngo-001"
+    assert d.loc["kmp-nv-001-moral-good", "ngo_pair_id"] == "ngo-001"
+    assert pd.isna(d.loc["kmp-nm-001-prudential-bad", "ngo_pair_id"])
+
+
+def test_ngo_pair_id_absent_for_foundations(tmp_path):
+    path = tmp_path / "r.jsonl"
+    _write(path, [("kmp-mf-001-harm-bad::blame::w1::raw", "gemma-2-9b-pretrained", 3)])
+    d = frame.load_frame(path, make_items("foundations", 1))
+    assert d["ngo_pair_id"].isna().all()
+
+
+def test_all_rows_dropped_raises(tmp_path):
+    path = tmp_path / "r.jsonl"
+    _write(path, [("kmp-nm-099-moral-bad::blame::w1::raw", "gemma-2-9b-pretrained", 3)])
+    with pytest.raises(ValueError, match="kmp-nm-099-moral-bad"):
+        frame.load_frame(path, make_items("nonmoral", 1))
