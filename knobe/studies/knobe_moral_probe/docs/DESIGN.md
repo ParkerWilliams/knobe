@@ -299,16 +299,20 @@ untouched. Screening is about 470 items × 4–6 reviewer calls.
 `rq1_v1_1_robustness/15_rq1a_severity_mde_and_power_planning.py`, applied
 to the pilot's finetuned per-foundation sign effects under parsed scoring:
 
-| foundation | Gemma | Mistral |
-|---|---:|---:|
-| loyalty | 13 | 66 |
-| authority | already enough | 357 (effect ≈ 0) |
-| fairness | 17 | 11 |
-| purity | 10 | 10 |
+| foundation | Gemma | Mistral | Llama |
+|---|---:|---:|---:|
+| loyalty | 13 | 66 | 99 |
+| authority | already enough | 357 (effect ≈ 0) | 14 |
+| fairness | 17 | 11 | none (effect ≈ 0) |
+| purity | 10 | 10 | 58 (reversed sign) |
 
-Llama showed no effect to power. These are rough: pilot estimates on 6–10
-storylines, under the old protocol. This was computed in a scratch session;
-the implementation plan adds a committed script for it.
+Llama's effects are mostly small or unstable: fairness ≈ 0, purity in the
+reversed direction, loyalty needing ~99 storylines. The exception is
+authority (β ≈ 1.07, 14 storylines). These are rough: pilot estimates on
+6–10 storylines, under the old protocol. Committed as
+`analysis/power_basis.py` → `outputs/power_basis.csv` (commit a67a29a); an
+earlier version of this paragraph, computed in a scratch session, said
+Llama showed no effect to power.
 
 ## 10. Analysis (unchanged in kind)
 
