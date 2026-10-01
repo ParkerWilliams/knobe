@@ -1,7 +1,10 @@
 """Pre-analysis gate (DESIGN.md section 8). Each function takes the
-kmp.frame DataFrame and returns a small table; main() writes them and
-exits 1 if any model x question x wording cell falls below the
-number-rate minimum.
+kmp.frame DataFrame and returns a small table; main() writes them, plus
+provenance.json (the frame's dropped unknown items and the results file's
+run manifest), and exits 1 if any model x question x wording cell falls
+below the number-rate minimum. Validity checks are defined per experiment
+(applicable_checks); failed ones are reported but do not change the exit
+code, since a pretrained model failing them is a finding (DESIGN.md section 8).
 
 Number rates count parse_ok over every row (an unparsed answer is a miss).
 Everything computed from ratings runs on frame.analysis_rows (NaN-free).
@@ -10,6 +13,7 @@ Per-model tables are keyed by model_key and carry tuning_status and family.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -17,6 +21,7 @@ import numpy as np
 import pandas as pd
 
 from kmp import protocol
+from kmp.elicit import RUN_FIELDS, manifest_path
 from kmp.frame import analysis_rows, load_frame
 from kmp.items import load_items
 
@@ -62,25 +67,63 @@ def anchor_agreement(frame: pd.DataFrame) -> pd.DataFrame:
     return _with_model_cols(out, frame)
 
 
+# Validity checks (DESIGN.md section 8, gate 2), each defined per experiment.
+VALIDITY_CHECKS = ("blame_bad_minus_good", "praise_good_minus_bad", "significance_moral_minus_procedural")
+# A check's status: "pass" (value > 0), "fail" (value <= 0), "no_data" (applicable
+# but not computable from this frame, e.g. an arm missing), "not_applicable" (the
+# experiment has no such contrast). Only "fail" and "no_data" are problems.
+PASS, FAIL, NO_DATA, NOT_APPLICABLE = "pass", "fail", "no_data", "not_applicable"
+PROBLEM_STATUSES = (FAIL, NO_DATA)
+
+
+def applicable_checks(experiment: str) -> tuple[str, ...]:
+    """Which validity checks an experiment's items can show. The significance
+    check contrasts the moral and procedural arms, which only nonmoral has."""
+    if experiment == "nonmoral":
+        return VALIDITY_CHECKS
+    if experiment in ("foundations", "ngo_verbatim"):
+        return ("blame_bad_minus_good", "praise_good_minus_bad")
+    raise protocol.unknown_experiment(experiment)
+
+
+def _check_value(d: pd.DataFrame, check: str) -> float:
+    def mean(qkey, **where):
+        sel = d[d["qkey"] == qkey]
+        for col, val in where.items():
+            sel = sel[sel[col] == val]
+        return sel["rating"].mean()
+    if check == "blame_bad_minus_good":
+        return mean("blame", sign="bad") - mean("blame", sign="good")
+    if check == "praise_good_minus_bad":
+        return mean("praise", sign="good") - mean("praise", sign="bad")
+    if check == "significance_moral_minus_procedural":
+        return mean("significance", arm="moral") - mean("significance", arm="procedural")
+    raise ValueError(f"unknown validity check {check!r}")
+
+
 def validity(frame: pd.DataFrame) -> pd.DataFrame:
-    """Sanity directions any real judgment should show (DESIGN.md section 8, gate 2)."""
+    """Sanity directions any real judgment should show, per model x experiment.
+    Every check gets a row; checks an experiment can't show are "not_applicable"
+    (value NaN), never a silent pass."""
+    for experiment in frame["experiment"].unique():   # unknown experiments raise even with no ratings
+        applicable_checks(experiment)
     rows = []
-    for model_key, d in analysis_rows(frame).groupby("model_key"):
-        def mean(qkey, **where):
-            sel = d[d["qkey"] == qkey]
-            for col, val in where.items():
-                sel = sel[sel[col] == val]
-            return sel["rating"].mean()
-        checks_ = {
-            "blame_bad_minus_good": mean("blame", sign="bad") - mean("blame", sign="good"),
-            "praise_good_minus_bad": mean("praise", sign="good") - mean("praise", sign="bad"),
-            "significance_moral_minus_procedural": mean("significance", arm="moral") - mean("significance", arm="procedural"),
-        }
-        for name, value in checks_.items():
-            rows.append(dict(model_key=model_key, check=name,
-                             value=value, passes=bool(value > 0) if pd.notna(value) else None))
-    out = pd.DataFrame(rows, columns=["model_key", "check", "value", "passes"])
+    for (model_key, experiment), d in analysis_rows(frame).groupby(["model_key", "experiment"]):
+        applicable = applicable_checks(experiment)
+        for check in VALIDITY_CHECKS:
+            if check not in applicable:
+                value, status = float("nan"), NOT_APPLICABLE
+            else:
+                value = _check_value(d, check)
+                status = NO_DATA if pd.isna(value) else (PASS if value > 0 else FAIL)
+            rows.append(dict(model_key=model_key, experiment=experiment, check=check, value=value, status=status))
+    out = pd.DataFrame(rows, columns=["model_key", "experiment", "check", "value", "status"])
     return _with_model_cols(out, frame)
+
+
+def validity_problems(table: pd.DataFrame) -> pd.DataFrame:
+    """Rows of a validity() table that failed or could not be computed."""
+    return table[table["status"].isin(PROBLEM_STATUSES)]
 
 
 def example_copying(frame: pd.DataFrame) -> pd.DataFrame:
@@ -96,6 +139,27 @@ def example_copying(frame: pd.DataFrame) -> pd.DataFrame:
     return _with_model_cols(share, frame)
 
 
+def provenance(frame: pd.DataFrame, results: Path, items: Path) -> dict:
+    """What the tables were computed from: the frame's dropped rows and the
+    results file's run manifest (<results>.manifest.json), if one exists."""
+    mpath = manifest_path(results)
+    if mpath.exists():
+        full = json.loads(mpath.read_text(encoding="utf-8"))
+        manifest = {k: full.get(k) for k in RUN_FIELDS}
+    else:
+        print(f"checks: WARNING no manifest at {mpath}; the run's release, runner_version, max_tokens, "
+              f"engine and model_keys are unrecorded", file=sys.stderr)
+        manifest = None
+    return {
+        "results": str(results), "items": str(items),
+        "manifest_path": str(mpath), "manifest": manifest,
+        "experiments": sorted(frame["experiment"].unique()),
+        "n_rows": len(frame), "n_rated_rows": len(analysis_rows(frame)),
+        "n_dropped_unknown_items": frame.attrs.get("n_dropped_unknown_items"),
+        "dropped_unknown_item_ids": frame.attrs.get("dropped_unknown_item_ids"),
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="knobe_moral_probe pre-analysis checks")
     p.add_argument("--results", required=True, type=Path)
@@ -105,11 +169,19 @@ def main(argv: list[str] | None = None) -> int:
 
     frame = load_frame(args.results, load_items(args.items))
     args.out_dir.mkdir(parents=True, exist_ok=True)
+    prov = provenance(frame, args.results, args.items)
+    (args.out_dir / "provenance.json").write_text(json.dumps(prov, indent=2) + "\n", encoding="utf-8")
+    print(f"== provenance\n{json.dumps(prov, indent=2)}")
     tables = {"number_rates": number_rates(frame), "anchor_agreement": anchor_agreement(frame),
               "validity": validity(frame), "example_copying": example_copying(frame)}
     for name, table in tables.items():
         table.to_csv(args.out_dir / f"{name}.csv", index=False)
         print(f"\n== {name}\n{table.to_string(index=False)}")
+    problems = validity_problems(tables["validity"])
+    if len(problems):
+        # A finding, not a blocker (DESIGN.md section 8): reported, exit code unchanged.
+        print(f"\n{len(problems)} applicable validity check(s) failed or had no data:\n"
+              f"{problems.to_string(index=False)}", file=sys.stderr)
     failing = tables["number_rates"][~tables["number_rates"]["passes"]]
     if len(failing):
         print(f"\n{len(failing)} cell(s) below the {protocol.NUMBER_RATE_MIN:.0%} number-rate minimum", file=sys.stderr)
