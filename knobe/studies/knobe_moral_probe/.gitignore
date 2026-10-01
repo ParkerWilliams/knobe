@@ -5,3 +5,4 @@
 outputs/elicit/*.jsonl
 outputs/checks/*/
 __pycache__/
+outputs/elicit/*.lock
