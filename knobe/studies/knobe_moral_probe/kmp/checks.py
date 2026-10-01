@@ -1,8 +1,16 @@
 """Pre-analysis gate (DESIGN.md section 8). Each function takes the
 kmp.frame DataFrame and returns a small table; main() writes them, plus
 provenance.json (inputs and their hashes, git state, thresholds, the
-frame's dropped unknown items, the results file's run manifest, and the
-gate summary).
+frame's dropped unknown items, the results file's run manifest, the
+no-examples baseline and its manifest, and the gate summary).
+
+--baseline is the same models run with kmp.elicit --no-examples (DESIGN.md
+amendment 2026-10-01). Example copying and the example effect are measured
+against it. main() exits 2 before writing anything if the baseline has no
+manifest, its manifest isn't examples=false, or any other run field
+(release, runner_version, max_tokens, engine, model_keys) differs from the
+results' manifest; also if --baseline is given and the results have no
+manifest, or the results' own manifest says examples=false.
 
 main() exits 1 (gate_summary) if anything blocks:
   - coverage: a model_key (from the manifest, else the models present) with
@@ -15,7 +23,9 @@ main() exits 1 (gate_summary) if anything blocks:
   - gate 1: a model x experiment x question x wording cell below the
     number-rate minimum;
   - gate 2, finetuned models: an applicable validity check that fails or
-    has no data, or an example-copying flag.
+    has no data; example copying that fails (excess above
+    protocol.COPY_EXCESS_MAX) or has no data (no --baseline, or no baseline
+    rows for that model x experiment x question).
 Section 8's "a finding, not a blocker" covers pretrained models only: their
 validity and copying problems are reported as findings and do not change
 the exit code. Anchor agreement (gate 4) has no threshold in DESIGN.md, so
@@ -28,7 +38,8 @@ so pooling them can hide one that parses or behaves badly. Validity is per
 model x experiment, not per wording: its contrasts average over a
 question's wordings (after recoding), since a sign or arm contrast needs
 the whole item set and per-wording cells would be too small to read.
-Example copying is per model x experiment x question.
+Example copying and the example effect are per model x experiment x
+question.
 
 provenance.json's git_dirty covers the whole repo, so untracked scratch
 files count as dirty too; it errs on the safe side.
@@ -167,32 +178,53 @@ def validity_problems(table: pd.DataFrame) -> pd.DataFrame:
     return table[table["status"].isin(PROBLEM_STATUSES)]
 
 
-def example_copying(frame: pd.DataFrame) -> pd.DataFrame:
-    """Share of written answers equal to a worked-example answer (before
-    recoding), per model x experiment x question, flagged above COPY_SHARE_MAX.
+COPY_KEYS = ["model_key", "experiment", "qkey"]
 
-    The written number is recovered from `rating` by undoing the 10 - x recode,
-    so this reads analysis_rows' ratings, never parsed_rating_raw.
 
-    Caveat, pending the researcher's decision on threshold/baseline: 0 and 5
-    are also natural answers (a clear "not at all", a scale midpoint), so a
-    high share can reflect genuine judgments rather than copying, and the
-    share can overstate copying."""
+def _example_share(frame: pd.DataFrame, name: str) -> pd.DataFrame:
+    """Share of written answers equal to a worked-example answer, per
+    model x experiment x question. The written number is recovered from
+    `rating` by undoing the 10 - x recode, so this reads analysis_rows'
+    ratings, never parsed_rating_raw."""
     rated = analysis_rows(frame)
     written = rated["rating"].where(~rated["reversed"].astype(bool), 10 - rated["rating"])
-    keys = [rated[c] for c in ("model_key", "experiment", "qkey")]
-    share = (written.isin(sorted(protocol.EXAMPLE_ANSWERS))
-             .groupby(keys).mean().rename("share_example_values").reset_index())
-    share["flag"] = share["share_example_values"] > protocol.COPY_SHARE_MAX
-    return _with_model_cols(share, frame)
+    hit = written.isin(sorted(protocol.EXAMPLE_ANSWERS)).astype(float).rename(name)
+    return hit.groupby([rated[c] for c in COPY_KEYS]).mean().reset_index()
 
 
-def example_effect(with_examples: pd.DataFrame, without_examples: pd.DataFrame) -> pd.DataFrame:
+def example_copying(frame: pd.DataFrame, baseline: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Gate 2's copying check (DESIGN.md amendment 2026-10-01), per model x
+    experiment x question: share_with (answers in EXAMPLE_ANSWERS, with the
+    worked examples) minus share_without (the same share in the no-examples
+    baseline run) = excess. 0 and 5 are natural answers, so the share alone
+    over-flags; the no-examples run is the chance level.
+
+    status: "fail" if excess > protocol.COPY_EXCESS_MAX, else "pass";
+    "no_data" if either share is missing (no baseline, no baseline rows for
+    the cell, or no rated rows in it). Every model x experiment x question in
+    the full frame gets a row."""
+    cells = frame[COPY_KEYS].drop_duplicates().sort_values(COPY_KEYS)
+    without = (_example_share(baseline, "share_without") if baseline is not None
+               else pd.DataFrame({**{c: pd.Series(dtype=object) for c in COPY_KEYS},
+                                  "share_without": pd.Series(dtype=float)}))
+    out = (cells.merge(_example_share(frame, "share_with"), on=COPY_KEYS, how="left")
+           .merge(without, on=COPY_KEYS, how="left").reset_index(drop=True))
+    out["share_without"] = out["share_without"].astype(float)
+    out["excess"] = out["share_with"] - out["share_without"]
+    out["status"] = [NO_DATA if pd.isna(x) else (FAIL if x > protocol.COPY_EXCESS_MAX else PASS)
+                     for x in out["excess"]]
+    return _with_model_cols(out, frame)
+
+
+def example_effect(with_examples: pd.DataFrame, without_examples: pd.DataFrame | None) -> pd.DataFrame:
     """Gate 3, per model x experiment x question: item-mean ratings (after
     recoding) with vs without the worked examples, over items rated in both.
     Format-only examples should leave these unchanged: r near 1, mean_diff
-    (with - without) near 0. Reported only (no DESIGN.md threshold)."""
-    keys = ["model_key", "experiment", "qkey"]
+    (with - without) near 0. Reported only (no DESIGN.md threshold).
+    No baseline (None) gives an empty table."""
+    keys = COPY_KEYS
+    if without_examples is None:
+        without_examples = with_examples.iloc[0:0]
 
     def item_means(f: pd.DataFrame) -> pd.Series:
         return analysis_rows(f).groupby([*keys, "item_id"])["rating"].mean()
@@ -241,6 +273,22 @@ def coverage(frame: pd.DataFrame, items: list[Item], model_keys: list[str]) -> p
     return out[[*cols, "expected_model", "n_rows"]]
 
 
+def baseline_manifest_problems(results_manifest: dict | None, baseline_manifest: dict | None) -> list[str]:
+    """Why a --baseline run can't be compared with the results. Empty = fine."""
+    if results_manifest is None:
+        return ["--baseline needs the results' run manifest to compare against, and it has none"]
+    if baseline_manifest is None:
+        return ["the baseline has no run manifest, so it can't be shown to be a no-examples run of the same models"]
+    problems = []
+    if baseline_manifest.get("examples") is not False:
+        problems.append(f"examples: the baseline manifest has {baseline_manifest.get('examples')!r}, "
+                        f"expected False (a kmp.elicit --no-examples run)")
+    problems += [f"{k}: the results' manifest has {results_manifest.get(k)!r}, the baseline's has "
+                 f"{baseline_manifest.get(k)!r}" for k in RUN_FIELDS
+                 if k != "examples" and results_manifest.get(k) != baseline_manifest.get(k)]
+    return problems
+
+
 def read_manifest(results: Path) -> dict | None:
     """The run fields of <results>.manifest.json, or None (with a warning) if absent."""
     mpath = manifest_path(results)
@@ -269,12 +317,14 @@ def _git(*args: str) -> str | None:
 
 
 def provenance(frame: pd.DataFrame, results: Path, items: Path, manifest: dict | None,
-               argv: list[str]) -> dict:
+               argv: list[str], baseline: Path | None = None, baseline_manifest: dict | None = None) -> dict:
     """What the tables were computed from: inputs and hashes, code state,
-    thresholds, the frame's dropped rows and the run manifest (None if absent)."""
+    thresholds, the frame's dropped rows, the run manifest (None if absent)
+    and the no-examples baseline with its manifest (None without --baseline)."""
     commit = _git("rev-parse", "HEAD")
     status = _git("status", "--porcelain")   # whole repo, untracked files included
     mpath = manifest_path(results).resolve()
+    bpath = manifest_path(baseline).resolve() if baseline is not None else None
     return {
         "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "argv": list(argv), "cwd": str(Path.cwd().resolve()),
@@ -282,10 +332,15 @@ def provenance(frame: pd.DataFrame, results: Path, items: Path, manifest: dict |
         "git_dirty": bool(status.strip()) if status is not None else None,
         "results": str(Path(results).resolve()), "results_sha256": _sha256(results),
         "items": str(Path(items).resolve()), "items_sha256": _sha256(items),
-        "number_rate_min": protocol.NUMBER_RATE_MIN, "copy_share_max": protocol.COPY_SHARE_MAX,
+        "number_rate_min": protocol.NUMBER_RATE_MIN, "copy_excess_max": protocol.COPY_EXCESS_MAX,
         "example_answers": sorted(protocol.EXAMPLE_ANSWERS),
         "manifest_path": str(mpath), "manifest": manifest,
         "manifest_sha256": _sha256(mpath) if mpath.exists() else None,
+        "baseline": str(Path(baseline).resolve()) if baseline is not None else None,
+        "baseline_sha256": _sha256(baseline) if baseline is not None else None,
+        "baseline_manifest_path": str(bpath) if bpath is not None else None,
+        "baseline_manifest": baseline_manifest,
+        "baseline_manifest_sha256": _sha256(bpath) if bpath is not None and bpath.exists() else None,
         "experiments": sorted(frame["experiment"].unique()),
         "n_rows": len(frame), "n_rated_rows": len(analysis_rows(frame)),
         "n_dropped_unknown_items": frame.attrs.get("n_dropped_unknown_items"),
@@ -293,16 +348,19 @@ def provenance(frame: pd.DataFrame, results: Path, items: Path, manifest: dict |
     }
 
 
-def run_checks(frame: pd.DataFrame, items: list[Item], model_keys: list[str]) -> dict[str, pd.DataFrame]:
+def run_checks(frame: pd.DataFrame, items: list[Item], model_keys: list[str],
+               baseline: pd.DataFrame | None = None) -> dict[str, pd.DataFrame]:
+    """baseline: the kmp.frame of the no-examples run, or None (copying is then no_data)."""
     return {"coverage": coverage(frame, items, model_keys), "number_rates": number_rates(frame),
             "anchor_agreement": anchor_agreement(frame), "validity": validity(frame),
-            "example_copying": example_copying(frame), "throughput": throughput(frame)}
+            "example_copying": example_copying(frame, baseline), "example_effect": example_effect(frame, baseline),
+            "throughput": throughput(frame)}
 
 
 def gate_summary(tables: dict[str, pd.DataFrame]) -> dict[str, list[str]]:
     """DESIGN.md section 8: what blocks analysis and what is only reported.
     Blocking: coverage gaps and number-rate cells below the minimum (every
-    model); validity fail/no_data and copying flags for finetuned models.
+    model); validity and example-copying fail/no_data for finetuned models.
     Findings: the same validity and copying problems for pretrained models."""
     blocking: list[str] = []
     findings: list[str] = []
@@ -326,10 +384,12 @@ def gate_summary(tables: dict[str, pd.DataFrame]) -> dict[str, list[str]]:
         (blocking if r.tuning_status == "finetuned" else findings).append(
             f"validity: {r.model_key} {r.experiment} {r.check} {r.status}{detail}")
     ec = tables["example_copying"]
-    for r in ec[ec["flag"]].itertuples():
+    for r in ec[ec["status"].isin(PROBLEM_STATUSES)].itertuples():
+        detail = ("no_data (no no-examples baseline rows)" if r.status == NO_DATA else
+                  f"excess {r.excess:.2f} > {protocol.COPY_EXCESS_MAX:.2f} "
+                  f"(with {r.share_with:.2f}, without {r.share_without:.2f})")
         (blocking if r.tuning_status == "finetuned" else findings).append(
-            f"example_copying: {r.model_key} {r.experiment} {r.qkey} share {r.share_example_values:.2f} "
-            f"> {protocol.COPY_SHARE_MAX:.2f}")
+            f"example_copying: {r.model_key} {r.experiment} {r.qkey} {detail}")
     return {"blocking": blocking, "findings": findings}
 
 
@@ -339,15 +399,32 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--results", required=True, type=Path)
     p.add_argument("--items", required=True, type=Path)
     p.add_argument("--out-dir", required=True, type=Path)
+    p.add_argument("--baseline", type=Path,
+                   help="results JSONL of the same models run with kmp.elicit --no-examples; example copying "
+                        "is measured against it (without it, copying is no_data and blocks finetuned models)")
     args = p.parse_args(argv)
 
     items = load_items(args.items)
     frame = load_frame(args.results, items)
-    args.out_dir.mkdir(parents=True, exist_ok=True)
     manifest = read_manifest(args.results)
+    problems = []
+    if manifest is not None and manifest.get("examples") is False:
+        problems.append(f"{args.results} is a no-examples run (its manifest has examples=false); "
+                        f"pass it as --baseline, not --results")
+    baseline = baseline_manifest = None
+    if args.baseline is not None:
+        bpath = manifest_path(args.baseline)
+        baseline_manifest = read_manifest(args.baseline) if bpath.exists() else None
+        problems += [f"baseline {args.baseline}: {m}" for m in baseline_manifest_problems(manifest, baseline_manifest)]
+    if problems:
+        print("checks: refusing to run:\n  " + "\n  ".join(problems), file=sys.stderr)
+        return 2
+    if args.baseline is not None:
+        baseline = load_frame(args.baseline, items)
+    args.out_dir.mkdir(parents=True, exist_ok=True)
     model_keys = manifest["model_keys"] if manifest and manifest.get("model_keys") else sorted(frame["model_key"].unique())
-    prov = provenance(frame, args.results, args.items, manifest, argv)
-    tables = run_checks(frame, items, model_keys)
+    prov = provenance(frame, args.results, args.items, manifest, argv, args.baseline, baseline_manifest)
+    tables = run_checks(frame, items, model_keys, baseline)
     for name, table in tables.items():
         table.to_csv(args.out_dir / f"{name}.csv", index=False)
         print(f"\n== {name}\n{table.to_string(index=False)}")

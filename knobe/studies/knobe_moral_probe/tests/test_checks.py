@@ -63,18 +63,72 @@ def test_validity_checks_directions():
     assert out.loc["blame_bad_minus_good", "tuning_status"] == "pretrained"
 
 
-def test_example_copying_share():
-    rows = [_row("gemma-2-9b-pretrained", "i1", "blame", "w1", False, "moral", "bad", v) for v in (0, 5, 9, 3)]
-    out = checks.example_copying(_frame(rows))
-    assert out.loc[0, "share_example_values"] == 0.75 and out.loc[0, "flag"]
+def _blame_rows(values, model_key="gemma-2-9b-pretrained", wording="w1", reversed_=False, experiment="nonmoral",
+                qkey="blame"):
+    return [_row(model_key, "i1", qkey, wording, reversed_, "moral", "bad", v, experiment) for v in values]
+
+
+def test_example_copying_is_the_excess_over_the_no_examples_run():
+    out = checks.example_copying(_frame(_blame_rows((0, 5, 9, 3))), _frame(_blame_rows((0, 1, 2, 3))))
+    r = out.iloc[0]
+    assert (r["share_with"], r["share_without"], r["excess"]) == (0.75, 0.25, 0.5)
+    assert r["status"] == "fail" and r["tuning_status"] == "pretrained"
+
+
+def test_example_copying_natural_answers_in_both_runs_are_not_copying():
+    # 0 and 5 are natural answers: a high share in both runs is no excess.
+    out = checks.example_copying(_frame(_blame_rows((0, 5, 5, 3))), _frame(_blame_rows((0, 5, 0, 3))))
+    assert out.loc[0, "excess"] == 0.0 and out.loc[0, "status"] == "pass"
 
 
 def test_example_copying_counts_the_written_number_not_the_recoded_one():
-    # Written 9 under a reversed wording is recoded to 1 but is still a copied example answer.
-    rows = [_row("gemma-2-9b-pretrained", "i1", "blame", "w3r", True, "moral", "bad", v) for v in (9, 9, 3, 4)]
-    rows.append(_row("gemma-2-9b-pretrained", "i1", "blame", "w1", False, "moral", "bad", None))
-    out = checks.example_copying(_frame(rows))
-    assert out.loc[0, "share_example_values"] == 0.5
+    # Written 9 under a reversed wording is recoded to 1 but is still a copied example
+    # answer, in both runs; unparsed rows are left out of both shares.
+    with_ = _blame_rows((9, 9, 3, 4), wording="w3r", reversed_=True) + _blame_rows((None,))
+    without = _blame_rows((9, 1, 3, 4), wording="w3r", reversed_=True) + _blame_rows((None, None))
+    out = checks.example_copying(_frame(with_), _frame(without))
+    assert (out.loc[0, "share_with"], out.loc[0, "share_without"], out.loc[0, "excess"]) == (0.5, 0.25, 0.25)
+
+
+def test_example_copying_threshold_edge(monkeypatch):
+    with_, without = _frame(_blame_rows((0, 5, 9, 1))), _frame(_blame_rows((0, 5, 1, 1)))   # excess 0.25
+    monkeypatch.setattr(protocol, "COPY_EXCESS_MAX", 0.25)
+    assert checks.example_copying(with_, without).loc[0, "status"] == "pass"     # equal: not above
+    monkeypatch.setattr(protocol, "COPY_EXCESS_MAX", 0.24)
+    assert checks.example_copying(with_, without).loc[0, "status"] == "fail"
+
+
+def test_copy_excess_max_is_the_proposed_value():
+    assert protocol.COPY_EXCESS_MAX == 0.10 and not hasattr(protocol, "COPY_SHARE_MAX")
+
+
+def test_example_copying_without_a_baseline_is_no_data():
+    out = checks.example_copying(_frame(_blame_rows((0, 5, 9, 3))))
+    assert out.loc[0, "share_with"] == 0.75 and np.isnan(out.loc[0, "share_without"])
+    assert out.loc[0, "status"] == "no_data" and np.isnan(out.loc[0, "excess"])
+
+
+def test_example_copying_is_no_data_where_the_baseline_lacks_the_cell():
+    with_ = _blame_rows((0, 1)) + _blame_rows((1, 2), qkey="praise") + _blame_rows((1, 2), experiment="ngo_verbatim")
+    with_ += _blame_rows((None,), qkey="intentionality")          # no rated rows with examples either
+    baseline = _blame_rows((0, 1)) + _blame_rows((1, 2), model_key="gemma-2-9b-instruct", qkey="praise")
+    out = checks.example_copying(_frame(with_), _frame(baseline)).set_index(["experiment", "qkey"])["status"]
+    assert out.to_dict() == {("nonmoral", "blame"): "pass", ("nonmoral", "intentionality"): "no_data",
+                             ("nonmoral", "praise"): "no_data", ("ngo_verbatim", "blame"): "no_data"}
+
+
+@pytest.mark.parametrize("model_key, where", [("gemma-2-9b-instruct", "blocking"), ("gemma-2-9b-pretrained", "findings")])
+@pytest.mark.parametrize("baseline", [None, (0, 1, 2, 3)])
+def test_copying_fail_and_no_data_block_finetuned_only(model_key, where, baseline):
+    with_ = _frame(_blame_rows((0, 5, 9, 3), model_key=model_key))
+    base = None if baseline is None else _frame(_blame_rows(baseline, model_key=model_key))
+    gate = checks.gate_summary(checks.run_checks(with_, [], [], baseline=base))
+    other = "findings" if where == "blocking" else "blocking"
+    copying = [g for g in gate[where] if g.startswith("example_copying:")]
+    assert len(copying) == 1 and not any(g.startswith("example_copying:") for g in gate[other])
+    assert ("no_data" in copying[0]) == (baseline is None)
+    if baseline is not None:
+        assert "excess 0.50 > 0.10" in copying[0]
 
 
 # --- per-experiment applicability (amendment B) ---------------------------
@@ -168,9 +222,10 @@ def test_example_copying_and_anchor_agreement_are_per_experiment_and_question():
     rows = [_row(m, "i1", "blame", "w1", False, "moral", "bad", v) for v in (0, 5, 9, 3)]
     rows += [_row(m, "i1", "praise", "w1", False, "moral", "bad", v) for v in (1, 2, 3, 4)]
     rows += [_row(m, "v1", "blame", "w1", False, "moral", "bad", v, "ngo_verbatim") for v in (1, 2)]
-    out = checks.example_copying(_frame(rows)).set_index(["experiment", "qkey"])
-    assert out.loc[("nonmoral", "blame"), "flag"] and not out.loc[("nonmoral", "praise"), "flag"]
-    assert out.loc[("ngo_verbatim", "blame"), "share_example_values"] == 0.0
+    baseline = [r[:-2] + (1, 1.0) for r in rows]      # every answer 1: no example values
+    out = checks.example_copying(_frame(rows), _frame(baseline)).set_index(["experiment", "qkey"])
+    assert out.loc[("nonmoral", "blame"), "status"] == "fail" and out.loc[("nonmoral", "praise"), "status"] == "pass"
+    assert out.loc[("ngo_verbatim", "blame"), "share_with"] == 0.0
     assert {"experiment", "qkey"} <= set(checks.anchor_agreement(_frame(rows)).columns)
 
 
@@ -204,14 +259,30 @@ def _manifest(model_keys):
             "model_keys": sorted(model_keys), "examples": True, "prompts": {"p": "sha"}}
 
 
-def _run_main(tmp_path, items, rows, manifest=None):
+SAME = object()
+
+
+def _run_main(tmp_path, items, rows, manifest=None, baseline_rows=SAME, baseline_manifest=SAME):
+    """baseline_rows: no-examples rows for --baseline (default: the same rows, so copying
+    excess is 0, when a main manifest is given; else no --baseline); None = no --baseline.
+    baseline_manifest: default the main manifest with examples false; None = no manifest file."""
     results, items_csv, out_dir = tmp_path / "r.jsonl", tmp_path / "items.csv", tmp_path / "checks"
     _write_results(results, rows)
     write_items(items, items_csv)
     if manifest is not None:
         elicit.manifest_path(results).write_text(json.dumps(manifest), encoding="utf-8")
-    code = checks.main(["--results", str(results), "--items", str(items_csv), "--out-dir", str(out_dir)])
-    return code, out_dir
+    argv = ["--results", str(results), "--items", str(items_csv), "--out-dir", str(out_dir)]
+    if baseline_rows is SAME:
+        baseline_rows = rows if manifest is not None else None
+    if baseline_rows is not None:
+        base = tmp_path / "baseline.jsonl"
+        _write_results(base, baseline_rows)
+        if baseline_manifest is SAME:
+            baseline_manifest = {**manifest, "examples": False}
+        if baseline_manifest is not None:
+            elicit.manifest_path(base).write_text(json.dumps(baseline_manifest), encoding="utf-8")
+        argv += ["--baseline", str(base)]
+    return checks.main(argv), out_dir
 
 
 def _gate(out_dir):
@@ -232,7 +303,13 @@ def test_main_records_dropped_items_manifest_and_provenance(tmp_path, capsys):
     assert prov["manifest"] == {k: manifest[k] for k in elicit.RUN_FIELDS}
     assert prov["results_sha256"] == hashlib.sha256((tmp_path / "r.jsonl").read_bytes()).hexdigest()
     assert prov["items_sha256"] == hashlib.sha256((tmp_path / "items.csv").read_bytes()).hexdigest()
-    assert prov["number_rate_min"] == protocol.NUMBER_RATE_MIN and prov["copy_share_max"] == protocol.COPY_SHARE_MAX
+    assert prov["number_rate_min"] == protocol.NUMBER_RATE_MIN and prov["copy_excess_max"] == protocol.COPY_EXCESS_MAX
+    assert "copy_share_max" not in prov
+    base = tmp_path / "baseline.jsonl"
+    assert prov["baseline"] == str(base.resolve())
+    assert prov["baseline_sha256"] == hashlib.sha256(base.read_bytes()).hexdigest()
+    assert prov["baseline_manifest"] == {**prov["manifest"], "examples": False}
+    assert prov["baseline_manifest_sha256"] == hashlib.sha256(elicit.manifest_path(base).read_bytes()).hexdigest()
     assert prov["argv"][0] == "--results" and prov["timestamp_utc"].endswith("+00:00")
     assert "git_commit" in prov and "git_dirty" in prov
     assert prov["gate"] == {"blocking": [], "findings": []}
@@ -261,7 +338,8 @@ def test_main_warns_when_manifest_absent_and_fails_low_number_rate(tmp_path, cap
 ])
 def test_main_blocks_on_finetuned_problems_only(tmp_path, capsys, mk, kwargs, code, blocked):
     items = make_ngo_verbatim_items(1)
-    got, out_dir = _run_main(tmp_path, items, _full_rows(items, mk, **kwargs), _manifest([mk]))
+    got, out_dir = _run_main(tmp_path, items, _full_rows(items, mk, **kwargs), _manifest([mk]),
+                             baseline_rows=_full_rows(items, mk))
     assert got == code
     gate = _gate(out_dir)
     assert "gate summary" in capsys.readouterr().err
@@ -298,8 +376,10 @@ def test_main_blocks_on_missing_expected_cell(tmp_path):
 
 def test_main_without_manifest_covers_the_models_present(tmp_path):
     items = make_ngo_verbatim_items(1)
-    code, out_dir = _run_main(tmp_path, items, _full_rows(items, "gemma-2-9b-instruct"))
+    code, out_dir = _run_main(tmp_path, items, _full_rows(items, "gemma-2-9b-pretrained"))
     assert code == 0 and _gate(out_dir)["blocking"] == []
+    assert _gate(out_dir)["findings"] and all("example_copying" in f and "no_data" in f
+                                             for f in _gate(out_dir)["findings"])
 
 
 # --- foundations coverage, unexpected models, provenance details -------------
@@ -355,7 +435,8 @@ def test_git_failure_leaves_git_fields_none_and_run_completes(tmp_path, monkeypa
         raise FileNotFoundError("git")
     monkeypatch.setattr(checks.subprocess, "run", boom)
     items = make_ngo_verbatim_items(1)
-    code, out_dir = _run_main(tmp_path, items, _full_rows(items, "gemma-2-9b-instruct"))
+    code, out_dir = _run_main(tmp_path, items, _full_rows(items, "gemma-2-9b-instruct"),
+                              _manifest(["gemma-2-9b-instruct"]))
     assert code == 0
     prov = json.loads((out_dir / "provenance.json").read_text())
     assert prov["git_commit"] is None and prov["git_dirty"] is None
@@ -406,3 +487,79 @@ def test_throughput_rows_per_second():
     f = _frame(rows).assign(timestamp=[100.0, 101.0, 102.0, 103.0, 104.0])
     tp = checks.throughput(f)
     assert tp.loc[0, "seconds"] == 4.0 and tp.loc[0, "rows_per_second"] == 1.25
+
+
+# --- copying against a no-examples baseline (DESIGN.md amendment 2026-10-01) --
+
+def test_main_without_baseline_blocks_finetuned_on_copying_no_data(tmp_path):
+    mk = "gemma-2-9b-instruct"
+    items = make_ngo_verbatim_items(1)
+    code, out_dir = _run_main(tmp_path, items, _full_rows(items, mk), _manifest([mk]), baseline_rows=None)
+    assert code == 1
+    blocking = _gate(out_dir)["blocking"]
+    assert blocking and all(b.startswith(f"example_copying: {mk} ngo_verbatim") and "no_data" in b
+                            for b in blocking)
+    prov = json.loads((out_dir / "provenance.json").read_text())
+    assert prov["baseline"] is None and prov["baseline_manifest"] is None
+    assert pd.read_csv(out_dir / "example_effect.csv").empty
+
+
+def test_main_with_baseline_writes_example_effect(tmp_path):
+    mk = "gemma-2-9b-instruct"
+    items = make_ngo_verbatim_items(1)
+    code, out_dir = _run_main(tmp_path, items, _full_rows(items, mk), _manifest([mk]))
+    assert code == 0
+    effect = pd.read_csv(out_dir / "example_effect.csv")
+    assert len(effect) and (effect["mean_diff"] == 0).all()
+    assert set(pd.read_csv(out_dir / "example_copying.csv")["status"]) == {"pass"}
+
+
+@pytest.mark.parametrize("change, message", [
+    (dict(examples=True), "examples"),
+    (dict(release="other"), "release"),
+    (dict(runner_version="v2"), "runner_version"),
+    (dict(model_keys=["gemma-2-9b-instruct", "gemma-2-9b-pretrained"]), "model_keys"),
+    (dict(max_tokens=99), "max_tokens"),
+])
+def test_main_refuses_mismatched_baseline_manifest(tmp_path, capsys, change, message):
+    mk = "gemma-2-9b-instruct"
+    items = make_ngo_verbatim_items(1)
+    manifest = _manifest([mk])
+    code, out_dir = _run_main(tmp_path, items, _full_rows(items, mk), manifest,
+                              baseline_manifest={**manifest, "examples": False, **change})
+    assert code == 2 and not out_dir.exists()
+    err = capsys.readouterr().err
+    assert "baseline" in err and message in err
+
+
+def test_main_refuses_baseline_without_manifest(tmp_path, capsys):
+    mk = "gemma-2-9b-instruct"
+    items = make_ngo_verbatim_items(1)
+    code, _ = _run_main(tmp_path, items, _full_rows(items, mk), _manifest([mk]), baseline_manifest=None)
+    assert code == 2 and "manifest" in capsys.readouterr().err
+
+
+def test_main_refuses_baseline_when_results_have_no_manifest(tmp_path, capsys):
+    mk = "gemma-2-9b-instruct"
+    items = make_ngo_verbatim_items(1)
+    rows = _full_rows(items, mk)
+    code, _ = _run_main(tmp_path, items, rows, None, baseline_rows=rows,
+                        baseline_manifest={**_manifest([mk]), "examples": False})
+    assert code == 2 and "manifest" in capsys.readouterr().err
+
+
+def test_main_refuses_no_examples_results(tmp_path, capsys):
+    mk = "gemma-2-9b-instruct"
+    items = make_ngo_verbatim_items(1)
+    code, _ = _run_main(tmp_path, items, _full_rows(items, mk), {**_manifest([mk]), "examples": False},
+                        baseline_rows=None)
+    assert code == 2 and "no-examples" in capsys.readouterr().err
+
+
+def test_main_accepts_an_old_baseline_manifest_only_if_it_says_examples_false(tmp_path, capsys):
+    # A manifest without the examples field predates --no-examples, so it is a with-examples run.
+    mk = "gemma-2-9b-instruct"
+    items = make_ngo_verbatim_items(1)
+    old = {k: v for k, v in _manifest([mk]).items() if k != "examples"}
+    code, _ = _run_main(tmp_path, items, _full_rows(items, mk), old, baseline_manifest=old)
+    assert code == 2 and "examples" in capsys.readouterr().err

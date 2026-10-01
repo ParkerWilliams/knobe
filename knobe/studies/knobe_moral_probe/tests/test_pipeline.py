@@ -1,6 +1,7 @@
 """items -> screening (scripted reviewer) -> selection -> elicitation (fake
-engine, one pretrained + one instruct key, with a resume) -> frame -> checks,
-on synthetic items from all three experiments. One --out per experiment: an
+engine, one pretrained + one instruct key, with a resume; plus a
+--no-examples run as the copying baseline) -> frame -> checks, on synthetic
+items from all three experiments. One --out per experiment: an
 items file can't mix experiments."""
 import asyncio
 import json
@@ -60,6 +61,15 @@ def test_pipeline(tmp_path, experiment):
     resumed = read_jsonl(out, ResultRecord)
     assert len(resumed) == n_jobs and {r.job_id: r.raw_response for r in resumed} == full
 
+    # The no-examples run of the same models: the copying baseline (DESIGN.md
+    # amendment 2026-10-01). Same job IDs, so its own --out.
+    baseline_out = tmp_path / "results_no_examples.jsonl"
+    assert elicit.main(["--items", str(selected_path), "--out", str(baseline_out), "--engine", "fake",
+                        "--model-keys", ",".join(KEYS), "--no-examples"]) == 0
+    assert elicit.main([*argv[:3], str(baseline_out), *argv[4:]]) == 2        # can't resume as a with-examples run
+    baseline = frame.load_frame(baseline_out, load_items(selected_path))
+    assert len(baseline) == n_jobs and set(baseline["job_id"]) == set(full)
+
     # Frame.
     d = frame.load_frame(out, load_items(selected_path))
     assert len(d) == n_jobs and set(d["experiment"]) == {experiment}
@@ -81,18 +91,24 @@ def test_pipeline(tmp_path, experiment):
     # pretrained finding), and the exit code follows gate_summary. Coverage and
     # number rates are fully determined by the pipeline and must never block.
     assert checks.number_rates(d)["passes"].all()
-    tables = checks.run_checks(d, load_items(selected_path), KEYS)
+    tables = checks.run_checks(d, load_items(selected_path), KEYS, baseline)
     assert (tables["coverage"]["n_rows"] > 0).all()
+    assert set(tables["example_copying"]["status"]) <= {"pass", "fail"}       # the baseline covers every cell
+    assert set(tables["example_effect"]["model_key"]) == set(KEYS)
+    assert list(tables["throughput"]["rows"]) == [n_jobs // len(KEYS)] * len(KEYS)
     gate = checks.gate_summary(tables)
     out_dir = tmp_path / "checks"
-    code = checks.main(["--results", str(out), "--items", str(selected_path), "--out-dir", str(out_dir)])
+    code = checks.main(["--results", str(out), "--items", str(selected_path), "--out-dir", str(out_dir),
+                        "--baseline", str(baseline_out)])
     assert code == (1 if gate["blocking"] else 0)
     assert not any(b.startswith(("coverage", "number_rate")) for b in gate["blocking"])
+    assert not any("no_data" in g for g in gate["blocking"] + gate["findings"] if g.startswith("example_copying"))
     prov = json.loads((out_dir / "provenance.json").read_text(encoding="utf-8"))
     assert prov["gate"] == gate and prov["experiments"] == [experiment]
     assert prov["n_rows"] == prov["n_rated_rows"] == n_jobs
     assert prov["manifest"]["model_keys"] == sorted(KEYS) and prov["manifest"]["engine"] == "fake"
     assert prov["n_dropped_unknown_items"] == 0
+    assert prov["baseline"] == str(baseline_out.resolve()) and prov["baseline_manifest"]["examples"] is False
     assert {p.name for p in out_dir.iterdir()} == {f"{t}.csv" for t in tables} | {"provenance.json"}
 
     # A gate that can block: drop one model's rows but keep the run's full

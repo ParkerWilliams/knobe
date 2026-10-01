@@ -25,7 +25,10 @@ REVIEWER_MODEL: str | None = None
 N_PER_WORDING = 8                                  # 3 wordings x 8 = 24 per core question
 N_SINGLE = 24
 NUMBER_RATE_MIN = 0.90                             # DESIGN.md section 8, gate 1
-COPY_SHARE_MAX = 0.5                               # example-copying flag; 3 of 11 values ~ 0.27 by chance
+# Example copying (DESIGN.md section 8, gate 2): the share of answers in EXAMPLE_ANSWERS
+# with the worked examples minus the same share in a no-examples run, per model x
+# experiment x question; above this it is copying.
+COPY_EXCESS_MAX = 0.10                             # proposed; revisit against the pilot and record (DESIGN.md amendment 2026-10-01)
 
 # The frozen frame, split so worked examples can sit between its parts.
 INSTRUCTION = constants.RAIMONDI_PROMPT_TEMPLATE.split("\n\n", 1)[0]
