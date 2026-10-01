@@ -29,12 +29,13 @@ from knobe.elicit_vllm import (
     EngineResponse,
     build_engine,
     default_registry_path,
+    read_results_tolerating_torn_tail,
     resolve_model_id,
 )
 from knobe.jobs import derive_temperature_and_seed
 from knobe.parsing import parse_rating
 from knobe.registry import load_registry, model_key_for
-from knobe.schemas import ResultRecord, append_jsonl, read_jsonl
+from knobe.schemas import ResultRecord, append_jsonl
 
 from kmp import prompts, protocol
 from kmp.items import design_problems, load_items
@@ -164,8 +165,9 @@ def main(argv: list[str] | None = None) -> int:
 
     jobs = build_jobs(prompts.build_subject_prompts(items), model_keys)
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    done_rows = (read_jsonl(args.out, ResultRecord)
-                 if args.out.exists() and args.out.stat().st_size else [])
+    # Missing/empty file -> []; a torn trailing line (crash mid-write) is
+    # dropped and the file repaired in place, so that job is simply re-run.
+    done_rows = read_results_tolerating_torn_tail(args.out)
     done = {r.job_id for r in done_rows}
 
     mpath = manifest_path(args.out)

@@ -222,3 +222,16 @@ def test_missing_responses_fail_the_run_and_resume_fills_them(tmp_path, monkeypa
     code, _ = _run(tmp_path, items)
     rows = read_jsonl(out, ResultRecord)
     assert code == 0 and len(rows) == n_jobs == len({r.job_id for r in rows})
+
+
+def test_resume_tolerates_torn_last_line(tmp_path, capsys):
+    items = make_items("nonmoral", 1)[:2]
+    n_jobs = len(elicit.build_jobs(prompts.build_subject_prompts(items), KEYS))
+    _, out = _run(tmp_path, items)
+    lines = out.read_text(encoding="utf-8").split("\n")
+    torn_id = json.loads(lines[-2])["job_id"]
+    out.write_text("\n".join(lines[:-2]) + "\n" + lines[-2][: len(lines[-2]) // 2], encoding="utf-8")
+    code, _ = _run(tmp_path, items)
+    rows = read_jsonl(out, ResultRecord)
+    assert code == 0 and "torn" in capsys.readouterr().err
+    assert len(rows) == n_jobs == len({r.job_id for r in rows}) and torn_id in {r.job_id for r in rows}
