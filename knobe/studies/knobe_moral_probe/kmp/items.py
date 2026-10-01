@@ -13,6 +13,7 @@ wordings can be rendered as "Did {agent} intentionally {effect}?".
 from __future__ import annotations
 
 import csv
+import re
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Literal
@@ -73,6 +74,14 @@ class Item(BaseModel):
         return self
 
 
+# DESIGN.md 2026-10-01 role-noun amendment: agents are named by role noun ("the
+# manager"), never by personal name, with no gendered pronouns, for every item
+# including the minimally adapted Ngo et al. pairs. Pronouns are checked here;
+# personal names cannot be detected reliably in code, so they are a
+# review-checklist item, not a code check.
+GENDERED_PRONOUNS = re.compile(r"\b(he|she|him|her|his|hers|himself|herself)\b", re.IGNORECASE)
+
+
 def pair_key(item: Item) -> tuple[str, int, str]:
     return (item.experiment, item.storyline_id, item.arm)
 
@@ -120,8 +129,11 @@ def design_problems(items: list[Item]) -> list[str]:
         signs = sorted(m.sign for m in members)
         if signs != ["bad", "good"]:
             problems.append(f"pair {key[1:]} has signs {signs}, needs exactly one bad and one good")
-        elif members[0].agent != members[1].agent and not all(m.source == "ngo" for m in members):
-            # Ngo et al.'s original pairs are kept verbatim (DESIGN.md section 3.2) and
-            # use different agents per version, so they are exempt from this check.
+        elif members[0].agent != members[1].agent:
             problems.append(f"pair {key[1:]}: agents differ ({members[0].agent!r} vs {members[1].agent!r})")
+    for item in sorted(items, key=lambda i: i.item_id):
+        found = sorted({w.lower() for name in ("scenario", "agent", "effect")
+                        for w in GENDERED_PRONOUNS.findall(getattr(item, name))})
+        if found:
+            problems.append(f"{item.item_id}: gendered pronoun(s) {found} (use a role noun)")
     return problems

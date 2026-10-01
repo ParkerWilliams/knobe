@@ -7,8 +7,8 @@ from kmp.items import FIELDS, Item, design_problems, load_items, make_item_id, w
 
 def _item(**over):
     base = dict(item_id="kmp-nm-007-prudential-bad", experiment="nonmoral", storyline_id=7,
-                arm="prudential", sign="bad", agent="Bill", effect="ruin his own savings",
-                scenario="Bill did X.", source="new")
+                arm="prudential", sign="bad", agent="Bill", effect="ruin the savings",
+                scenario="The manager did X.", source="new")
     base.update(over)
     return Item(**base)
 
@@ -34,7 +34,7 @@ def test_item_rejects_arm_outside_experiment():
 
 def test_item_rejects_blank_or_padded_text():
     with pytest.raises(ValidationError, match="whitespace"):
-        _item(effect=" ruin his own savings")
+        _item(effect=" ruin the savings")
 
 
 def test_csv_roundtrip(tmp_path, nonmoral_items):
@@ -116,18 +116,44 @@ def _ngo_pair(source="ngo", good_source=None):
     return bad, good
 
 
-def test_design_problems_ngo_pair_exempt_from_same_agent():
-    assert design_problems(list(_ngo_pair())) == []
+def test_design_problems_ngo_pair_with_different_agents_is_reported():
+    assert any("agents differ" in p for p in design_problems(list(_ngo_pair())))
 
 
-def test_design_problems_non_ngo_pair_still_needs_same_agent():
-    assert any("agents differ" in p for p in design_problems(list(_ngo_pair(source="new"))))
-
-
-def test_design_problems_mixed_source_pair_still_needs_same_agent():
-    assert any("agents differ" in p for p in design_problems(list(_ngo_pair(good_source="new"))))
+def test_design_problems_ngo_pair_with_same_agent_is_clean():
+    bad, good = _ngo_pair()
+    assert design_problems([bad, good.model_copy(update={"agent": "Bill"})]) == []
 
 
 def test_design_problems_ngo_pair_missing_partner_still_reported():
     problems = design_problems([_ngo_pair()[0]])
     assert any("needs exactly one bad and one good" in p for p in problems)
+
+
+def _role_pair(**over_bad):
+    bad = _item(item_id="kmp-nm-001-moral-bad", storyline_id=1, arm="moral", sign="bad",
+                agent="the manager", effect="harm the environment",
+                scenario="The manager started a project.", **over_bad)
+    good = bad.model_copy(update={"item_id": "kmp-nm-001-moral-good", "sign": "good"})
+    return bad, good
+
+
+def test_design_problems_clean_role_noun_item_passes():
+    assert design_problems(list(_role_pair())) == []
+
+
+@pytest.mark.parametrize("word", ["he", "she", "him", "her", "his", "hers", "himself", "herself"])
+@pytest.mark.parametrize("field", ["scenario", "agent", "effect"])
+def test_design_problems_flags_gendered_pronoun(word, field):
+    bad, good = _role_pair()
+    bad = bad.model_copy(update={field: f"x {word.capitalize()} y"})
+    good = good.model_copy(update={"agent": bad.agent})
+    problems = design_problems([bad, good])
+    assert any("gendered pronoun" in p and bad.item_id in p and word in p for p in problems)
+
+
+def test_design_problems_pronoun_check_ignores_embedded_words():
+    bad, good = _role_pair()
+    text = "the there hero shelf history otherwise cheer"
+    bad = bad.model_copy(update={"scenario": text})
+    assert design_problems([bad, good]) == []
