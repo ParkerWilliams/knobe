@@ -7,6 +7,11 @@ pilots' copy of Ngo's stimulus appendix. Each vignette is a header line "N."
 followed by four non-blank lines: three scenario clauses, then the question
 ("Did X intentionally ...?").
 
+Not reused: analysis/ngo_extensions/nonmoral_pilot/build_dataset.py's
+parse_ngo_items reads the same file but returns only (scenario, question),
+with no sign, agent or effect (CLAUDE.md section 7). The two agree on all 80
+scenarios.
+
 Signs: the file does not label them. Ngo lists every pair as the harm
 version, then the help version, so item 2N-1 is bad, item 2N is good, and
 both belong to pair N = storyline N. The pilots used the same convention
@@ -168,7 +173,9 @@ def main(argv: list[str] | None = None) -> int:
             status = {i.item_id: i.review_status for i in current}
             write_items([i if i.item_id in changed else i.model_copy(update={"review_status": status[i.item_id]})
                          for i in parsed], args.out)
-            print(f"updated {args.out}: {len(changed)} item(s) changed and reset to draft: {sorted(changed)}")
+            removed = sorted({i.item_id for i in current} - {i.item_id for i in parsed})
+            print(f"updated {args.out}: {len(changed)} item(s) changed and reset to draft: {sorted(changed)}"
+                  + (f"; removed {len(removed)} row(s) not in the source: {removed}" if removed else ""))
             return 0
         if diffs:
             print(f"{args.out} differs from {args.source}; not overwriting it (it holds the review statuses; "
