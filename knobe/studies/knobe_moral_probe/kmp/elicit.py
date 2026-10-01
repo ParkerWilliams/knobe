@@ -12,13 +12,21 @@ model_keys, prompt_id -> text_sha256) is written before generating; a
 resume whose run fields or already-run prompt texts differ is refused
 (exit 2), as is a resume with rows but no manifest. Jobs the engine
 returns no response for make the run exit 1; re-running resumes them.
+
+Concurrency: the whole run holds an exclusive non-blocking fcntl.flock on
+<out>.lock; a second run on the same --out exits 2. Use one --out per
+model set. flock on NFS/Lustre depends on mount options (e.g. Lustre
+needs -o flock; some NFS setups only lock locally), so on a cluster
+filesystem check that locks are actually shared across nodes.
 """
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import os
 import sys
+import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -134,16 +142,54 @@ def manifest_problems(old: dict, new: dict, done_prompt_ids: set[str], limit: in
     return problems
 
 
+def lock_path(out: Path) -> Path:
+    """``<out>.lock``, held (flock) for the whole run."""
+    out = Path(out)
+    return out.with_name(out.name + ".lock")
+
+
 def write_manifest(manifest: dict, path: Path) -> None:
-    tmp = path.with_name(path.name + ".tmp")
-    tmp.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    os.replace(tmp, path)
+    """Atomic: unique tmp file in the same dir, fsync, then os.replace."""
+    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=path.name + ".", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+            fh.flush()
+            os.fsync(fh.fileno())
+        os.replace(tmp, path)
+    except BaseException:
+        Path(tmp).unlink(missing_ok=True)
+        raise
+
+
+def _reconcile_manifest(out: Path, manifest: dict, done_rows: list[ResultRecord]) -> list[str]:
+    """Checks ``manifest`` (this run) against the sidecar of the rows already
+    in ``out``, merges in the old prompt entries, and writes it. Returns the
+    reasons to refuse (nothing is written then); empty = written."""
+    mpath = manifest_path(out)
+    if done_rows:
+        if not mpath.exists():
+            return [f"{out} has {len(done_rows)} rows but no run manifest at {mpath}"]
+        try:
+            old = json.loads(mpath.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            return [f"run manifest {mpath} could not be read as JSON: {exc}"]
+        if not isinstance(old, dict) or not isinstance(old.get("prompts", {}), dict):
+            return [f"run manifest {mpath} is not a JSON object with a prompts mapping"]
+        problems = manifest_problems(old, manifest, {r.prompt_id for r in done_rows})
+        if problems:
+            return [f"rows would mix versions (see {mpath}):", *problems]
+        manifest = {**manifest, "prompts": {**old.get("prompts", {}), **manifest["prompts"]}}
+    write_manifest(manifest, mpath)
+    return []
 
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="knobe_moral_probe elicitation")
     p.add_argument("--items", required=True, type=Path, help="selected items CSV (from kmp.screen)")
-    p.add_argument("--out", required=True, type=Path, help="results JSONL (appended; resumable)")
+    p.add_argument("--out", required=True, type=Path,
+                   help="results JSONL (appended; resumable); one --out per model set; "
+                        "concurrent runs on the same --out are refused")
     p.add_argument("--engine", default="fake", choices=["fake", "vllm", "hf"])
     p.add_argument("--model-keys", help=f"comma-separated subset of {', '.join(MODEL_KEYS)}")
     p.add_argument("--registry", type=Path, help="models.yaml (default: the repo's configs/models.yaml)")
@@ -151,7 +197,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--max-tokens", type=int, default=protocol.MAX_TOKENS)
     args = p.parse_args(argv)
 
-    model_keys = [k.strip() for k in args.model_keys.split(",")] if args.model_keys else list(MODEL_KEYS)
+    model_keys = (sorted(dict.fromkeys(k.strip() for k in args.model_keys.split(",")))
+                  if args.model_keys else list(MODEL_KEYS))
     unknown = sorted(set(model_keys) - set(MODEL_KEYS))
     if unknown:
         p.error(f"unknown model key(s) {unknown}")
@@ -165,29 +212,30 @@ def main(argv: list[str] | None = None) -> int:
 
     jobs = build_jobs(prompts.build_subject_prompts(items), model_keys)
     args.out.parent.mkdir(parents=True, exist_ok=True)
+    lpath = lock_path(args.out)
+    with open(lpath, "a") as lock_fh:
+        try:
+            fcntl.flock(lock_fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            print(f"refusing to run: another run holds {lpath}; use one --out per model set", file=sys.stderr)
+            return 2
+        return _run_locked(args, jobs, model_keys)   # lock released when lock_fh closes
+
+
+def _run_locked(args: argparse.Namespace, jobs: list[Job], model_keys: list[str]) -> int:
     # Missing/empty file -> []; a torn trailing line (crash mid-write) is
     # dropped and the file repaired in place, so that job is simply re-run.
     done_rows = read_results_tolerating_torn_tail(args.out)
-    done = {r.job_id for r in done_rows}
-
-    mpath = manifest_path(args.out)
     manifest = build_manifest(jobs, args.engine, model_keys, args.max_tokens)
-    if done_rows:
-        if not mpath.exists():
-            print(f"refusing to resume: {args.out} has {len(done_rows)} rows but no run manifest at {mpath}",
-                  file=sys.stderr)
-            return 2
-        old = json.loads(mpath.read_text(encoding="utf-8"))
-        problems = manifest_problems(old, manifest, {r.prompt_id for r in done_rows})
-        if problems:
-            print(f"refusing to resume {args.out} (rows would mix versions; see {mpath}):\n  "
-                  + "\n  ".join(problems), file=sys.stderr)
-            return 2
-        manifest["prompts"] = {**old.get("prompts", {}), **manifest["prompts"]}
-    write_manifest(manifest, mpath)
+    problems = _reconcile_manifest(args.out, manifest, done_rows)
+    if problems:
+        print(f"refusing to resume {args.out}:\n  " + "\n  ".join(problems), file=sys.stderr)
+        return 2
 
-    remaining = [j for j in jobs if j.job_id not in done]
-    print(f"{len(done)} done, {len(remaining)} remaining of {len(jobs)} jobs")
+    # Local set difference: knobe.jobs.diff_jobs takes JobRecord, not kmp's Job (CLAUDE.md section 7).
+    done_ids = {r.job_id for r in done_rows}
+    remaining = [j for j in jobs if j.job_id not in done_ids]
+    print(f"{len(jobs) - len(remaining)} done, {len(remaining)} remaining of {len(jobs)} jobs")
     if not remaining:
         return 0
 
@@ -213,14 +261,12 @@ def main(argv: list[str] | None = None) -> int:
                         print(f"ERROR: no response for {job.job_id}", file=sys.stderr)
                         n_missing += 1
                         continue
-                    append_jsonl(to_result(job, request, response, revision), fh)
-                fh.flush()
+                    append_jsonl(to_result(job, request, response, revision), fh)  # flushes per row
     if n_missing:
         print(f"ERROR: {n_missing} job(s) got no response; re-run the same command to resume them",
               file=sys.stderr)
         return 1
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

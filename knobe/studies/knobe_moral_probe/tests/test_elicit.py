@@ -235,3 +235,62 @@ def test_resume_tolerates_torn_last_line(tmp_path, capsys):
     rows = read_jsonl(out, ResultRecord)
     assert code == 0 and "torn" in capsys.readouterr().err
     assert len(rows) == n_jobs == len({r.job_id for r in rows}) and torn_id in {r.job_id for r in rows}
+
+
+# --- Concurrency and manifest I/O -----------------------------------------
+
+import fcntl  # noqa: E402
+
+
+def test_main_refuses_when_out_is_locked(tmp_path, capsys):
+    out = tmp_path / "out.jsonl"
+    with open(elicit.lock_path(out), "w") as held:
+        fcntl.flock(held, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        code, _ = _run(tmp_path, make_items("nonmoral", 1)[:2])
+    assert code == 2 and "another run holds" in capsys.readouterr().err
+    assert not out.exists() and not elicit.manifest_path(out).exists()
+
+
+def test_lock_released_after_run(tmp_path):
+    items = make_items("nonmoral", 1)[:2]
+    _, out = _run(tmp_path, items)
+    with open(elicit.lock_path(out), "w") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)        # would raise if still held
+
+
+@pytest.mark.parametrize("content", ["", "{not json", "[1, 2]"])
+def test_resume_refuses_unparseable_manifest(tmp_path, capsys, content):
+    items = make_items("nonmoral", 1)[:2]
+    _, out = _run(tmp_path, items)
+    elicit.manifest_path(out).write_text(content, encoding="utf-8")
+    code, _ = _run(tmp_path, items)
+    assert code == 2 and "manifest" in capsys.readouterr().err
+
+
+def test_manifest_write_leaves_no_tmp_files(tmp_path):
+    _, out = _run(tmp_path, make_items("nonmoral", 1)[:2])
+    assert not [p for p in tmp_path.iterdir() if ".tmp" in p.name]
+
+
+def test_duplicate_model_keys_are_deduplicated(tmp_path):
+    items = make_items("nonmoral", 1)[:2]
+    items_path, out = tmp_path / "items.csv", tmp_path / "out.jsonl"
+    write_items(items, items_path)
+    k = KEYS[0]
+    code = elicit.main(["--items", str(items_path), "--out", str(out), "--engine", "fake",
+                        "--model-keys", f"{k},{k}"])
+    rows = read_jsonl(out, ResultRecord)
+    assert code == 0 and len(rows) == len(elicit.build_jobs(prompts.build_subject_prompts(items), [k]))
+    assert len({r.job_id for r in rows}) == len(rows) and _manifest(out)["model_keys"] == [k]
+
+
+def test_progress_counts_done_within_current_job_set(tmp_path, capsys):
+    items = make_items("nonmoral", 1)[:2]
+    _, out = _run(tmp_path, items)
+    n_jobs = len(elicit.build_jobs(prompts.build_subject_prompts(items), KEYS))
+    stray = read_jsonl(out, ResultRecord)[0].model_copy(update={"job_id": "stray::x::0"})
+    with open(out, "a", encoding="utf-8") as fh:
+        fh.write(stray.model_dump_json() + "\n")
+    capsys.readouterr()
+    code, _ = _run(tmp_path, items)
+    assert code == 0 and f"{n_jobs} done, 0 remaining of {n_jobs} jobs" in capsys.readouterr().out
