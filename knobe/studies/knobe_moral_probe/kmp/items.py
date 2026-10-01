@@ -17,7 +17,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 Experiment = Literal["nonmoral", "foundations"]
 Sign = Literal["bad", "good"]
@@ -43,7 +43,7 @@ class Item(BaseModel):
 
     item_id: str
     experiment: Experiment
-    storyline_id: int
+    storyline_id: int = Field(ge=1, le=999)
     arm: str
     sign: Sign
     agent: str
@@ -51,6 +51,13 @@ class Item(BaseModel):
     scenario: str
     source: Source
     review_status: ReviewStatus = "draft"
+
+    @field_validator("storyline_id", mode="before")
+    @classmethod
+    def _no_bool(cls, v):
+        if isinstance(v, bool):
+            raise ValueError("storyline_id must be an integer, not a bool")
+        return v
 
     @model_validator(mode="after")
     def _check(self) -> "Item":
@@ -71,8 +78,23 @@ def pair_key(item: Item) -> tuple[str, int, str]:
 
 
 def load_items(path: str | Path) -> list[Item]:
+    """Load items; a bad row raises ValueError naming its CSV line. An empty file is valid."""
+    items = []
     with open(path, newline="", encoding="utf-8") as fh:
-        return [Item(**row) for row in csv.DictReader(fh)]
+        reader = csv.DictReader(fh)
+        while True:
+            start = reader.reader.line_num + 1
+            try:
+                row = next(reader)
+            except StopIteration:
+                break
+            try:
+                if None in row:
+                    raise ValueError("row has more cells than the header has columns")
+                items.append(Item(**row))
+            except ValueError as exc:  # pydantic's ValidationError is a ValueError
+                raise ValueError(f"{path}, line {start}: {exc}") from exc
+    return items
 
 
 def write_items(items: list[Item], path: str | Path) -> None:

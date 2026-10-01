@@ -2,7 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from conftest import make_items
-from kmp.items import Item, design_problems, load_items, make_item_id, write_items
+from kmp.items import FIELDS, Item, design_problems, load_items, make_item_id, write_items
 
 
 def _item(**over):
@@ -38,9 +38,51 @@ def test_item_rejects_blank_or_padded_text():
 
 
 def test_csv_roundtrip(tmp_path, nonmoral_items):
+    tricky = nonmoral_items[0].model_copy(update={"scenario": 'He said, "go"\nthen left, quietly.'})
+    items = [tricky] + nonmoral_items[1:]
     path = tmp_path / "items.csv"
-    write_items(nonmoral_items, path)
-    assert sorted(load_items(path), key=lambda i: i.item_id) == sorted(nonmoral_items, key=lambda i: i.item_id)
+    write_items(items, path)
+    assert load_items(path) == sorted(items, key=lambda i: i.item_id)
+
+
+@pytest.mark.parametrize("bad", [-1, 0, 1000, True])
+def test_item_rejects_bad_storyline_id(bad):
+    with pytest.raises(ValidationError):
+        _item(storyline_id=bad, item_id=make_item_id("nonmoral", bad, "prudential", "bad"))
+
+
+def test_item_accepts_zero_padded_storyline_id_string():
+    assert _item(storyline_id="007").storyline_id == 7
+
+
+def _write_csv(path, *rows):
+    header = ",".join(FIELDS)
+    path.write_text("\n".join([header, *rows]) + "\n", encoding="utf-8")
+
+
+GOOD_ROW = "kmp-nm-007-prudential-bad,nonmoral,007,prudential,bad,Bill,ruin his savings,Bill did X.,new,draft"
+
+
+def test_load_items_zero_padded_id_from_csv(tmp_path):
+    _write_csv(tmp_path / "i.csv", GOOD_ROW)
+    assert load_items(tmp_path / "i.csv")[0].storyline_id == 7
+
+
+def test_load_items_names_line_of_invalid_row(tmp_path):
+    _write_csv(tmp_path / "i.csv", GOOD_ROW, GOOD_ROW.replace("nonmoral,007", "nonmoral,0"))
+    with pytest.raises(ValueError, match=r"line 3"):
+        load_items(tmp_path / "i.csv")
+
+
+def test_load_items_names_line_of_ragged_row(tmp_path):
+    _write_csv(tmp_path / "i.csv", GOOD_ROW, GOOD_ROW + ",extra")
+    with pytest.raises(ValueError, match=r"line 3.*more cells"):
+        load_items(tmp_path / "i.csv")
+
+
+def test_load_items_empty_file_is_valid(tmp_path):
+    _write_csv(tmp_path / "i.csv")
+    assert load_items(tmp_path / "i.csv") == []
 
 
 def test_design_problems_clean(nonmoral_items, foundation_items):
