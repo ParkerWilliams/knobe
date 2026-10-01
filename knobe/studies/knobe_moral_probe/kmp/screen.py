@@ -17,6 +17,8 @@ from kmp.items import Item, pair_key
 
 VALENCE_BAD_MAX = 3
 VALENCE_GOOD_MIN = 7
+# Starting value from configs/curation.yaml moral_min=6 (the main study's instrument).
+# Deliberately NOT read from that config, so main-pipeline edits can't silently change kmp screening.
 TARGET_MIN = 6
 
 
@@ -24,7 +26,10 @@ def intended_check(item: Item) -> str:
     return f"domain_{item.arm}" if item.experiment == "nonmoral" else f"fnd_{item.arm}"
 
 
-def item_failures(item: Item, scores: dict[str, int | None]) -> list[str]:
+def item_failures(item: Item, scores: dict[str, int | None] | None) -> list[str]:
+    """scores=None (or empty) means the item was never rated."""
+    if not scores:
+        return ["not rated"]
     failures = []
     v = scores.get("valence")
     if v is None:
@@ -44,9 +49,9 @@ def item_failures(item: Item, scores: dict[str, int | None]) -> list[str]:
 
     if item.experiment == "nonmoral":
         others = [scores.get(k) for k in protocol.DOMAIN_CHECKS if k != target_key]
-        if any(o is None for o in others):
-            failures.append("a domain rating is unparsed")
-        elif any(o >= t for o in others):
+        missing = [k for k in protocol.DOMAIN_CHECKS if k != target_key and scores.get(k) is None]
+        failures += [f"{k} unparsed" for k in missing]
+        if not missing and any(o >= t for o in others):
             failures.append(f"{target_key} is not the highest domain rating")
     elif item.arm != "harm":
         h = scores.get("fnd_harm")
@@ -58,19 +63,24 @@ def item_failures(item: Item, scores: dict[str, int | None]) -> list[str]:
 
 
 def select_pairs(items: list[Item], scores_by_item: dict[str, dict[str, int | None]]) -> tuple[list[Item], list[dict]]:
+    ids = [i.item_id for i in items]
+    dups = sorted({x for x in ids if ids.count(x) > 1})
+    if dups:
+        raise ValueError(f"duplicate item_ids in input: {dups}")
     pairs: dict[tuple, list[Item]] = defaultdict(list)
     for item in items:
         pairs[pair_key(item)].append(item)
     selected, report = [], []
-    for _key, members in sorted(pairs.items()):
+    for key, members in sorted(pairs.items()):
         members = sorted(members, key=lambda i: i.sign)                     # bad, good
-        failures = {m.item_id: item_failures(m, scores_by_item.get(m.item_id, {})) for m in members}
-        if len(members) != 2:
+        failures = {m.item_id: item_failures(m, scores_by_item.get(m.item_id)) for m in members}
+        if [m.sign for m in members] != ["bad", "good"]:
             for m in members:
                 failures[m.item_id].append("partner not approved")
         passed = all(not f for f in failures.values())
         if passed:
             selected += members
-        report += [dict(item_id=m.item_id, storyline_id=m.storyline_id, arm=m.arm, sign=m.sign,
-                        pair_passed=passed, failures="; ".join(failures[m.item_id])) for m in members]
+        report += [dict(item_id=m.item_id, pair_key="|".join(map(str, key)), storyline_id=m.storyline_id,
+                        arm=m.arm, sign=m.sign, pair_passed=passed, failures="; ".join(failures[m.item_id]),
+                        scores=dict(scores_by_item.get(m.item_id) or {})) for m in members]
     return selected, report
