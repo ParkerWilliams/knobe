@@ -175,7 +175,7 @@ def _drop(items, *ids):
 
 
 def test_scaffold_in_fields_and_defaults_to_none():
-    assert FIELDS[-1] == "scaffold"
+    assert "scaffold" in FIELDS
     assert _item().scaffold is None
 
 

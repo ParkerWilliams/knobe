@@ -535,11 +535,48 @@ def test_main_records_shared_without_harm(tmp_path, foundation_items, monkeypatc
                             "--mock"]) == 0
     meta = json.loads((out_dir / "screening_meta.json").read_text())
     assert meta["shared_without_harm"] == [1]
-    assert "shared storylines without a surviving harm pair: [1]" in capsys.readouterr().err
+    err = capsys.readouterr().err
+    assert "shared storylines without a surviving harm pair: [1]" in err
+    assert "excluded from the primary pooled contrast" in err
 
 
 def test_main_records_empty_shared_without_harm_for_nonmoral(tmp_path, nonmoral_items):
     out_dir = tmp_path / "s"
     assert screen_run.main(["--items", str(_write(nonmoral_items, tmp_path)), "--out-dir", str(out_dir),
                             "--mock"]) == 0
-    assert json.loads((out_dir / "screening_meta.json").read_text())["shared_without_harm"] == []
+    meta = json.loads((out_dir / "screening_meta.json").read_text())
+    assert meta["shared_without_harm"] == [] and meta["shared_without_nonharm"] == []
+
+
+def test_shared_without_nonharm_lists_harm_only_survivors(foundation_items):
+    selected = [i for i in foundation_items if not (i.storyline_id == 2 and i.arm != "harm")]
+    assert screen.shared_without_nonharm(foundation_items, selected) == [2]
+    assert screen.shared_without_harm(foundation_items, selected) == []
+
+
+def test_both_surviving_is_in_neither_list(foundation_items):
+    assert screen.shared_without_harm(foundation_items, foundation_items) == []
+    assert screen.shared_without_nonharm(foundation_items, foundation_items) == []
+    purpose = make_purpose_storyline(9)
+    assert screen.shared_without_nonharm(foundation_items + purpose, foundation_items + purpose) == []
+
+
+class _OnlyHarmFor2(ScriptedClient):
+    async def complete(self, prompt, max_tokens):
+        answer = await super().complete(prompt, max_tokens)
+        item_id, qkey = self.lookup[prompt]
+        if item_id.startswith("kmp-mf-002-") and "-harm-" not in item_id and qkey != "valence":
+            return "2"
+        return answer
+
+
+def test_main_records_shared_without_nonharm(tmp_path, foundation_items, monkeypatch, capsys):
+    monkeypatch.setattr(screen_run, "MockClient", lambda **kw: _OnlyHarmFor2(foundation_items))
+    out_dir = tmp_path / "s"
+    assert screen_run.main(["--items", str(_write(foundation_items, tmp_path)), "--out-dir", str(out_dir),
+                            "--mock"]) == 0
+    meta = json.loads((out_dir / "screening_meta.json").read_text())
+    assert meta["shared_without_nonharm"] == [2] and meta["shared_without_harm"] == []
+    err = capsys.readouterr().err
+    assert "shared storylines without a surviving non-harm pair: [2]" in err
+    assert "excluded from the primary pooled contrast" in err
