@@ -4,10 +4,13 @@ Wordings are DRAFTS pending review. Every other module reads them from here.
 Templates take {agent} (as written mid-sentence) and {effect} (a bare verb
 phrase); see kmp.items. Reversed wordings put the high pole at 0 and are
 recoded as 10 - x at analysis time (kmp.frame).
+is_reversed() is the only supported reversal check; do not infer it from key names.
 """
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
+from types import MappingProxyType
 
 from knobe import constants
 
@@ -35,7 +38,7 @@ class Wording:
 _LEAD = "The action had this side effect: it would {effect}. "
 _EXTENT = ", on a scale from 0 (not at all) to 10 (entirely)?"
 
-QUESTIONS: dict[str, tuple[Wording, ...]] = {
+QUESTIONS: Mapping[str, tuple[Wording, ...]] = MappingProxyType({
     "intentionality": (
         Wording("w1", "Did {agent} intentionally {effect}?"),
         Wording("w2", "To what extent did {agent} {effect} on purpose, on a scale from 0 (not at all) to 10 (completely)?"),
@@ -95,7 +98,7 @@ QUESTIONS: dict[str, tuple[Wording, ...]] = {
         Wording("w1", _LEAD + "To what extent does this side effect involve honoring or violating a taboo, or something "
                       "treated as sacred" + _EXTENT),
     ),
-}
+})
 
 CORE = ("intentionality", "blame", "praise")
 DOMAIN_CHECKS = ("domain_moral", "domain_prudential", "domain_procedural")

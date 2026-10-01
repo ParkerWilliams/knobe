@@ -1,7 +1,9 @@
+import pytest
 from knobe import constants
 
 from conftest import make_items
 from kmp import protocol
+from kmp.items import ARMS
 
 
 def test_core_questions_have_three_wordings_one_reversed():
@@ -74,3 +76,23 @@ def test_instruction_and_block_come_from_the_frozen_templates():
 def test_release_and_runner_carry_the_study_name():
     assert protocol.RELEASE == "knobe_moral_probe"
     assert protocol.RUNNER_VERSION.startswith("knobe_moral_probe")
+
+
+def test_questions_is_read_only():
+    with pytest.raises(TypeError):
+        protocol.QUESTIONS["new"] = ()
+    with pytest.raises(TypeError):
+        del protocol.QUESTIONS["blame"]
+
+
+def test_reversed_flag_matches_key_suffix():
+    for qkey, ws in protocol.QUESTIONS.items():
+        for w in ws:
+            assert w.key.endswith("r") == w.reversed, (qkey, w.key)
+
+
+def test_every_arm_has_a_question_key():
+    for arm in ARMS["foundations"]:
+        assert f"fnd_{arm}" in protocol.QUESTIONS, arm
+    for arm in ARMS["nonmoral"]:
+        assert f"domain_{arm}" in protocol.QUESTIONS, arm
