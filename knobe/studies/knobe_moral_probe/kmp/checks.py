@@ -28,6 +28,12 @@ main() exits 1 (gate_summary) if anything blocks:
     has no data; example copying that fails (excess above
     protocol.COPY_EXCESS_MAX) or has no data (no --baseline, or no baseline
     rows for that model x experiment x question).
+--stage (DESIGN.md amendment 2026-10-01): "pilot" (the default) is the
+above. "full" (the full run, which has no no-examples run): example
+copying never blocks; its fail and no_data rows are findings for every
+model, and a missing --baseline prints a note instead of a warning.
+Everything else is the same at both stages; provenance.json records it.
+
 Section 8's "a finding, not a blocker" covers pretrained models only: their
 validity and copying problems are reported as findings and do not change
 the exit code. Anchor agreement (gate 4) has no threshold in DESIGN.md, so
@@ -420,11 +426,17 @@ def run_checks(frame: pd.DataFrame, items: list[Item], model_keys: list[str],
             "throughput": throughput(frame, model_starts)}
 
 
-def gate_summary(tables: dict[str, pd.DataFrame]) -> dict[str, list[str]]:
+STAGES = ("pilot", "full")
+
+
+def gate_summary(tables: dict[str, pd.DataFrame], stage: str = "pilot") -> dict[str, list[str]]:
     """DESIGN.md section 8: what blocks analysis and what is only reported.
     Blocking: coverage gaps and number-rate cells below the minimum (every
     model); validity and example-copying fail/no_data for finetuned models.
-    Findings: the same validity and copying problems for pretrained models."""
+    Findings: the same validity and copying problems for pretrained models.
+    stage "full": example copying is a finding for every model, never blocking."""
+    if stage not in STAGES:
+        raise ValueError(f"unknown stage {stage!r}; expected one of {STAGES}")
     blocking: list[str] = []
     findings: list[str] = []
     cov = tables["coverage"]
@@ -451,8 +463,8 @@ def gate_summary(tables: dict[str, pd.DataFrame]) -> dict[str, list[str]]:
         detail = ("no_data (no no-examples baseline rows)" if r.status == NO_DATA else
                   f"excess {r.excess:.2f} > {protocol.COPY_EXCESS_MAX:.2f} "
                   f"(with {r.share_with:.2f}, without {r.share_without:.2f})")
-        (blocking if r.tuning_status == "finetuned" else findings).append(
-            f"example_copying: {r.model_key} {r.experiment} {r.qkey} {detail}")
+        blocks = r.tuning_status == "finetuned" and stage == "pilot"
+        (blocking if blocks else findings).append(f"example_copying: {r.model_key} {r.experiment} {r.qkey} {detail}")
     return {"blocking": blocking, "findings": findings}
 
 
@@ -464,7 +476,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--out-dir", required=True, type=Path)
     p.add_argument("--baseline", type=Path,
                    help="results JSONL of the same models run with kmp.elicit --no-examples; example copying "
-                        "is measured against it (without it, copying is no_data and blocks finetuned models)")
+                        "is measured against it (without it, copying is no_data and, at --stage pilot, "
+                        "blocks finetuned models)")
+    p.add_argument("--stage", choices=STAGES, default="pilot",
+                   help="pilot (default): copying blocks finetuned models and needs --baseline; "
+                        "full: copying is reported as findings only (DESIGN.md amendment 2026-10-01)")
     args = p.parse_args(argv)
 
     items = load_items(args.items)
@@ -485,6 +501,11 @@ def main(argv: list[str] | None = None) -> int:
     if problems:
         print("checks: refusing to run:\n  " + "\n  ".join(problems), file=sys.stderr)
         return 2
+    if args.baseline is None:
+        print("checks: WARNING no --baseline: example copying is no_data and blocks finetuned models "
+              "(--stage pilot needs the no-examples run for every model)" if args.stage == "pilot" else
+              "checks: note: no --baseline; at --stage full example copying is reported as findings only",
+              file=sys.stderr)
     args.out_dir.mkdir(parents=True, exist_ok=True)
     model_keys = manifest["model_keys"] if manifest and manifest.get("model_keys") else sorted(frame["model_key"].unique())
     starts = read_model_starts(args.results)
@@ -494,14 +515,15 @@ def main(argv: list[str] | None = None) -> int:
     for name, table in tables.items():
         table.to_csv(args.out_dir / f"{name}.csv", index=False)
         print(f"\n== {name}\n{table.to_string(index=False)}")
-    prov["gate"] = gate = gate_summary(tables)
+    prov["stage"] = args.stage
+    prov["gate"] = gate = gate_summary(tables, args.stage)
     (args.out_dir / "provenance.json").write_text(json.dumps(prov, indent=2) + "\n", encoding="utf-8")
     print(f"\n== provenance\n{json.dumps(prov, indent=2)}")
 
-    lines = ["\n== gate summary (DESIGN.md section 8)"]
+    lines = [f"\n== gate summary (DESIGN.md section 8, stage {args.stage})"]
     lines.append(f"BLOCKING ({len(gate['blocking'])}):" if gate["blocking"] else "blocking: none")
     lines += [f"  {b}" for b in gate["blocking"]]
-    lines.append(f"non-blocking findings, pretrained models ({len(gate['findings'])}):" if gate["findings"]
+    lines.append(f"non-blocking findings ({len(gate['findings'])}):" if gate["findings"]
                  else "non-blocking findings: none")
     lines += [f"  {f}" for f in gate["findings"]]
     if any(b.startswith("number_rate") for b in gate["blocking"]):

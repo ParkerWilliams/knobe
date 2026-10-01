@@ -18,10 +18,13 @@ RELEASE = "knobe_moral_probe"                      # seed namespace (knobe.jobs)
 RUNNER_VERSION = "knobe_moral_probe_elicit-0.1"
 MAX_TOKENS = 10                                    # revisited in the pilot (DESIGN.md section 8)
 REVIEW_MAX_TOKENS = 8
-# Screening reviewer (a Claude model ID, never a subject). Pin before the first real
-# screening run (DESIGN.md section 4); the researcher chooses it. kmp.screen_run refuses
-# real runs while this is None, differs from --reviewer-model, or ends in "-latest".
-REVIEWER_MODEL: str | None = None
+# Screening reviewer (a Claude model ID, never a subject; DESIGN.md section 4), pinned
+# by the researcher (DESIGN.md amendment 2026-10-01, reviewer pin). The reviewer client
+# sends temperature 0 with thinking disabled; the current generation (Opus 5.5,
+# Sonnet 5.5, Fable 5.1) rejects both, so it would need a protocol change. Exact ID,
+# no date suffix. kmp.screen_run refuses real runs if this is None, differs from
+# --reviewer-model, or ends in "-latest".
+REVIEWER_MODEL: str | None = "claude-sonnet-4-6"
 N_PER_WORDING = 8                                  # 3 wordings x 8 = 24 per core question
 N_SINGLE = 24
 NUMBER_RATE_MIN = 0.90                             # DESIGN.md section 8, gate 1

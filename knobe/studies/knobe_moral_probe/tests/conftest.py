@@ -70,3 +70,16 @@ def make_ngo_verbatim_items(n_storylines: int = 2, status: str = "approved") -> 
 @pytest.fixture
 def ngo_verbatim_items() -> list[Item]:
     return make_ngo_verbatim_items()
+
+
+@pytest.fixture(autouse=True)
+def _no_real_reviewer_calls(monkeypatch):
+    """protocol.REVIEWER_MODEL is pinned, so a real screening run is no longer refused
+    by default: fail any test that would construct the real (API) client. Tests that
+    script a client replace screen_run.ScreeningClient themselves; unit tests of
+    complete() build it with __new__ and a fake transport, so neither is affected."""
+    from kmp import screen_run
+
+    def refuse(self, *args, **kwargs):
+        pytest.fail("a test tried to construct the real screening client (it would call the API)")
+    monkeypatch.setattr(screen_run.ScreeningClient, "__init__", refuse)

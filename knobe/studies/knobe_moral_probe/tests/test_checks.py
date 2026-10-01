@@ -285,7 +285,7 @@ def _manifest(model_keys):
 SAME = object()
 
 
-def _run_main(tmp_path, items, rows, manifest=None, baseline_rows=SAME, baseline_manifest=SAME):
+def _run_main(tmp_path, items, rows, manifest=None, baseline_rows=SAME, baseline_manifest=SAME, extra=()):
     """baseline_rows: no-examples rows for --baseline (default: the same rows, so copying
     excess is 0, when a main manifest is given; else no --baseline); None = no --baseline.
     baseline_manifest: default the main manifest with examples false; None = no manifest file."""
@@ -305,7 +305,7 @@ def _run_main(tmp_path, items, rows, manifest=None, baseline_rows=SAME, baseline
         if baseline_manifest is not None:
             elicit.manifest_path(base).write_text(json.dumps(baseline_manifest), encoding="utf-8")
         argv += ["--baseline", str(base)]
-    return checks.main(argv), out_dir
+    return checks.main([*argv, *extra]), out_dir
 
 
 def _gate(out_dir):
@@ -650,3 +650,66 @@ def test_main_accepts_an_old_baseline_manifest_only_if_it_says_examples_false(tm
     old = {k: v for k, v in _manifest([mk]).items() if k != "examples"}
     code, _ = _run_main(tmp_path, items, _full_rows(items, mk), old, baseline_manifest=old)
     assert code == 2 and "examples" in capsys.readouterr().err
+
+
+# --- --stage pilot|full (DESIGN.md amendment 2026-10-01: no-examples run is pilot-only) --
+
+def test_gate_summary_full_stage_never_blocks_on_copying():
+    rows = _blame_rows((0, 5, 9, 3), model_key="gemma-2-9b-instruct")
+    for base in (None, _frame(_blame_rows((0, 1, 2, 3), model_key="gemma-2-9b-instruct"))):
+        tables = checks.run_checks(_frame(rows), [], [], baseline=base)
+        pilot = checks.gate_summary(tables)
+        full = checks.gate_summary(tables, stage="full")
+        assert [b for b in pilot["blocking"] if b.startswith("example_copying")]
+        assert not any(b.startswith("example_copying") for b in full["blocking"])
+        assert [f for f in full["findings"] if f.startswith("example_copying")] == \
+            [b for b in pilot["blocking"] if b.startswith("example_copying")]
+        assert checks.gate_summary(tables, stage="pilot") == pilot   # pilot is the default
+
+
+def test_gate_summary_rejects_unknown_stage():
+    tables = checks.run_checks(_frame(_blame_rows((1, 2))), [], [])
+    with pytest.raises(ValueError, match="stage"):
+        checks.gate_summary(tables, stage="final")
+
+
+def test_main_full_stage_without_baseline_does_not_block_on_copying(tmp_path, capsys):
+    mk = "gemma-2-9b-instruct"
+    items = make_ngo_verbatim_items(1)
+    code, out_dir = _run_main(tmp_path, items, _full_rows(items, mk), _manifest([mk]), baseline_rows=None,
+                              extra=["--stage", "full"])
+    assert code == 0
+    gate = _gate(out_dir)
+    assert gate["blocking"] == [] and gate["findings"]
+    assert all(f.startswith("example_copying") and "no_data" in f for f in gate["findings"])
+    prov = json.loads((out_dir / "provenance.json").read_text())
+    assert prov["stage"] == "full"
+    err = capsys.readouterr().err
+    assert "note" in err and "--baseline" in err and "WARNING no --baseline" not in err
+
+
+def test_main_pilot_stage_is_the_default_and_unchanged(tmp_path, capsys):
+    mk = "gemma-2-9b-instruct"
+    items = make_ngo_verbatim_items(1)
+    code, out_dir = _run_main(tmp_path, items, _full_rows(items, mk), _manifest([mk]), baseline_rows=None)
+    assert code == 1
+    assert _gate(out_dir)["blocking"] and all(b.startswith("example_copying") for b in _gate(out_dir)["blocking"])
+    assert json.loads((out_dir / "provenance.json").read_text())["stage"] == "pilot"
+    assert "WARNING no --baseline" in capsys.readouterr().err
+    code, out_dir = _run_main(tmp_path, items, _full_rows(items, mk), _manifest([mk]), baseline_rows=None,
+                              extra=["--stage", "pilot"])
+    assert code == 1 and json.loads((out_dir / "provenance.json").read_text())["stage"] == "pilot"
+
+
+def test_main_full_stage_still_blocks_on_everything_else(tmp_path):
+    mk = "gemma-2-9b-instruct"
+    items = make_ngo_verbatim_items(1)
+    code, out_dir = _run_main(tmp_path, items, _full_rows(items, mk, blame=(2, 8)), _manifest([mk]),
+                              baseline_rows=None, extra=["--stage", "full"])
+    assert code == 1 and all(b.startswith("validity") for b in _gate(out_dir)["blocking"])
+
+
+def test_main_rejects_unknown_stage(tmp_path):
+    items = make_ngo_verbatim_items(1)
+    with pytest.raises(SystemExit):
+        _run_main(tmp_path, items, _full_rows(items, "gemma-2-9b-instruct"), extra=["--stage", "final"])

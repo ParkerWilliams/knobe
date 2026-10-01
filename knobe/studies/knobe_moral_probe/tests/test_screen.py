@@ -599,3 +599,29 @@ def test_main_git_failure_leaves_git_fields_none(tmp_path, nonmoral_items, monke
                             "--mock"]) == 0
     meta = json.loads((tmp_path / "s" / "screening_meta.json").read_text())
     assert meta["git_commit"] is None and meta["git_dirty"] is None
+
+
+# --- the reviewer pin (DESIGN.md amendment 2026-10-01) ------------------------
+
+def test_reviewer_is_pinned_to_sonnet_4_6_and_passes_the_guards():
+    from knobe.elicit_vllm import default_registry_path
+    from knobe.registry import load_registry
+    assert protocol.REVIEWER_MODEL == "claude-sonnet-4-6"
+    assert screen_run.pin_problems(protocol.REVIEWER_MODEL) == []
+    curate.check_reviewer_not_subject(protocol.REVIEWER_MODEL, load_registry(default_registry_path()))
+
+
+def test_default_pin_reaches_the_client_with_no_api_call(tmp_path, nonmoral_items, monkeypatch):
+    built = []
+
+    def fake_client(model):
+        built.append(model)
+        client = ScriptedClient(nonmoral_items)
+        client.input_tokens_used, client.output_tokens_used, client.served_models = 1, 1, {model}
+        return client
+
+    monkeypatch.setattr(screen_run, "ScreeningClient", fake_client)
+    out_dir = tmp_path / "s"
+    assert screen_run.main(["--items", str(_write(nonmoral_items, tmp_path)), "--out-dir", str(out_dir)]) == 0
+    assert built == ["claude-sonnet-4-6"]
+    assert {r.reviewer_model for r in _raw(out_dir / "screening_raw.jsonl")} == {"claude-sonnet-4-6"}

@@ -263,7 +263,7 @@ def pin_problems(reviewer_model: str | None) -> list[str]:
         problems.append(f"--reviewer-model {reviewer_model!r} differs from protocol.REVIEWER_MODEL {pinned!r}; "
                         f"change the pin in kmp/protocol.py instead")
     if reviewer_model and reviewer_model.endswith("-latest"):
-        problems.append(f"{reviewer_model!r} is a moving '-latest' alias; pin a dated model ID in kmp/protocol.py")
+        problems.append(f"{reviewer_model!r} is a moving '-latest' alias; pin an exact model ID in kmp/protocol.py")
     return problems
 
 

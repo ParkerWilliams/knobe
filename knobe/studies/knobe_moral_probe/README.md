@@ -98,6 +98,8 @@ no-examples results file.
 
     ../../.venv/bin/python -m kmp.checks --results outputs/elicit/<experiment>.jsonl --baseline outputs/elicit/<experiment>_noex.jsonl --items outputs/screening/<experiment>/selected_items.csv --out-dir outputs/checks/<experiment>
 
+`--stage pilot` (the default) needs the no-examples baseline for every model, since copying blocks instruct models without it; `--stage full` (the full run) needs no baseline and reports copying as findings only.
+
 Exit 0: nothing blocks. Exit 1: a blocking gate (an uncaught error, such as
 an unreadable results file, also exits 1; read stderr). Exit 2: the inputs were
 refused before anything was written (a missing or mismatched manifest, a
