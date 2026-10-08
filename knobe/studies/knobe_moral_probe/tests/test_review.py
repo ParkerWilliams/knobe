@@ -170,3 +170,18 @@ def test_bad_batch_names_and_existing_sheet_are_refused(tmp_path, capsys):
     (tmp_path / "review" / "01_test.md").write_text("x", encoding="utf-8")
     assert review.main([*sheet_args, "--batch", "01_test"]) == 2
     assert not (tmp_path / "review" / "01_test_decisions.csv").exists()
+
+
+def test_apply_a_batch_while_a_later_sheet_is_blank(tmp_path):
+    path, sheet_args = _setup(tmp_path, pair() + pair(arm="procedural"))
+    assert review.main([*sheet_args, "--batch", "01_test", "--arms", "prudential"]) == 0
+    assert review.main([*sheet_args, "--batch", "02_test", "--arms", "procedural"]) == 0
+    first = tmp_path / "review" / "01_test_decisions.csv"
+    _fill(first)
+    assert review.main(_apply_args(path, first)) == 0
+    assert _record_ok(tmp_path, path)
+    second = tmp_path / "review" / "02_test_decisions.csv"
+    _fill(second, decision="rejected", note="B4: no")
+    assert review.main(_apply_args(path, second)) == 0
+    assert _record_ok(tmp_path, path)
+    assert {i.review_status for i in load_items(path)} == {"approved", "rejected"}

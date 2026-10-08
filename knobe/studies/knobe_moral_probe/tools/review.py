@@ -192,12 +192,8 @@ def _apply(args, items: list[Item]) -> int:
         return refuse(f"{len(missing)} row(s) have no decision: {missing}")
     updated, problems = apply_decisions(items, rows)
     if not problems:
-        # The record after this apply: every other file, plus this one in its place.
-        others = [r for r in record if Path(r["file"]).resolve() != path.resolve()]
-        later = [f for f in decision_files(review_dir) if f.name > path.name]
-        if later:
-            problems.append(f"{path.name} is older than {[f.name for f in later]}; apply the newest file only")
-        problems += approval_problems(updated, [*others, *rows])
+        # The record as it stands, in file-name order, includes this file; a later filled file wins.
+        problems += approval_problems(updated, record)
     if problems:
         return refuse("\n  " + "\n  ".join(problems))
     write_items(updated, args.items)
