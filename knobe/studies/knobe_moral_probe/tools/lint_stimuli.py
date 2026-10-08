@@ -36,6 +36,15 @@ in the bad version's first sentence (decision B2: the bad version's goal).
 This is permissive in one way: adding or dropping "the" always passes. The
 reviewer still reads every B8 diff on the review sheet.
 
+Strictness beyond the checklist: section 6 exempts adapted Ngo items from A2-A8, but
+A3 (the "did not care at all about the effect" prefix) and A4 ("<Agent> knew ...") are
+applied to them anyway. All 80 Ngo texts pass both today, so this is deliberate extra
+strictness, not a requirement of the checklist.
+
+Sentence splitting is a plain split after ".", "!" or "?" followed by whitespace. It
+miscounts abbreviations such as "Dr." or "U.S." and sentences that end inside a quotation
+mark, so do not write them in a scenario. The splitter is left as is.
+
 Run from the study folder:
     ../../.venv/bin/python -m tools.lint_stimuli stimuli/nonmoral.csv
 Exit 0 clean, 1 problems found.
