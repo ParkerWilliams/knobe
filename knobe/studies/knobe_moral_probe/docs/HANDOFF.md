@@ -1,6 +1,7 @@
 # knobe_moral_probe: handoff
 
-Last updated 2026-10-08. Branch `knobe_moral_probe`. Read this first, then
+Last updated 2026-10-08. Branch `knobe_moral_probe`. Read this first (the
+one-page status is `TASK_CHECKLIST.md`), then
 the amendments at the top of `DESIGN.md`.
 
 ## Where the study is
