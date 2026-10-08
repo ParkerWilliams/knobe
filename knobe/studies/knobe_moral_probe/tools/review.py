@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import re
 import sys
 from collections import defaultdict
 from datetime import date
@@ -29,8 +30,8 @@ from pathlib import Path
 
 from kmp.items import Item, design_problems, load_items, write_items
 from tools import lint_stimuli
-from tools.review_record import (DECISION_FIELDS, DECISIONS, REVIEW_DIR, decision_files, read_decisions,
-                                 text_sha256)
+from tools.review_record import (DECISION_FIELDS, DECISIONS, REVIEW_DIR, approval_problems, decision_files,
+                                 read_decisions, text_sha256)
 
 _A = [f"A{i}" for i in range(1, 14)]
 _R = ["R1", "R2", "R3", "R4"]
@@ -157,9 +158,54 @@ def apply_decisions(items: list[Item], rows: list[dict[str, str]]) -> tuple[list
     return list(updated.values()), problems
 
 
-def _read_filled(path: Path) -> list[dict[str, str]]:
-    with open(path, newline="", encoding="utf-8") as fh:
-        return [{**row, "file": str(path)} for row in csv.DictReader(fh)]
+BATCH_RE = re.compile(r"^\d{2}_[A-Za-z0-9_-]+$")
+DECISIONS_NAME_RE = re.compile(r"^\d{2}_[A-Za-z0-9_-]+_decisions\.csv$")
+
+
+def _listed_ids(path: Path) -> list[str]:
+    with open(path, newline="", encoding="utf-8-sig") as fh:
+        return [(row.get("item_id") or "").strip() for row in csv.DictReader(fh)]
+
+
+def _apply(args, items: list[Item]) -> int:
+    def refuse(msg: str) -> int:
+        print(f"refusing; nothing written: {msg}", file=sys.stderr)
+        return 2
+
+    path, review_dir = args.decisions, args.review_dir
+    if path.resolve().parent != review_dir.resolve():
+        return refuse(f"{path} is not inside the review directory {review_dir}")
+    if not DECISIONS_NAME_RE.match(path.name):
+        return refuse(f"{path.name} does not look like NN_<batch>_decisions.csv")
+    try:
+        rows = read_decisions([path])
+        record = read_decisions(decision_files(review_dir))
+    except ValueError as exc:
+        return refuse(str(exc))
+    listed = _listed_ids(path)
+    dupes = sorted({i for i in listed if listed.count(i) > 1})
+    if dupes:
+        return refuse(f"duplicate item_ids in {path.name}: {dupes}")
+    filled = {r["item_id"] for r in rows}
+    missing = [i for i in listed if i not in filled]
+    if missing:
+        return refuse(f"{len(missing)} row(s) have no decision: {missing}")
+    updated, problems = apply_decisions(items, rows)
+    if not problems:
+        # The record after this apply: every other file, plus this one in its place.
+        others = [r for r in record if Path(r["file"]).resolve() != path.resolve()]
+        later = [f for f in decision_files(review_dir) if f.name > path.name]
+        if later:
+            problems.append(f"{path.name} is older than {[f.name for f in later]}; apply the newest file only")
+        problems += approval_problems(updated, [*others, *rows])
+    if problems:
+        return refuse("\n  " + "\n  ".join(problems))
+    write_items(updated, args.items)
+    counts = defaultdict(int)
+    for r in rows:
+        counts[r["decision"]] += 1
+    print(f"applied {len(rows)} decisions to {args.items}: {dict(sorted(counts.items()))}")
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -176,26 +222,16 @@ def main(argv: list[str] | None = None) -> int:
     a = sub.add_parser("apply", help="apply filled-in decisions (researcher only)")
     a.add_argument("--items", required=True, type=Path)
     a.add_argument("--decisions", required=True, type=Path)
+    a.add_argument("--review-dir", type=Path, default=REVIEW_DIR)
     args = p.parse_args(argv)
     items = load_items(args.items)
 
     if args.command == "apply":
-        rows = _read_filled(args.decisions)
-        missing = [r["item_id"] for r in rows if not r["decision"].strip()]
-        if missing:
-            print(f"refusing: {len(missing)} row(s) have no decision: {missing}", file=sys.stderr)
-            return 2
-        updated, problems = apply_decisions(items, rows)
-        if problems:
-            print("refusing; nothing written:\n  " + "\n  ".join(problems), file=sys.stderr)
-            return 2
-        write_items(updated, args.items)
-        counts = defaultdict(int)
-        for r in rows:
-            counts[r["decision"]] += 1
-        print(f"applied {len(rows)} decisions to {args.items}: {dict(sorted(counts.items()))}")
-        return 0
+        return _apply(args, items)
 
+    if not BATCH_RE.match(args.batch):
+        print(f"refusing: batch {args.batch!r} must look like NN_<name> (letters, digits, _ and -)", file=sys.stderr)
+        return 2
     log_rows = lint_stimuli.read_log(args.log) if args.log.exists() else []
     verbatim = load_items(args.verbatim) if args.verbatim.exists() else None
     problems = design_problems(items, stage="authoring") + lint_stimuli.lint(
@@ -215,12 +251,14 @@ def main(argv: list[str] | None = None) -> int:
         originals = {i.item_id: by_key[(i.storyline_id, i.sign)] for i in selected
                      if lint_stimuli.is_adapted_ngo(i) and (i.storyline_id, i.sign) in by_key}
     sheet = args.review_dir / f"{args.batch}.md"
-    try:
-        write_template(selected, args.review_dir / f"{args.batch}_decisions.csv")
-    except FileExistsError as exc:
-        print(f"refusing: {exc}", file=sys.stderr)
-        return 2
-    sheet.write_text(render_sheet(args.batch, selected, log_rows, originals, str(args.items)), encoding="utf-8")
+    template = args.review_dir / f"{args.batch}_decisions.csv"
+    text = render_sheet(args.batch, selected, log_rows, originals, str(args.items))
+    for existing in (sheet, template):
+        if existing.exists():
+            print(f"refusing: {existing} exists; it may hold decisions. Use a new batch name.", file=sys.stderr)
+            return 2
+    write_template(selected, template)
+    sheet.write_text(text, encoding="utf-8")
     print(f"wrote {sheet} and its decisions template ({len(selected)} items)")
     return 0
 

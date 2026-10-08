@@ -3,7 +3,7 @@ import csv
 
 from kmp.items import load_items, write_items
 from tools import ngo_source, review
-from tools.review_record import DECISION_FIELDS, text_sha256
+from tools.review_record import DECISION_FIELDS, approval_problems, decision_files, read_decisions, text_sha256
 
 from test_lint_stimuli import pair
 
@@ -17,6 +17,15 @@ def _fill(path, decision="approved", note=""):
         writer = csv.DictWriter(fh, fieldnames=DECISION_FIELDS)
         writer.writeheader()
         writer.writerows(rows)
+
+
+def _record_ok(tmp_path, items_path):
+    rows = read_decisions(decision_files(tmp_path / "review"))
+    return approval_problems(load_items(items_path), rows) == []
+
+
+def _apply_args(path, decisions):
+    return ["apply", "--items", str(path), "--decisions", str(decisions), "--review-dir", str(decisions.parent)]
 
 
 def _setup(tmp_path, items):
@@ -53,8 +62,10 @@ def test_sheet_then_apply_round_trip(tmp_path, capsys):
     assert "B2 B3 B4 B5 B6 B7" in sheet
     decisions = tmp_path / "review" / "01_test_decisions.csv"
     _fill(decisions)
-    assert review.main(["apply", "--items", str(path), "--decisions", str(decisions)]) == 0
+    assert review.main(["apply", "--items", str(path), "--decisions", str(decisions),
+                        "--review-dir", str(decisions.parent)]) == 0
     statuses = {i.item_id: i.review_status for i in load_items(path)}
+    assert _record_ok(tmp_path, path)
     assert statuses == {"kmp-nm-001-prudential-bad": "approved", "kmp-nm-001-prudential-good": "approved",
                         "kmp-nm-001-procedural-bad": "draft", "kmp-nm-001-procedural-good": "draft"}
     # The approved items now leave the next sheet, and their approvals pass lint.
@@ -75,14 +86,17 @@ def test_apply_refuses_incomplete_rows_and_changed_text(tmp_path, capsys):
     path, sheet_args = _setup(tmp_path, pair())
     assert review.main([*sheet_args, "--batch", "01_test"]) == 0
     decisions = tmp_path / "review" / "01_test_decisions.csv"
-    assert review.main(["apply", "--items", str(path), "--decisions", str(decisions)]) == 2   # blank decisions
+    assert review.main(["apply", "--items", str(path), "--decisions", str(decisions),
+                        "--review-dir", str(decisions.parent)]) == 2   # blank decisions
     _fill(decisions, decision="rejected")                                                     # no note
-    assert review.main(["apply", "--items", str(path), "--decisions", str(decisions)]) == 2
+    assert review.main(["apply", "--items", str(path), "--decisions", str(decisions),
+                        "--review-dir", str(decisions.parent)]) == 2
     assert "needs a note" in capsys.readouterr().err
     edited = [i.model_copy(update={"effect": "lose the clerk's savings"}) if i.sign == "bad" else i for i in pair()]
     write_items(edited, path)
     _fill(decisions, decision="approved")
-    assert review.main(["apply", "--items", str(path), "--decisions", str(decisions)]) == 2
+    assert review.main(["apply", "--items", str(path), "--decisions", str(decisions),
+                        "--review-dir", str(decisions.parent)]) == 2
     assert "changed since the sheet was made" in capsys.readouterr().err
     assert {i.review_status for i in load_items(path)} == {"draft"}
 
@@ -93,3 +107,66 @@ def test_revise_keeps_the_item_a_draft():
            "date": "2026-10-02", "note": "B4: bigger"}
     updated, problems = review.apply_decisions([item], [row])
     assert problems == [] and updated[0].review_status == "draft"
+
+
+def test_apply_accepts_bom_and_padded_cells(tmp_path):
+    path, sheet_args = _setup(tmp_path, pair())
+    assert review.main([*sheet_args, "--batch", "01_test"]) == 0
+    decisions = tmp_path / "review" / "01_test_decisions.csv"
+    _fill(decisions, note="  ")
+    text = decisions.read_text(encoding="utf-8").replace(",approved,MM,", ", approved , MM ,")
+    decisions.write_text(text, encoding="utf-8-sig")
+    assert review.main(_apply_args(path, decisions)) == 0
+    assert {i.review_status for i in load_items(path)} == {"approved"}
+    assert _record_ok(tmp_path, path)
+
+
+def test_apply_refuses_duplicate_rows(tmp_path, capsys):
+    path, sheet_args = _setup(tmp_path, pair())
+    assert review.main([*sheet_args, "--batch", "01_test"]) == 0
+    decisions = tmp_path / "review" / "01_test_decisions.csv"
+    _fill(decisions)
+    lines = decisions.read_text(encoding="utf-8").splitlines()
+    decisions.write_text("\n".join([*lines, lines[1]]) + "\n", encoding="utf-8")
+    assert review.main(_apply_args(path, decisions)) == 2
+    assert "duplicate" in capsys.readouterr().err
+    assert {i.review_status for i in load_items(path)} == {"draft"}
+
+
+def test_apply_refuses_file_outside_review_dir_and_bad_name(tmp_path, capsys):
+    path, sheet_args = _setup(tmp_path, pair())
+    assert review.main([*sheet_args, "--batch", "01_test"]) == 0
+    decisions = tmp_path / "review" / "01_test_decisions.csv"
+    _fill(decisions)
+    outside = tmp_path / "01_test_decisions.csv"
+    outside.write_text(decisions.read_text(encoding="utf-8"), encoding="utf-8")
+    args = ["apply", "--items", str(path), "--decisions", str(outside), "--review-dir", str(tmp_path / "review")]
+    assert review.main(args) == 2
+    badname = tmp_path / "review" / "mine.csv"
+    badname.write_text(decisions.read_text(encoding="utf-8"), encoding="utf-8")
+    assert review.main(_apply_args(path, badname)) == 2
+    assert {i.review_status for i in load_items(path)} == {"draft"}
+
+
+def test_apply_refuses_an_older_file_after_a_newer_one(tmp_path, capsys):
+    path, sheet_args = _setup(tmp_path, pair())
+    assert review.main([*sheet_args, "--batch", "01_test"]) == 0
+    old = tmp_path / "review" / "01_test_decisions.csv"
+    _fill(old, decision="approved")
+    new = tmp_path / "review" / "02_test_decisions.csv"
+    new.write_text(old.read_text(encoding="utf-8"), encoding="utf-8")
+    _fill(new, decision="rejected", note="B4: no")
+    assert review.main(_apply_args(path, new)) == 0
+    assert review.main(_apply_args(path, old)) == 2
+    assert {i.review_status for i in load_items(path)} == {"rejected"}
+    assert _record_ok(tmp_path, path)
+
+
+def test_bad_batch_names_and_existing_sheet_are_refused(tmp_path, capsys):
+    path, sheet_args = _setup(tmp_path, pair())
+    for bad in ("../x", "a/b", "test"):
+        assert review.main([*sheet_args, "--batch", bad]) == 2
+    assert list((tmp_path / "review").iterdir()) == []
+    (tmp_path / "review" / "01_test.md").write_text("x", encoding="utf-8")
+    assert review.main([*sheet_args, "--batch", "01_test"]) == 2
+    assert not (tmp_path / "review" / "01_test_decisions.csv").exists()
