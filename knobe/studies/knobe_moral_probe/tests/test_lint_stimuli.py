@@ -284,3 +284,14 @@ def test_log_rows_need_from_and_to_except_fresh_action():
     assert lint.log_problems(items, [{**typo, "from": "x"}]) == []
     fresh = {"item_id": iid, "field": "scenario", "kind": "fresh_action", "from": "", "to": "", "note": "n"}
     assert lint.log_problems(items, [fresh]) == []
+
+
+def test_b8_is_skipped_when_the_verbatim_file_is_not_ngos(verbatim):
+    item = adapted(19, "bad", MANAGER_BAD.replace("make employees unhappy", "make staff unhappy"),
+                   "make employees unhappy")
+    edited = [verbatim[0].model_copy(update={"scenario": verbatim[0].scenario.replace("babies.", "infants.")}),
+              *verbatim[1:]]
+    problems = lint.lint([item], verbatim=edited)
+    assert "file: --verbatim differs from Ngo's source; B8 can't be checked (B9)" in problems
+    assert not any("(B8)" in p for p in problems)
+    assert any("(B8)" in p for p in lint.lint([item], verbatim=verbatim))

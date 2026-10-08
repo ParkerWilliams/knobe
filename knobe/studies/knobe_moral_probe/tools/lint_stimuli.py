@@ -310,6 +310,8 @@ def lint(items: list[Item], *, log_rows: list[dict[str, str]] = (), verbatim: li
         if any(map(is_adapted_ngo, items)):
             if verbatim is None:
                 out.append("file: adapted Ngo items need --verbatim to check B8")
+            elif ngo_source.differences(verbatim, ngo_source.load_source()):
+                out.append("file: --verbatim differs from Ngo's source; B8 can't be checked (B9)")
             else:
                 out += adaptation_problems(items, verbatim, log_rows)
     out += approval_problems(items, list(decisions))
