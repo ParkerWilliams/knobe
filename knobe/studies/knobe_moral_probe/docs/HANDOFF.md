@@ -1,6 +1,6 @@
 # knobe_moral_probe: handoff
 
-Last updated 2026-10-01. Branch `knobe_moral_probe`. Read this first, then
+Last updated 2026-10-08. Branch `knobe_moral_probe`. Read this first, then
 the amendments at the top of `DESIGN.md`.
 
 ## Where the study is
@@ -10,25 +10,39 @@ the amendments at the top of `DESIGN.md`.
 | Design (`DESIGN.md`) | Approved, with dated amendments at the top (they win over the body) |
 | Pipeline (`kmp/`, 13-task `IMPLEMENTATION_PLAN.md`) | **Done.** Every task spec- and quality-reviewed, final whole-branch review fixed. 311 tests pass. The plan text is historical; module docstrings are current |
 | Definitions and review checklist | **Approved by the researcher** 2026-10-01 (decisions A–U resolved) |
-| Stimuli authoring (`AUTHORING_PLAN.md`, Tasks 0–22) | **In progress.** Task 0 (sign-off) and Task 1 (`tools/ngo_source.py`) done and reviewed |
+| Stimuli authoring (`AUTHORING_PLAN.md`, Tasks 0–22) | **In progress.** Tasks 0–6 done and reviewed (tools, `ngo_verbatim.csv`, README). Task 7 sheet made; waiting on the researcher |
 | Screening | Not started. Reviewer pinned: `claude-sonnet-4-6` |
 | Pilot | Not started |
 | Full run | Not started |
 
 ## Next step
 
-Resume `AUTHORING_PLAN.md` at **Task 2** (`tools/review_record.py`), then
-Tasks 3–6 (generate `stimuli/ngo_verbatim.csv`, lint, review tool, README).
-These are code tasks; no researcher input is needed until **Task 7**, the
-review of the 80 verbatim items.
+**Researcher:** review `stimuli/review/01_nv_all.md` (80 verbatim items),
+fill in `stimuli/review/01_nv_all_decisions.csv` (`approved` / `rejected` /
+`revise`, reviewer initials, date; a note is required for rejected and
+revise), then run from the study folder:
 
-How it was run: subagent-driven. One implementer per task, given the task's
-text plus the plan header, then a review (spec + quality; for stimuli code,
-checked against the source text), then fixes, then the next task. Stop at
-every **STOP** in the plan.
+    ../../.venv/bin/python -m tools.review apply --items stimuli/ngo_verbatim.csv --decisions stimuli/review/01_nv_all_decisions.csv
+
+Then the agent resumes `AUTHORING_PLAN.md` at **Task 7 Step 4/5** (parser
+fixes for any `revise`, lint, commit the decisions), then Task 8–9.
+
+The tools changed from the plan's code after review (2026-10-08); the
+module docstrings and tests are current:
+- `review_record.read_decisions` strips cells, accepts an Excel BOM, and
+  rejects bad decision values, an empty reviewer and wrong cell counts.
+  `text_sha256` hashes a frozen field list.
+- `review apply` only takes a `NN_<batch>_decisions.csv` inside the review
+  dir, refuses duplicate rows, and refuses to write any status the whole
+  review record doesn't back. `sheet` needs an `NN_` batch name and never
+  overwrites.
+- `lint_stimuli`: adapted Ngo pairs must have identical action sentences
+  (one goal); pronoun changes in storyline 10 (pronouns that mean the uncle
+  or aunt) need a log row; a log row licenses only its own span; B8 is
+  skipped if the verbatim file differs from Ngo's source.
 
 To restart in a new session: "Continue the knobe_moral_probe authoring plan
-at Task 2, subagent-driven. Read docs/HANDOFF.md."
+at Task 7, subagent-driven. Read docs/HANDOFF.md."
 
 ## Researcher gates ahead
 
