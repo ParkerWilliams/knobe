@@ -1,9 +1,10 @@
 """tools.lint_stimuli: mechanical checklist checks beyond design_problems."""
 import csv
+import re
 
 import pytest
 
-from kmp.items import Item, make_item_id
+from kmp.items import GENDERED_PRONOUNS, Item, make_item_id
 from tools import lint_stimuli as lint
 from tools import ngo_source
 from tools.review_record import DECISION_FIELDS, text_sha256
@@ -230,3 +231,29 @@ def test_cli(tmp_path, capsys):
     write_items(pair() + pair(sid=2), path)
     assert lint.main(args) == 1
     assert "(D3)" in capsys.readouterr().err
+
+
+# ---- pronouns that do not refer to the agent ----------------------------------------------------------
+
+def test_non_agent_pronoun_set_is_pinned_against_the_source(verbatim):
+    # Reference cannot be resolved by code. Mechanical part: object and reflexive pronouns refer to
+    # the agent only rarely, so outside the hand-derived set none may appear. The his/her/he/she
+    # cases were read by hand (all refer to the agent outside the set).
+    assert set(lint.NON_AGENT_PRONOUNS) == {10}
+    objectish = re.compile(r"\b(him|himself|herself|hers)\b", re.IGNORECASE)
+    outside = {i.storyline_id for i in verbatim if objectish.search(i.scenario + " " + i.effect)}
+    assert outside == set(lint.NON_AGENT_PRONOUNS)
+    for sid in lint.NON_AGENT_PRONOUNS:
+        assert any(GENDERED_PRONOUNS.search(i.scenario) for i in verbatim if i.storyline_id == sid)
+
+
+def test_b8_him_to_role_noun_needs_a_log_row_in_storyline_10(verbatim):
+    original = next(i for i in verbatim if i.item_id == "kmp-nv-010-moral-bad")
+    scenario = (original.scenario.replace("Kate", "The relative", 1).replace("Kate", "The relative")
+                .replace("placing him in", "placing the relative in"))
+    item = adapted(10, "bad", scenario, original.effect, "the relative")
+    problems = lint.adaptation_problems([item], verbatim, [])
+    assert len(problems) == 1 and "changes 'him' to 'the relative'" in problems[0]
+    row = {"item_id": item.item_id, "field": "scenario", "kind": "other_name", "from": "placing him in",
+           "to": "placing the relative in", "note": "him is the uncle"}
+    assert lint.adaptation_problems([item], verbatim, [row]) == []

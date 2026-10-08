@@ -64,6 +64,17 @@ ACTION_SENTENCE = {"nonmoral": 0, "ngo_verbatim": 0, "foundations": 1}
 NGO_STORYLINES = range(1, 41)
 NAMING_FILLER = frozenset({"the", "'", "s"})
 
+# Storylines in Ngo's text where a gendered pronoun refers to someone other than the agent, so
+# turning that pronoun into the agent's role noun would change who the sentence is about.
+# Derived by reading all 80 verbatim texts (not by code; a parser cannot resolve reference).
+# tests/test_lint_stimuli.py pins this set against the source: outside it, no object or
+# reflexive pronoun (him, himself, herself, hers) appears at all; the his/her/he/she cases
+# were read by hand and found to refer to the agent.
+NON_AGENT_PRONOUNS = {
+    10: "'avoid being his caretaker' / 'placing him' / 'make him extremely unhappy' (bad) and "
+        "'make her extremely happy' (good) refer to the relative placed in the home, not the agent",
+}
+
 _SENTENCE_BREAK = re.compile(r"(?<=[.!?])\s+")
 _TOKEN = re.compile(r"\w+|[^\w\s]")
 
@@ -208,7 +219,10 @@ def _within(span: list[str], text: str) -> bool:
     return not span or f" {' '.join(span)} " in f" {' '.join(_tokens(text))} "
 
 
-def _naming_change(old: list[str], new: list[str], verbatim_agent: str, role_noun: str) -> bool:
+def _naming_change(old: list[str], new: list[str], verbatim_agent: str, role_noun: str,
+                   storyline_id: int | None = None) -> bool:
+    if storyline_id in NON_AGENT_PRONOUNS and any(GENDERED_PRONOUNS.fullmatch(t) for t in old):
+        return False
     before = {t.lower() for t in _tokens(verbatim_agent)} | NAMING_FILLER
     after = {t.lower() for t in _tokens(role_noun)} | NAMING_FILLER
     return (all(t.lower() in before or GENDERED_PRONOUNS.fullmatch(t) for t in old)
@@ -242,12 +256,16 @@ def adaptation_problems(items: list[Item], verbatim: list[Item], log_rows: list[
             a, b = _tokens(before), _tokens(after)
             for tag, i1, i2, j1, j2 in SequenceMatcher(a=a, b=b, autojunk=False).get_opcodes():
                 old, new = a[i1:i2], b[j1:j2]
-                if tag == "equal" or _naming_change(old, new, original.agent, item.agent):
+                if tag == "equal" or _naming_change(old, new, original.agent, item.agent, item.storyline_id):
                     continue
                 if any(_within(old, r["from"]) and _within(new, r["to"]) for r in listed):
                     continue
-                out.append(f"{item.item_id}: {field} changes {' '.join(old)!r} to {' '.join(new)!r}, which is "
-                           f"not a name or pronoun change and not in the authoring log (B8)")
+                if item.storyline_id in NON_AGENT_PRONOUNS and any(GENDERED_PRONOUNS.fullmatch(t) for t in old):
+                    why = (f"replaces a pronoun in a storyline where some pronouns do not refer to the agent "
+                           f"({NON_AGENT_PRONOUNS[item.storyline_id]}) and is not in the authoring log (B8)")
+                else:
+                    why = "is not a name or pronoun change and not in the authoring log (B8)"
+                out.append(f"{item.item_id}: {field} changes {' '.join(old)!r} to {' '.join(new)!r}, which {why}")
     return out
 
 
