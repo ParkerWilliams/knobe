@@ -21,8 +21,15 @@ DECISIONS = ("approved", "rejected", "revise")
 REVIEW_DIR = Path(__file__).resolve().parents[1] / "stimuli" / "review"
 
 
+# Frozen on purpose: this is the current kmp.items.FIELDS minus review_status, written out
+# literally. Changing it invalidates every recorded decision, so a new Item field must be a
+# conscious choice (a test fails until it is added here).
+HASHED_FIELDS = ["item_id", "experiment", "storyline_id", "arm", "sign", "agent",
+                 "effect", "scenario", "source", "scaffold"]
+
+
 def text_sha256(item: Item) -> str:
-    fields = {k: v for k, v in item.model_dump().items() if k != "review_status"}
+    fields = {f: getattr(item, f) for f in HASHED_FIELDS}
     return hashlib.sha256(json.dumps(fields, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
 
 
@@ -31,14 +38,31 @@ def decision_files(review_dir: str | Path = REVIEW_DIR) -> list[Path]:
 
 
 def read_decisions(paths: list[Path]) -> list[dict[str, str]]:
-    """Filled-in rows of the given decisions files, in order. Rows with an empty decision are skipped."""
+    """Filled-in rows of the given decisions files, in order. Rows with an empty decision are skipped.
+
+    Cells are stripped. A non-blank row must have the right number of cells, a decision in
+    DECISIONS and a reviewer; otherwise ValueError names the file and line.
+    """
     rows = []
     for path in paths:
-        with open(path, newline="", encoding="utf-8") as fh:
+        with open(path, newline="", encoding="utf-8-sig") as fh:
             reader = csv.DictReader(fh)
             if reader.fieldnames != DECISION_FIELDS:
                 raise ValueError(f"{path}: header {reader.fieldnames} should be {DECISION_FIELDS}")
-            rows += [{**row, "file": str(path)} for row in reader if row["decision"].strip()]
+            for raw in reader:
+                where = f"{path} line {reader.line_num}"
+                if None in raw:
+                    raise ValueError(f"{where}: too many cells")
+                if any(v is None for v in raw.values()):
+                    raise ValueError(f"{where}: too few cells")
+                row = {k: v.strip() for k, v in raw.items()}
+                if not row["decision"]:
+                    continue
+                if row["decision"] not in DECISIONS:
+                    raise ValueError(f"{where}: decision {row['decision']!r} is not one of {DECISIONS}")
+                if not row["reviewer"]:
+                    raise ValueError(f"{where}: reviewer is empty")
+                rows.append({**row, "file": str(path)})
     return rows
 
 
