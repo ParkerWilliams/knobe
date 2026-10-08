@@ -219,6 +219,14 @@ def _within(span: list[str], text: str) -> bool:
     return not span or f" {' '.join(span)} " in f" {' '.join(_tokens(text))} "
 
 
+def _covers(full: list[str], start: int, end: int, row_text: str) -> bool:
+    """True if full[start:end] lies inside one occurrence of the row's tokens in full (an empty
+    range, i.e. a pure insertion or deletion, may sit at either edge of the occurrence)."""
+    sub = _tokens(row_text)
+    return any(full[p:p + len(sub)] == sub and p <= start and end <= p + len(sub)
+               for p in range(len(full) - len(sub) + 1)) if sub else False
+
+
 def _naming_change(old: list[str], new: list[str], verbatim_agent: str, role_noun: str,
                    storyline_id: int | None = None) -> bool:
     if storyline_id in NON_AGENT_PRONOUNS and any(GENDERED_PRONOUNS.fullmatch(t) for t in old):
@@ -258,7 +266,7 @@ def adaptation_problems(items: list[Item], verbatim: list[Item], log_rows: list[
                 old, new = a[i1:i2], b[j1:j2]
                 if tag == "equal" or _naming_change(old, new, original.agent, item.agent, item.storyline_id):
                     continue
-                if any(_within(old, r["from"]) and _within(new, r["to"]) for r in listed):
+                if any(_covers(a, i1, i2, r["from"]) and _covers(b, j1, j2, r["to"]) for r in listed):
                     continue
                 if item.storyline_id in NON_AGENT_PRONOUNS and any(GENDERED_PRONOUNS.fullmatch(t) for t in old):
                     why = (f"replaces a pronoun in a storyline where some pronouns do not refer to the agent "
@@ -279,6 +287,8 @@ def log_problems(items: list[Item], log_rows: list[dict[str, str]]) -> list[str]
             out.append(f"authoring log line {n}: kind {row['kind']!r} not in {LOG_KINDS}")
         if row["field"] not in ("scenario", "effect"):
             out.append(f"authoring log line {n}: field {row['field']!r} should be scenario or effect")
+        if row["kind"] != "fresh_action" and not (row["from"].strip() and row["to"].strip()):
+            out.append(f"authoring log line {n}: from and to must both be non-empty for kind {row['kind']!r}")
         if not row["note"].strip():
             out.append(f"authoring log line {n}: note is empty")
     return out

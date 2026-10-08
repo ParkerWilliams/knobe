@@ -206,7 +206,7 @@ def test_b9_verbatim_must_equal_the_source(verbatim):
 
 
 def test_log_rows_are_checked():
-    rows = [{"item_id": "kmp-nm-099-moral-bad", "field": "question", "kind": "whim", "from": "", "to": "", "note": ""}]
+    rows = [{"item_id": "kmp-nm-099-moral-bad", "field": "question", "kind": "whim", "from": "a", "to": "b", "note": ""}]
     problems = lint.log_problems(pair(), rows)
     assert len(problems) == 4
 
@@ -257,3 +257,30 @@ def test_b8_him_to_role_noun_needs_a_log_row_in_storyline_10(verbatim):
     row = {"item_id": item.item_id, "field": "scenario", "kind": "other_name", "from": "placing him in",
            "to": "placing the relative in", "note": "him is the uncle"}
     assert lint.adaptation_problems([item], verbatim, [row]) == []
+
+
+# ---- log rows license only their own span ---------------------------------------------------------------------
+
+STAFF_ROW = {"item_id": "kmp-nm-019-moral-bad", "field": "scenario", "kind": "typo",
+             "from": "make employees unhappy", "to": "make staff unhappy", "note": "test"}
+
+
+def test_b8_log_row_does_not_license_an_unrelated_insertion(verbatim):
+    scenario = (MANAGER_BAD.replace("make employees unhappy", "make staff unhappy")
+                .replace("enacted the plan", "enacted the unhappy plan"))
+    item = adapted(19, "bad", scenario, "make employees unhappy")
+    problems = lint.adaptation_problems([item], verbatim, [STAFF_ROW])
+    assert len(problems) == 1 and "changes '' to 'unhappy'" in problems[0]
+    ok = adapted(19, "bad", MANAGER_BAD.replace("make employees unhappy", "make staff unhappy"),
+                 "make employees unhappy")
+    assert lint.adaptation_problems([ok], verbatim, [STAFF_ROW]) == []
+
+
+def test_log_rows_need_from_and_to_except_fresh_action():
+    items = pair()
+    iid = items[0].item_id
+    typo = {"item_id": iid, "field": "scenario", "kind": "typo", "from": "", "to": "x", "note": "n"}
+    assert any("non-empty" in p for p in lint.log_problems(items, [typo]))
+    assert lint.log_problems(items, [{**typo, "from": "x"}]) == []
+    fresh = {"item_id": iid, "field": "scenario", "kind": "fresh_action", "from": "", "to": "", "note": "n"}
+    assert lint.log_problems(items, [fresh]) == []
