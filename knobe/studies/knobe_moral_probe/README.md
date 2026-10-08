@@ -24,7 +24,10 @@ and carries its name:
 This study is new work. It changes none of the earlier files, and reads
 none of their outputs except one: `analysis/power_basis.py`, the
 design-stage power check, reads the MF pilot's committed
-`sign_wcb_parsed.csv`.
+`sign_wcb_parsed.csv`. It also reads one pilot *input*:
+`tools/ngo_source.py` parses the pilots' copy of Ngo et al.'s stimuli,
+`nonmoral_pilot/ngo_2015_original_80.txt`. The pilot variant files are read
+by the authors as drafting material, never by code.
 
 - **Ngo-extension pilots**
   (`analysis/ngo_extensions/nonmoral_pilot/`, `moral_foundations_pilot/`,
@@ -53,8 +56,12 @@ format) is imported, not copied.
 | `kmp/` | pipeline: items, protocol, prompts, screen (pass rule, pair selection), screen_run (reviewer runner and CLI), elicit, frame, checks |
 | `tests/` | `.venv/bin/python -m pytest studies/knobe_moral_probe/tests -q` from the repo root |
 | `tools/check_chat_bos.py` | pre-pilot check for a doubled BOS on instruct chat prompts |
+| `tools/ngo_source.py` | Ngo's 80 vignettes → `stimuli/ngo_verbatim.csv`; compare-only once it exists |
+| `tools/lint_stimuli.py` | checklist checks beyond `design_problems` (A1 A3 A4 A9 A10 B2 B8 B9 C2 C3 C4 D2 D3, approvals) |
+| `tools/review.py` | `sheet`: review sheet + decisions template (drafting agent); `apply`: decisions → review_status (researcher only) |
+| `docs/AUTHORING_PLAN.md` | the stimuli authoring plan |
 | `analysis/power_basis.py` | DESIGN.md §9 power table → `outputs/power_basis.csv` |
-| `stimuli/` | one items file per experiment: `nonmoral.csv`, `foundations.csv`, `ngo_verbatim.csv` |
+| `stimuli/` | one items file per experiment (`nonmoral.csv`, `foundations.csv`, `ngo_verbatim.csv`); `nonmoral_log.csv` (every change from Ngo, every fresh action); `NOTES.md` (conventions, role nouns, scaffolds, batches, disclosure); `review/` (sheets and the researcher's decisions) |
 
 ## Commands
 
@@ -69,6 +76,14 @@ real elicitation. Exit 1 means some model gets BOS twice.
 
     .venv/bin/python studies/knobe_moral_probe/tools/check_chat_bos.py
     .venv/bin/python studies/knobe_moral_probe/tools/check_chat_bos.py --vllm
+
+**Authoring** (`docs/AUTHORING_PLAN.md`). Lint every items file after each
+edit; the review sheet refuses files that aren't clean. Only the researcher
+runs `apply`.
+
+    ../../.venv/bin/python -m tools.lint_stimuli stimuli/<experiment>.csv
+    ../../.venv/bin/python -m tools.review sheet --items stimuli/<experiment>.csv --batch NN_<name> [--storylines 1-20] [--arms moral]
+    ../../.venv/bin/python -m tools.review apply --items stimuli/<experiment>.csv --decisions stimuli/review/NN_<name>_decisions.csv
 
 **Screening** (`kmp.screen`, which runs `kmp.screen_run`'s CLI). Start with
 `--dry-run`: it prints the call count and a token estimate and asks nothing
