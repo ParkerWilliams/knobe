@@ -89,6 +89,16 @@ def test_b2_flags_a_pair_differing_before_the_side_effect():
                                                            "before the side-effect sentence (B2)"]
 
 
+def test_adapted_pair_must_share_one_goal():
+    bad = MANAGER_BAD.replace("to increase earnings", "to buy a house")
+    good = bad.replace("to buy a house", "to buy a car").replace("unhappy.", "happy.")
+    items = [adapted(3, "bad", bad, "make employees unhappy"), adapted(3, "good", good, "make employees happy")]
+    assert lint.pair_problems(items) == ["pair (3, 'moral'): bad and good action sentences differ; the good "
+                                         "version takes the bad version's goal (B8, decision B2)"]
+    aligned = [items[0], items[1].model_copy(update={"scenario": good.replace("buy a car", "buy a house")})]
+    assert lint.pair_problems(aligned) == []
+
+
 def test_c2_one_agent_per_storyline():
     items = pair() + [make(arm="procedural", sign=s, agent="the engineer",
                            scenario=(CLERK_BAD if s == "bad" else CLERK_GOOD).replace("clerk", "engineer"))

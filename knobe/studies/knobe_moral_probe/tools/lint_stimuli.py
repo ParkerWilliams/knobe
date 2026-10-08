@@ -136,7 +136,15 @@ def _pairs(items: list[Item]) -> dict[tuple[int, str], dict[str, Item]]:
 def pair_problems(items: list[Item]) -> list[str]:
     out = []
     for key, pair in sorted(_pairs(items).items()):
-        if set(pair) != {"bad", "good"} or pair["bad"].source == "ngo":
+        if set(pair) != {"bad", "good"}:
+            continue
+        if is_adapted_ngo(pair["bad"]):
+            bad_action, good_action = (split_sentences(pair[s].scenario)[0] for s in ("bad", "good"))
+            if bad_action != good_action:
+                out.append(f"pair {key}: bad and good action sentences differ; the good version takes the bad "
+                           f"version's goal (B8, decision B2)")
+            continue
+        if pair["bad"].source == "ngo":
             continue
         if split_sentences(pair["bad"].scenario)[:-1] != split_sentences(pair["good"].scenario)[:-1]:
             out.append(f"pair {key}: bad and good differ before the side-effect sentence (B2)")
