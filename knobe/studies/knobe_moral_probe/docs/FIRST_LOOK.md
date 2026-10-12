@@ -33,8 +33,9 @@ and decides on it; the agent never launches anything that costs money.
 ## Cluster notes (for whoever runs steps 2–3)
 
 - **Code:** `git@github.com:ParkerWilliams/knobe.git`, branch
-  `knobe_moral_probe`. Everything for this run is in
-  `studies/knobe_moral_probe/`; it imports `src/knobe/` for the engine.
+  `knobe_moral_probe`. The project is the `knobe/` folder inside the clone;
+  everything for this run is in `knobe/studies/knobe_moral_probe/` ("the
+  study folder"), and it imports `knobe/src/knobe/` for the engine.
 - **Environment:** the setup the repo README validated on the H200s:
   `vllm==0.10.1`, `huggingface_hub>=0.24.0` (declare them in the job
   config's `runtime_env.pip`), plus the repo installed with `.[stats]`.
@@ -72,7 +73,7 @@ tell the agent: elicit then needs a copy of the file without that pair.
 
 ### 2. (cluster) Double-BOS check
 
-From the repo root on the cluster:
+From the `knobe/` folder on the cluster (the project folder inside the clone, where `.venv` and `pyproject.toml` live):
 
     .venv/bin/python studies/knobe_moral_probe/tools/check_chat_bos.py 2>&1 | tee studies/knobe_moral_probe/outputs/bos_check.txt
     .venv/bin/python studies/knobe_moral_probe/tools/check_chat_bos.py --vllm 2>&1 | tee -a studies/knobe_moral_probe/outputs/bos_check.txt
@@ -139,7 +140,7 @@ check reads. On the other end, from the study folder:
     ../../.venv/bin/python -m kmp.checks --results outputs/elicit/ngo_verbatim_gemma.jsonl --baseline outputs/elicit/ngo_verbatim_gemma_noex.jsonl --items stimuli/ngo_verbatim.csv --out-dir outputs/checks/ngo_verbatim_gemma
     ../../.venv/bin/python -m kmp.checks --results outputs/elicit/ngo_verbatim_llama_mistral.jsonl --baseline outputs/elicit/ngo_verbatim_llama_mistral_noex.jsonl --items stimuli/ngo_verbatim.csv --out-dir outputs/checks/ngo_verbatim_llama_mistral
 
-Then the sign-effect table over both jobs, from the repo root (about 1 min):
+Then the sign-effect table over both jobs, from the `knobe/` folder (about 1 min):
 
     .venv/bin/python studies/knobe_moral_probe/analysis/first_look.py --results studies/knobe_moral_probe/outputs/elicit/ngo_verbatim_gemma.jsonl studies/knobe_moral_probe/outputs/elicit/ngo_verbatim_llama_mistral.jsonl --items studies/knobe_moral_probe/stimuli/ngo_verbatim.csv --out studies/knobe_moral_probe/outputs/first_look/sign_effects.csv
 
