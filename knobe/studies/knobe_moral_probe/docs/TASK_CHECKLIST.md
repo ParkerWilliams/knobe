@@ -20,7 +20,7 @@ waits for you. `HANDOFF.md` has the detail.
 ## First look on Ngo's 80 (`FIRST_LOOK.md`), before any more authoring
 
 - [x] `analysis/first_look.py` (sign-effect fits), tested on the fake engine
-- [ ] **(you)** Sheet 01: fill in `01_nv_all_decisions.csv`, run `tools.review apply`
+- [x] **(you)** Sheet 01: all 80 approved by MM 2026-10-12 (Codex pre-review), applied
 - [x] **(you)** Confirm the go/no-go rule in `FIRST_LOOK.md` (2 of 3 instruct, confirmed 2026-10-12)
 - [ ] **(cluster)** `tools/check_chat_bos.py`, then with `--vllm`
 - [ ] **STOP (you):** go-ahead on about 2.2–3 h of GPU
@@ -39,6 +39,7 @@ waits for you. `HANDOFF.md` has the detail.
 - [ ] Task 9: `stimuli/NOTES.md`, `nonmoral_log.csv`, role-noun table for all 40 storylines
   - [ ] **STOP (you):** approve the role-noun table (decisions O, P)
 - [ ] Task 10: batches 02–03, adapted Ngo moral pairs (2 × 40 items). **STOP (you):** review
+  - Fix in the adapted items (MM, 2026-10-12): pair 9 bad, the effect names the person the scenario names, not "her neighbor"; pair 36 good, the effect says music player, not tablet. Kept as written in `ngo_verbatim`
 - [ ] Task 11: batches 04–05, prudential pairs (2 × 40). **STOP (you):** review
 - [ ] Task 12: batches 06–07, procedural pairs (2 × 40). **STOP (you):** review
 - [ ] Task 13: nonmoral completeness check (D2)

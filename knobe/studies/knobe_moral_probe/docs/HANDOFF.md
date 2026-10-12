@@ -17,7 +17,7 @@ Authoring (Task 9 on) resumes only after a go.
 | Pipeline (`kmp/`, 13-task `IMPLEMENTATION_PLAN.md`) | **Done.** Every task spec- and quality-reviewed, final whole-branch review fixed. 311 tests pass. The plan text is historical; module docstrings are current |
 | Definitions and review checklist | **Approved by the researcher** 2026-10-01 (decisions A–U resolved) |
 | Stimuli authoring (`AUTHORING_PLAN.md`, Tasks 0–22) | **In progress.** Tasks 0–6 done and reviewed (tools, `ngo_verbatim.csv`, README). Task 7 sheet made; waiting on the researcher |
-| First look on Ngo's 80 (`FIRST_LOOK.md`) | **Next.** Script `analysis/first_look.py` done and tested; waiting on sheet 01, then the cluster |
+| First look on Ngo's 80 (`FIRST_LOOK.md`) | **Next.** Script done and tested; all 80 items approved 2026-10-12; go/no-go rule confirmed. Waiting on the cluster (BOS check, then GPU go-ahead) |
 | Screening | Not started. Reviewer pinned: `claude-sonnet-4-6` |
 | Pilot | Not started |
 | Full run | Not started |
@@ -26,14 +26,9 @@ Authoring (Task 9 on) resumes only after a go.
 
 Follow `docs/FIRST_LOOK.md`:
 
-1. **Researcher:** review `stimuli/review/01_nv_all.md`, fill in
-   `stimuli/review/01_nv_all_decisions.csv` (`approved` / `rejected` /
-   `revise`, reviewer initials, date; a note is required for rejected and
-   revise). (The go/no-go rule was confirmed 2026-10-12.) Then run from
-   the study folder:
-
-       ../../.venv/bin/python -m tools.review apply --items stimuli/ngo_verbatim.csv --decisions stimuli/review/01_nv_all_decisions.csv
-
+1. ~~Researcher: sheet 01~~ Done 2026-10-12: MM approved all 80 (Codex
+   pre-review). Items 17 and 72 are kept as written here and fixed in the
+   adapted items (Task 10; see `TASK_CHECKLIST.md`).
 2. **Cluster:** the double-BOS check, then (after the researcher's
    go-ahead on about 2.2–3 h of GPU) a validation pass and the elicitation.
 3. **Local:** `kmp.checks`, `analysis/first_look.py`, log, commit, and
