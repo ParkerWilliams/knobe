@@ -17,7 +17,7 @@ Authoring (Task 9 on) resumes only after a go.
 | Pipeline (`kmp/`, 13-task `IMPLEMENTATION_PLAN.md`) | **Done.** Every task spec- and quality-reviewed, final whole-branch review fixed. 311 tests pass. The plan text is historical; module docstrings are current |
 | Definitions and review checklist | **Approved by the researcher** 2026-10-01 (decisions A–U resolved) |
 | Stimuli authoring (`AUTHORING_PLAN.md`, Tasks 0–22) | **In progress.** Tasks 0–6 done and reviewed (tools, `ngo_verbatim.csv`, README). Task 7 sheet made; waiting on the researcher |
-| First look on Ngo's 80 (`FIRST_LOOK.md`) | **Next.** Script done and tested; all 80 items approved 2026-10-12; go/no-go rule confirmed. Waiting on the cluster (BOS check, then GPU go-ahead) |
+| First look on Ngo's 80 (`FIRST_LOOK.md`) | **Next.** Script done and tested; all 80 items approved 2026-10-12; go/no-go rule confirmed. Waiting on Parker's cluster run |
 | Screening | Not started. Reviewer pinned: `claude-sonnet-4-6` |
 | Pilot | Not started |
 | Full run | Not started |
@@ -29,8 +29,8 @@ Follow `docs/FIRST_LOOK.md`:
 1. ~~Researcher: sheet 01~~ Done 2026-10-12: MM approved all 80 (Codex
    pre-review). Items 17 and 72 are kept as written here and fixed in the
    adapted items (Task 10; see `TASK_CHECKLIST.md`).
-2. **Cluster:** the double-BOS check, then (after the researcher's
-   go-ahead on about 2.2–5.3 h of GPU) a validation pass and the elicitation.
+2. **Cluster (Parker runs and decides on GPU time):** the double-BOS
+   check, the Gemma self-check, then the elicitation (about 2.2–5.3 h).
 3. **Local:** `kmp.checks`, `analysis/first_look.py`, log, commit, and
    apply the go/no-go rule.
 

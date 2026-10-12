@@ -27,8 +27,8 @@ The main analysis uses the role-noun adapted items (DESIGN amendment
 **Not needed:** screening (Ngo's items are human-validated; the reviewer
 is for new items), an Anthropic API key, any authoring.
 
-**Spending:** nothing in this plan costs money except cluster GPU time
-(step 3), which needs the researcher's go-ahead first.
+**Spending:** the only cost is cluster GPU time (step 3). Parker runs it
+and decides on it; the agent never launches anything that costs money.
 
 ## Cluster notes (for whoever runs steps 2–3)
 
@@ -78,20 +78,27 @@ From the repo root on the cluster:
 
 Exit 1 means some model gets BOS twice. Stop and report it before step 3.
 
-### 3. (cluster) Elicitation. **STOP: researcher go-ahead first**
+### 3. (cluster) Elicitation
 
 Size: 80 items × 168 samples = 13,440 rows per model per condition; 6
 models × 2 conditions (with examples, `--no-examples`) = 161,280 rows. At
 15–20 rows/s that's about **2.2–3 h of GPU**, or about 5.3 h at the G1 pilot's 8.4 rows/s. No API
 cost.
 
-**3a. Validation pass (about 12–15 min).** One model, with examples. This
-checks throughput and the number rate before the long run:
+**3a. Self-check (about 15–25 min, recommended).** Gemma-instruct alone,
+with examples, in the Gemma job setup. It was the slowest model and the
+worst at answering with a number in the earlier pilots, so it is the
+worst case for both:
 
-    ../../.venv/bin/python -m kmp.elicit --items stimuli/ngo_verbatim.csv --out outputs/elicit/nv_check_mistral.jsonl --engine vllm --model-keys mistral-7b-v0.1-instruct
+    ../../.venv/bin/python -m kmp.elicit --items stimuli/ngo_verbatim.csv --out outputs/elicit/nv_check_gemma.jsonl --engine vllm --model-keys gemma-2-9b-instruct
+    ../../.venv/bin/python -m kmp.checks --stage full --results outputs/elicit/nv_check_gemma.jsonl --items stimuli/ngo_verbatim.csv --out-dir outputs/checks/nv_check_gemma
 
-Report the rows/s and the share of numeric answers. Go on only if they're
-close to the estimate.
+`outputs/checks/nv_check_gemma/throughput.csv` has the rows/s, and
+`number_rates.csv` has the share of numeric answers per question and
+wording. If any `passes` is False (under 90% numbers), the full run would
+fail the gates: stop and send the agent the file and a few
+`raw_response`s from the `.jsonl`. Otherwise go on to 3b.
+The check file is not part of 3b's results.
 
 **3b. Full first look.** Two jobs, split by family because of Gemma's
 attention backend (cluster notes above). Each job runs its models with

@@ -23,8 +23,7 @@ waits for you. `HANDOFF.md` has the detail.
 - [x] **(you)** Sheet 01: all 80 approved by MM 2026-10-12 (Codex pre-review), applied
 - [x] **(you)** Confirm the go/no-go rule in `FIRST_LOOK.md` (2 of 3 instruct, confirmed 2026-10-12)
 - [ ] **(cluster)** `tools/check_chat_bos.py`, then with `--vllm`
-- [ ] **STOP (you):** go-ahead on about 2.2–5.3 h of GPU
-- [ ] **(cluster)** Validation pass (one model), then both full elicitation runs
+- [ ] **(Parker, cluster)** Gemma self-check, then both full elicitation jobs (about 2.2–5.3 h GPU; Parker's call)
 - [ ] `kmp.checks` + `first_look.py`, log, commit
 - [ ] **STOP (you):** go / no-go
 
