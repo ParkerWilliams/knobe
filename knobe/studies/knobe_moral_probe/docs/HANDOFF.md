@@ -29,7 +29,7 @@ Follow `docs/FIRST_LOOK.md`:
 1. **Researcher:** review `stimuli/review/01_nv_all.md`, fill in
    `stimuli/review/01_nv_all_decisions.csv` (`approved` / `rejected` /
    `revise`, reviewer initials, date; a note is required for rejected and
-   revise), and confirm the go/no-go rule in `FIRST_LOOK.md`. Then run from
+   revise). (The go/no-go rule was confirmed 2026-10-12.) Then run from
    the study folder:
 
        ../../.venv/bin/python -m tools.review apply --items stimuli/ngo_verbatim.csv --decisions stimuli/review/01_nv_all_decisions.csv

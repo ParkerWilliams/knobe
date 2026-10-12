@@ -21,7 +21,7 @@ waits for you. `HANDOFF.md` has the detail.
 
 - [x] `analysis/first_look.py` (sign-effect fits), tested on the fake engine
 - [ ] **(you)** Sheet 01: fill in `01_nv_all_decisions.csv`, run `tools.review apply`
-- [ ] **(you)** Confirm the go/no-go rule in `FIRST_LOOK.md`
+- [x] **(you)** Confirm the go/no-go rule in `FIRST_LOOK.md` (2 of 3 instruct, confirmed 2026-10-12)
 - [ ] **(cluster)** `tools/check_chat_bos.py`, then with `--vllm`
 - [ ] **STOP (you):** go-ahead on about 2.2–3 h of GPU
 - [ ] **(cluster)** Validation pass (one model), then both full elicitation runs

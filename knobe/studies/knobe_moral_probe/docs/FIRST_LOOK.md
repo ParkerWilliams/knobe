@@ -92,7 +92,7 @@ Commit `outputs/checks/ngo_verbatim/`, `outputs/first_look/sign_effects.csv`
 and the manifests, and add `ANALYSIS_LOG.md` lines for the run, the checks
 and the first look.
 
-## Go/no-go rule (proposed; the researcher confirms it before the data)
+## Go/no-go rule (confirmed by the researcher 2026-10-12, before any data)
 
 Fixed before the data, because with 24 model × question cells some will
 reach p < .05 by chance. A fake-engine run with random answers produced
