@@ -19,9 +19,13 @@ screening look, not the confirmatory analysis (DESIGN.md section 10).
 Seeding: per fit, int(sha256(f"{BASE_SEED}|{cell}|{qkey}|{term}")[:8], 16),
 so a fit's draws don't depend on which other fits run or their order.
 
+--results takes one or more with-examples results files (the cluster runs
+Gemma as its own job); each is loaded through load_frame, then concatenated.
+
 Run from the repo root:
     .venv/bin/python studies/knobe_moral_probe/analysis/first_look.py \\
-        --results studies/knobe_moral_probe/outputs/elicit/ngo_verbatim.jsonl \\
+        --results studies/knobe_moral_probe/outputs/elicit/ngo_verbatim_gemma.jsonl \\
+                  studies/knobe_moral_probe/outputs/elicit/ngo_verbatim_llama_mistral.jsonl \\
         --items studies/knobe_moral_probe/stimuli/ngo_verbatim.csv \\
         --out studies/knobe_moral_probe/outputs/first_look/sign_effects.csv
 """
@@ -87,11 +91,19 @@ def sign_effects(frame: pd.DataFrame) -> pd.DataFrame:
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    p.add_argument("--results", required=True, type=Path, help="with-examples results (kmp.elicit)")
+    p.add_argument("--results", required=True, type=Path, nargs="+", help="with-examples results (kmp.elicit)")
     p.add_argument("--items", required=True, type=Path)
     p.add_argument("--out", required=True, type=Path)
     a = p.parse_args(argv)
-    out = sign_effects(load_frame(a.results, load_items(a.items)))
+    items = load_items(a.items)
+    frames = [load_frame(r, items) for r in a.results]
+    seen = [set(f["model_key"]) for f in frames]
+    if len(seen) > 1 and sum(map(len, seen)) != len(set().union(*seen)):
+        raise ValueError("a model appears in more than one results file; pass each model's results once")
+    frame = pd.concat(frames, ignore_index=True)
+    if (frame.groupby("family")["model_family"].nunique() > 1).any():
+        raise ValueError("a short family name covers several registry families across the results files")
+    out = sign_effects(frame)
     a.out.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(a.out, index=False)
     with pd.option_context("display.width", 200, "display.max_columns", 20):
