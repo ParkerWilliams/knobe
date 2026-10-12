@@ -41,6 +41,9 @@ and decides on it; the agent never launches anything that costs money.
   config's `runtime_env.pip`), plus the repo installed with `.[stats]`.
   The cluster's HF identity already reaches the gated Llama and Gemma
   checkpoints.
+- **Python:** the commands below write `.venv/bin/python` (local layout).
+  In a cluster job, use the job environment's `python`, run from the same
+  folders.
 - **Gemma needs `VLLM_ATTENTION_BACKEND=TRITON_ATTN_VLLM_V1`.** Neither
   `kmp.elicit` nor `src/knobe` sets it, so the G1 pilot's split applies:
   one job for Gemma with that variable set (`--model-keys
