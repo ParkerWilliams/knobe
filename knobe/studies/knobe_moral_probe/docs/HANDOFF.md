@@ -1,8 +1,13 @@
 # knobe_moral_probe: handoff
 
-Last updated 2026-10-08. Branch `knobe_moral_probe`. Read this first (the
+Last updated 2026-10-12. Branch `knobe_moral_probe`. Read this first (the
 one-page status is `TASK_CHECKLIST.md`), then
 the amendments at the top of `DESIGN.md`.
+
+**2026-10-12: the plan is reordered.** Before any more authoring, Ngo's 80
+vignettes (word for word) run on all 6 models as a go/no-go:
+`docs/FIRST_LOOK.md` has the steps, the cost and the go/no-go rule.
+Authoring (Task 9 on) resumes only after a go.
 
 ## Where the study is
 
@@ -12,21 +17,30 @@ the amendments at the top of `DESIGN.md`.
 | Pipeline (`kmp/`, 13-task `IMPLEMENTATION_PLAN.md`) | **Done.** Every task spec- and quality-reviewed, final whole-branch review fixed. 311 tests pass. The plan text is historical; module docstrings are current |
 | Definitions and review checklist | **Approved by the researcher** 2026-10-01 (decisions A–U resolved) |
 | Stimuli authoring (`AUTHORING_PLAN.md`, Tasks 0–22) | **In progress.** Tasks 0–6 done and reviewed (tools, `ngo_verbatim.csv`, README). Task 7 sheet made; waiting on the researcher |
+| First look on Ngo's 80 (`FIRST_LOOK.md`) | **Next.** Script `analysis/first_look.py` done and tested; waiting on sheet 01, then the cluster |
 | Screening | Not started. Reviewer pinned: `claude-sonnet-4-6` |
 | Pilot | Not started |
 | Full run | Not started |
 
 ## Next step
 
-**Researcher:** review `stimuli/review/01_nv_all.md` (80 verbatim items),
-fill in `stimuli/review/01_nv_all_decisions.csv` (`approved` / `rejected` /
-`revise`, reviewer initials, date; a note is required for rejected and
-revise), then run from the study folder:
+Follow `docs/FIRST_LOOK.md`:
 
-    ../../.venv/bin/python -m tools.review apply --items stimuli/ngo_verbatim.csv --decisions stimuli/review/01_nv_all_decisions.csv
+1. **Researcher:** review `stimuli/review/01_nv_all.md`, fill in
+   `stimuli/review/01_nv_all_decisions.csv` (`approved` / `rejected` /
+   `revise`, reviewer initials, date; a note is required for rejected and
+   revise), and confirm the go/no-go rule in `FIRST_LOOK.md`. Then run from
+   the study folder:
 
-Then the agent resumes `AUTHORING_PLAN.md` at **Task 7 Step 4/5** (parser
-fixes for any `revise`, lint, commit the decisions), then Task 8–9.
+       ../../.venv/bin/python -m tools.review apply --items stimuli/ngo_verbatim.csv --decisions stimuli/review/01_nv_all_decisions.csv
+
+2. **Cluster:** the double-BOS check, then (after the researcher's
+   go-ahead on about 2.2–3 h of GPU) a validation pass and the elicitation.
+3. **Local:** `kmp.checks`, `analysis/first_look.py`, log, commit, and
+   apply the go/no-go rule.
+
+After a go, the agent resumes `AUTHORING_PLAN.md` at Task 7 Step 4/5 (lint,
+commit the decisions), then Task 8–9.
 
 The tools changed from the plan's code after review (2026-10-08); the
 module docstrings and tests are current:
@@ -42,8 +56,8 @@ module docstrings and tests are current:
   or aunt) need a log row; a log row licenses only its own span; B8 is
   skipped if the verbatim file differs from Ngo's source.
 
-To restart in a new session: "Continue the knobe_moral_probe authoring plan
-at Task 7, subagent-driven. Read docs/HANDOFF.md."
+To restart in a new session: "Continue the knobe_moral_probe first look.
+Read docs/HANDOFF.md and docs/FIRST_LOOK.md."
 
 ## Researcher gates ahead
 

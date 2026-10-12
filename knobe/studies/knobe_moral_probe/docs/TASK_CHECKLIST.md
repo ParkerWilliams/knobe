@@ -1,6 +1,6 @@
 # knobe_moral_probe: task checklist
 
-Last updated 2026-10-08. Task numbers are `AUTHORING_PLAN.md`'s. **(you)**
+Last updated 2026-10-12. Task numbers are `AUTHORING_PLAN.md`'s. **(you)**
 marks a step only the researcher can do; **STOP** is a gate where the agent
 waits for you. `HANDOFF.md` has the detail.
 
@@ -17,7 +17,18 @@ waits for you. `HANDOFF.md` has the detail.
 - [x] Task 5: review sheets and decisions (`tools/review.py`)
 - [x] Task 6: README
 
-## Stimuli authoring
+## First look on Ngo's 80 (`FIRST_LOOK.md`), before any more authoring
+
+- [x] `analysis/first_look.py` (sign-effect fits), tested on the fake engine
+- [ ] **(you)** Sheet 01: fill in `01_nv_all_decisions.csv`, run `tools.review apply`
+- [ ] **(you)** Confirm the go/no-go rule in `FIRST_LOOK.md`
+- [ ] **(cluster)** `tools/check_chat_bos.py`, then with `--vllm`
+- [ ] **STOP (you):** go-ahead on about 2.2–3 h of GPU
+- [ ] **(cluster)** Validation pass (one model), then both full elicitation runs
+- [ ] `kmp.checks` + `first_look.py`, log, commit
+- [ ] **STOP (you):** go / no-go
+
+## Stimuli authoring (after a go)
 
 - [ ] Task 7: review batch 01, the verbatim set (80 items)
   - [x] Sheet `stimuli/review/01_nv_all.md` made and committed
@@ -46,7 +57,7 @@ waits for you. `HANDOFF.md` has the detail.
 
 ## Before the pilot
 
-- [ ] **(you, on the cluster)** Run `tools/check_chat_bos.py`, then with `--vllm`; report both
+- [ ] Double-BOS check: done in the first look
 - [ ] Pilot cost estimate including the `--no-examples` run, for all 6 models. **STOP (you):** go-ahead
 - [ ] Pilot: about 40 items × 6 models, with and without examples; `kmp.checks --stage pilot --baseline <noex results>`
 - [ ] Revisit `COPY_EXCESS_MAX` (0.10 proposed) on the pilot results

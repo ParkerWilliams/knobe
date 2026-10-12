@@ -60,7 +60,9 @@ format) is imported, not copied.
 | `tools/lint_stimuli.py` | checklist checks beyond `design_problems` (A1 A3 A4 A9 A10 B2 B8 B9 C2 C3 C4 D2 D3, approvals) |
 | `tools/review.py` | `sheet`: review sheet + decisions template (drafting agent); `apply`: decisions → review_status (researcher only) |
 | `docs/AUTHORING_PLAN.md` | the stimuli authoring plan |
+| `docs/FIRST_LOOK.md` | go/no-go run on Ngo's 80 vignettes before the extensions are authored: steps, cost, decision rule |
 | `analysis/power_basis.py` | DESIGN.md §9 power table → `outputs/power_basis.csv` |
+| `analysis/first_look.py` | sign-effect fits for the first look → `outputs/first_look/sign_effects.csv` |
 | `stimuli/` | one items file per experiment (`nonmoral.csv`, `foundations.csv`, `ngo_verbatim.csv`); `nonmoral_log.csv` (every change from Ngo, every fresh action); `NOTES.md` (conventions, role nouns, scaffolds, batches, disclosure); `review/` (sheets and the researcher's decisions) |
 
 ## Commands
