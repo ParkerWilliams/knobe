@@ -30,6 +30,30 @@ is for new items), an Anthropic API key, any authoring.
 **Spending:** nothing in this plan costs money except cluster GPU time
 (step 3), which needs the researcher's go-ahead first.
 
+## Cluster notes (for whoever runs steps 2–3)
+
+- **Code:** `git@github.com:ParkerWilliams/knobe.git`, branch
+  `knobe_moral_probe`. Everything for this run is in
+  `studies/knobe_moral_probe/`; it imports `src/knobe/` for the engine.
+- **Environment:** the setup the repo README validated on the H200s:
+  `vllm==0.10.1`, `huggingface_hub>=0.24.0` (declare them in the job
+  config's `runtime_env.pip`), plus the repo installed with `.[stats]`.
+  The cluster's HF identity already reaches the gated Llama and Gemma
+  checkpoints.
+- **Gemma needs `VLLM_ATTENTION_BACKEND=TRITON_ATTN_VLLM_V1`.** Neither
+  `kmp.elicit` nor `src/knobe` sets it, so the G1 pilot's split applies:
+  one job for Gemma with that variable set (`--model-keys
+  gemma-2-9b-pretrained,gemma-2-9b-instruct`), one for Llama and Mistral
+  without it. Step 3b gives each job its own `--out` files.
+- **Throughput:** the G1 pilot measured 8.4–11.6 rows/s per H200, but with
+  11-candidate forced scoring, which `kmp.elicit` doesn't do. The 15–20
+  rows/s assumed below is unconfirmed, and step 3a is what settles it. At
+  8.4 rows/s the whole run is about 5.3 h.
+- **Resume:** re-running the same command on the same `--out` resumes.
+  Results need to survive a pod restart (local disk or S3, as in G1).
+- **Bring back:** every `.jsonl` and `.manifest.json` from
+  `outputs/elicit/`, plus the BOS-check output.
+
 ## Steps
 
 ### 1. (researcher) Approve the 80 items
@@ -58,7 +82,7 @@ Exit 1 means some model gets BOS twice. Stop and report it before step 3.
 
 Size: 80 items × 168 samples = 13,440 rows per model per condition; 6
 models × 2 conditions (with examples, `--no-examples`) = 161,280 rows. At
-the pilots' measured 15–20 rows/s that's about **2.2–3 h of GPU**. No API
+15–20 rows/s that's about **2.2–3 h of GPU**, or about 5.3 h at the G1 pilot's 8.4 rows/s. No API
 cost.
 
 **3a. Validation pass (about 12–15 min).** One model, with examples. This
@@ -69,28 +93,38 @@ checks throughput and the number rate before the long run:
 Report the rows/s and the share of numeric answers. Go on only if they're
 close to the estimate.
 
-**3b. Full first look**, from the study folder:
+**3b. Full first look.** Two jobs, split by family because of Gemma's
+attention backend (cluster notes above). Each job runs its models with
+examples and then with `--no-examples`, from the study folder:
 
-    ../../.venv/bin/python -m kmp.elicit --items stimuli/ngo_verbatim.csv --out outputs/elicit/ngo_verbatim.jsonl --engine vllm
-    ../../.venv/bin/python -m kmp.elicit --items stimuli/ngo_verbatim.csv --out outputs/elicit/ngo_verbatim_noex.jsonl --engine vllm --no-examples
+    # job 1, with VLLM_ATTENTION_BACKEND=TRITON_ATTN_VLLM_V1
+    ../../.venv/bin/python -m kmp.elicit --items stimuli/ngo_verbatim.csv --out outputs/elicit/ngo_verbatim_gemma.jsonl --engine vllm --model-keys gemma-2-9b-pretrained,gemma-2-9b-instruct
+    ../../.venv/bin/python -m kmp.elicit --items stimuli/ngo_verbatim.csv --out outputs/elicit/ngo_verbatim_gemma_noex.jsonl --engine vllm --model-keys gemma-2-9b-pretrained,gemma-2-9b-instruct --no-examples
 
-Re-running the same command resumes. Bring back both `.jsonl` files and
-both `.manifest.json` files. The `.jsonl` files are gitignored; the
-manifests are committed.
+    # job 2, default backend
+    ../../.venv/bin/python -m kmp.elicit --items stimuli/ngo_verbatim.csv --out outputs/elicit/ngo_verbatim_llama_mistral.jsonl --engine vllm --model-keys llama-3.1-8b-pretrained,llama-3.1-8b-instruct,mistral-7b-v0.1-pretrained,mistral-7b-v0.1-instruct
+    ../../.venv/bin/python -m kmp.elicit --items stimuli/ngo_verbatim.csv --out outputs/elicit/ngo_verbatim_llama_mistral_noex.jsonl --engine vllm --model-keys llama-3.1-8b-pretrained,llama-3.1-8b-instruct,mistral-7b-v0.1-pretrained,mistral-7b-v0.1-instruct --no-examples
+
+Re-running the same command resumes. Bring back all four `.jsonl` files
+and their `.manifest.json` files. The `.jsonl` files are gitignored; the
+manifests are committed. Don't concatenate the files: each one is checked
+against its own manifest.
 
 ### 4. (local) Gates and the sign-effect table
 
-From the study folder:
+`kmp.checks` once per job, from the study folder:
 
-    ../../.venv/bin/python -m kmp.checks --results outputs/elicit/ngo_verbatim.jsonl --baseline outputs/elicit/ngo_verbatim_noex.jsonl --items stimuli/ngo_verbatim.csv --out-dir outputs/checks/ngo_verbatim
+    ../../.venv/bin/python -m kmp.checks --results outputs/elicit/ngo_verbatim_gemma.jsonl --baseline outputs/elicit/ngo_verbatim_gemma_noex.jsonl --items stimuli/ngo_verbatim.csv --out-dir outputs/checks/ngo_verbatim_gemma
+    ../../.venv/bin/python -m kmp.checks --results outputs/elicit/ngo_verbatim_llama_mistral.jsonl --baseline outputs/elicit/ngo_verbatim_llama_mistral_noex.jsonl --items stimuli/ngo_verbatim.csv --out-dir outputs/checks/ngo_verbatim_llama_mistral
 
-From the repo root (about 1 min):
+Then the sign-effect table over both jobs, from the repo root (about 1 min):
 
-    .venv/bin/python studies/knobe_moral_probe/analysis/first_look.py --results studies/knobe_moral_probe/outputs/elicit/ngo_verbatim.jsonl --items studies/knobe_moral_probe/stimuli/ngo_verbatim.csv --out studies/knobe_moral_probe/outputs/first_look/sign_effects.csv
+    .venv/bin/python studies/knobe_moral_probe/analysis/first_look.py --results studies/knobe_moral_probe/outputs/elicit/ngo_verbatim_gemma.jsonl studies/knobe_moral_probe/outputs/elicit/ngo_verbatim_llama_mistral.jsonl --items studies/knobe_moral_probe/stimuli/ngo_verbatim.csv --out studies/knobe_moral_probe/outputs/first_look/sign_effects.csv
 
-Commit `outputs/checks/ngo_verbatim/`, `outputs/first_look/sign_effects.csv`
+Commit `outputs/checks/ngo_verbatim_*/`, `outputs/first_look/sign_effects.csv`
 and the manifests, and add `ANALYSIS_LOG.md` lines for the run, the checks
-and the first look.
+and the first look. (This split was run end to end on the fake engine on
+2026-10-12.)
 
 ## Go/no-go rule (confirmed by the researcher 2026-10-12, before any data)
 

@@ -30,7 +30,7 @@ Follow `docs/FIRST_LOOK.md`:
    pre-review). Items 17 and 72 are kept as written here and fixed in the
    adapted items (Task 10; see `TASK_CHECKLIST.md`).
 2. **Cluster:** the double-BOS check, then (after the researcher's
-   go-ahead on about 2.2–3 h of GPU) a validation pass and the elicitation.
+   go-ahead on about 2.2–5.3 h of GPU) a validation pass and the elicitation.
 3. **Local:** `kmp.checks`, `analysis/first_look.py`, log, commit, and
    apply the go/no-go rule.
 
