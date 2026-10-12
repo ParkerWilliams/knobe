@@ -13,8 +13,16 @@ copying, anchor reversal, throughput).
 
 **Caveat.** The verbatim items keep Ngo's names and pronouns, which change
 with the sign (Bill harms, Robyn helps), so agent is confounded with sign.
-That's acceptable for a go/no-go. The main analysis uses the role-noun
-adapted items (DESIGN amendment 2026-10-01).
+The confound is not systematic: by the scenario's pronouns, the agent is
+male in 21 bad and 19 good versions, so a gender bias can't make a sign
+effect on its own. The name differs within the pair in 33 of 40
+storylines, which adds noise and possible name cues (ethnicity, age) that
+don't favor either sign. (Counted 2026-10-12 from `stimuli/ngo_verbatim.csv`:
+he/his/him vs she/her per scenario; `agent` column bad vs good.) So a go
+here is fair evidence of an effect. It can't say how much the role-noun
+adaptation changes it; the verbatim-vs-adapted comparison does that later.
+The main analysis uses the role-noun adapted items (DESIGN amendment
+2026-10-01).
 
 **Not needed:** screening (Ngo's items are human-validated; the reviewer
 is for new items), an Anthropic API key, any authoring.
