@@ -51,8 +51,9 @@ and decides on it; the agent never launches anything that costs money.
   8.4 rows/s the whole run is about 5.3 h.
 - **Resume:** re-running the same command on the same `--out` resumes.
   Results need to survive a pod restart (local disk or S3, as in G1).
-- **Bring back:** every `.jsonl` and `.manifest.json` from
-  `outputs/elicit/`, plus the BOS-check output.
+- **Hand back through the repo:** step 3c. One compressed bundle in
+  `results_dist/` (the pilots' convention), the manifests, and the
+  BOS-check output, pushed to this branch.
 
 ## Steps
 
@@ -73,10 +74,11 @@ tell the agent: elicit then needs a copy of the file without that pair.
 
 From the repo root on the cluster:
 
-    .venv/bin/python studies/knobe_moral_probe/tools/check_chat_bos.py
-    .venv/bin/python studies/knobe_moral_probe/tools/check_chat_bos.py --vllm
+    .venv/bin/python studies/knobe_moral_probe/tools/check_chat_bos.py 2>&1 | tee studies/knobe_moral_probe/outputs/bos_check.txt
+    .venv/bin/python studies/knobe_moral_probe/tools/check_chat_bos.py --vllm 2>&1 | tee -a studies/knobe_moral_probe/outputs/bos_check.txt
 
-Exit 1 means some model gets BOS twice. Stop and report it before step 3.
+If either reports a doubled BOS (exit 1 without the `tee`), stop and push
+`bos_check.txt` before step 3.
 
 ### 3. (cluster) Elicitation
 
@@ -112,10 +114,23 @@ examples and then with `--no-examples`, from the study folder:
     ../../.venv/bin/python -m kmp.elicit --items stimuli/ngo_verbatim.csv --out outputs/elicit/ngo_verbatim_llama_mistral.jsonl --engine vllm --model-keys llama-3.1-8b-pretrained,llama-3.1-8b-instruct,mistral-7b-v0.1-pretrained,mistral-7b-v0.1-instruct
     ../../.venv/bin/python -m kmp.elicit --items stimuli/ngo_verbatim.csv --out outputs/elicit/ngo_verbatim_llama_mistral_noex.jsonl --engine vllm --model-keys llama-3.1-8b-pretrained,llama-3.1-8b-instruct,mistral-7b-v0.1-pretrained,mistral-7b-v0.1-instruct --no-examples
 
-Re-running the same command resumes. Bring back all four `.jsonl` files
-and their `.manifest.json` files. The `.jsonl` files are gitignored; the
-manifests are committed. Don't concatenate the files: each one is checked
-against its own manifest.
+Re-running the same command resumes. Don't concatenate the files: each
+one is checked against its own manifest.
+
+**3c. Hand back through the repo.** The `.jsonl` files are gitignored
+(repo CLAUDE.md §3), so they go in one compressed bundle in `results_dist/`,
+like the pilots' results (about 5 MB on the fake engine). The manifests and
+the BOS output are committed as they are. From the study folder:
+
+    tar -czf ../../results_dist/results_knobe_moral_probe_first_look.tar.gz outputs/elicit/ngo_verbatim_*.jsonl
+    git add ../../results_dist/results_knobe_moral_probe_first_look.tar.gz outputs/elicit/ngo_verbatim_*.manifest.json outputs/bos_check.txt
+    git commit -m "[knobe_moral_probe] first look: elicitation results (bundle), manifests, BOS check"
+    git push origin knobe_moral_probe
+
+The glob also picks up the `.starts.jsonl` sidecars, which the throughput
+check reads. On the other end, from the study folder:
+
+    tar -xzf ../../results_dist/results_knobe_moral_probe_first_look.tar.gz
 
 ### 4. (local) Gates and the sign-effect table
 
