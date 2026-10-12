@@ -9,6 +9,15 @@ already emit the BOS text, so if the second tokenization also adds BOS
 Gemma in particular degrades on that. This script measures it; it changes
 nothing.
 
+2026-10-12 (Parker): the engine now renders chat prompts through
+`knobe.elicit_vllm.render_chat_prompt` (commit "fix(elicit): chat-format
+prompts reached the model with two BOS tokens"), which drops the template's
+BOS text when the tokenizer adds its own. This script therefore renders
+through that same function, so its verdict is about what the engine sends
+rather than about the template in isolation; the `template-only` column
+still shows what the unfixed two-step recipe would have produced (2 for the
+affected models), for the record.
+
 Two modes, both read the instruct checkpoints from the knobe registry:
 
   tokenizer (default, CPU only; needs HF access to the gated repos):
@@ -28,7 +37,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from knobe.elicit_vllm import default_registry_path
+from knobe.elicit_vllm import default_registry_path, render_chat_prompt
 from knobe.registry import load_registry
 
 FAMILIES = ("llama-3.1-8b", "mistral-7b-v0.1", "gemma-2-9b")  # the study's six models
@@ -44,11 +53,17 @@ def count_leading_bos(ids: list[int], bos_id: int | None) -> int:
     return n
 
 
+def template_only_ids(tok) -> list[int]:
+    """The unfixed recipe: template text, then a string-prompt tokenization."""
+    text = tok.apply_chat_template(MESSAGES, tokenize=False, add_generation_prompt=True)
+    return tok(text)["input_ids"]
+
+
 def check_tokenizer(model_id: str, revision: str) -> tuple[list[int], int | None, object]:
     from transformers import AutoTokenizer
 
     tok = AutoTokenizer.from_pretrained(model_id, revision=revision)
-    text = tok.apply_chat_template(MESSAGES, tokenize=False, add_generation_prompt=True)
+    text = render_chat_prompt(tok, MESSAGES)  # what VllmEngine._prompt_text sends
     ids = tok(text)["input_ids"]  # add_special_tokens=True, as for a string prompt
     return ids, tok.bos_token_id, tok
 
@@ -58,7 +73,7 @@ def check_vllm(model_id: str, revision: str) -> tuple[list[int], int | None, obj
 
     llm = LLM(model=model_id, revision=revision, dtype="bfloat16")
     tok = llm.get_tokenizer()
-    text = tok.apply_chat_template(MESSAGES, tokenize=False, add_generation_prompt=True)
+    text = render_chat_prompt(tok, MESSAGES)  # what VllmEngine._prompt_text sends
     out = llm.generate([text], SamplingParams(temperature=0.0, max_tokens=1))
     return list(out[0].prompt_token_ids), tok.bos_token_id, tok
 
@@ -77,9 +92,11 @@ def main(argv: list[str] | None = None) -> int:
         family = registry[fam]
         ids, bos_id, tok = check(family.finetuned, family.revision)
         n = count_leading_bos(ids, bos_id)
+        n_template = count_leading_bos(template_only_ids(tok), bos_id)
         head = tok.convert_ids_to_tokens(ids[:4])
         verdict = "DOUBLE BOS" if n > 1 else ("ok" if n == 1 else "no BOS")
-        print(f"{fam:18s} {family.finetuned:40s} leading BOS={n}  first tokens={head}  -> {verdict}")
+        print(f"{fam:18s} {family.finetuned:40s} leading BOS={n} (template-only={n_template})  "
+              f"first tokens={head}  -> {verdict}")
         if n > 1:
             doubled.append(fam)
     mode = "vllm" if args.vllm else "tokenizer"
