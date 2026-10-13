@@ -1,0 +1,30 @@
+# Registry for the OpenRouter first look (tools/openrouter_first_look.py).
+# NOT the study's model set: DESIGN.md pins Llama-3.1-8B, Mistral-7B-v0.1 and
+# Gemma-2-9B (pretrained + instruct). On 2026-10-12 the cluster was
+# unavailable (submit access pending), OpenRouter served only one of those six,
+# and Parker chose cheap instruct models instead: Llama-3.1-8B-Instruct (the
+# study's own instruct checkpoint; Llama-3.2-1B was tried first but answered with
+# a number only 34% of the time in a smoke test), Gemma-3-4B-it, Mistral-Nemo. So this
+# is an indicative first look on substitute instruct-only models, not the
+# FIRST_LOOK.md go/no-go on the study models. Instruct-only: OpenRouter serves
+# no base checkpoints, so RQ3 (pretrained vs instruct) is out of scope here.
+#
+# Same schema as configs/models.yaml; the short family names (text before the
+# first "-") are llama / gemma / mistral, as kmp.frame expects. d_model and
+# n_layers are informational only (no analysis here reads them).
+families:
+  llama-3.1-8b:
+    finetuned: meta-llama/llama-3.1-8b-instruct
+    d_model: 4096
+    n_layers: 32
+    role: extension
+  gemma-3-4b:
+    finetuned: google/gemma-3-4b-it
+    d_model: 2560
+    n_layers: 34
+    role: extension
+  mistral-nemo:
+    finetuned: mistralai/mistral-nemo
+    d_model: 5120
+    n_layers: 40
+    role: extension
