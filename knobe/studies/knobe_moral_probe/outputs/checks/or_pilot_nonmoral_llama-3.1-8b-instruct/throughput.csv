@@ -1,0 +1,2 @@
+model_key,tuning_status,family,rows,seconds,rows_per_second,start_recorded
+llama-3.1-8b-instruct,finetuned,llama,40320,2545.6103739738464,15.83903036074532,True

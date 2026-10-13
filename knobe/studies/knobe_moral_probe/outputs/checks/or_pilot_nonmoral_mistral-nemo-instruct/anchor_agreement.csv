@@ -1,0 +1,4 @@
+model_key,tuning_status,family,experiment,qkey,n_items,r,mean_diff
+mistral-nemo-instruct,finetuned,mistral,nonmoral,blame,235,-0.5729043407805755,-1.8359421783889867
+mistral-nemo-instruct,finetuned,mistral,nonmoral,intentionality,235,-0.6728767969141358,-3.77472969111267
+mistral-nemo-instruct,finetuned,mistral,nonmoral,praise,238,-0.8293687069377792,6.306301261763447

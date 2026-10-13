@@ -1,0 +1,14 @@
+model_key,tuning_status,family,experiment,qkey,wording_key,number_rate,passes
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,blame,w1,0.1734375,False
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,blame,w2,0.33645833333333336,False
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,blame,w3r,0.20208333333333334,False
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,domain_moral,w1,0.3229166666666667,False
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,domain_procedural,w1,0.28229166666666666,False
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,domain_prudential,w1,0.27152777777777776,False
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,intentionality,w1,0.0921875,False
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,intentionality,w2,0.3416666666666667,False
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,intentionality,w3r,0.2864583333333333,False
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,praise,w1,0.28125,False
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,praise,w2,0.321875,False
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,praise,w3r,0.29010416666666666,False
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,significance,w1,0.1453125,False

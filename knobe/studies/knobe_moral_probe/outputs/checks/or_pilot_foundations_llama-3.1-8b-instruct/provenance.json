@@ -1,0 +1,88 @@
+{
+  "timestamp_utc": "2026-10-13T19:43:25+00:00",
+  "argv": [
+    "--results",
+    "outputs/elicit/or_pilot_foundations_llama-3.1-8b-instruct.jsonl",
+    "--items",
+    "stimuli/pilot/pilot_foundations.csv",
+    "--out-dir",
+    "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/checks/or_pilot_foundations_llama-3.1-8b-instruct",
+    "--stage",
+    "full"
+  ],
+  "cwd": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe",
+  "git_commit": "68f1ec20913603b6b92814d84ce56de0ecd8fddd",
+  "git_dirty": true,
+  "results": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_pilot_foundations_llama-3.1-8b-instruct.jsonl",
+  "results_sha256": "78c2525858dcbe1c28260ce0fc4b8defe1b00ff2d3fd86ed4f4852974c9ff335",
+  "items": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/stimuli/pilot/pilot_foundations.csv",
+  "items_sha256": "7dcdd9b1970fbbd5a9f2d08fdf5a5c9dff1206c5a8a7df1c7c94facfb51503ad",
+  "number_rate_min": 0.9,
+  "copy_excess_max": 0.1,
+  "example_answers": [
+    0,
+    5,
+    9
+  ],
+  "manifest_path": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_pilot_foundations_llama-3.1-8b-instruct.jsonl.manifest.json",
+  "manifest": {
+    "release": "knobe_moral_probe",
+    "runner_version": "knobe_moral_probe_elicit-0.1",
+    "max_tokens": 10,
+    "engine": "openrouter",
+    "model_keys": [
+      "llama-3.1-8b-instruct"
+    ],
+    "examples": true
+  },
+  "fake_engine": false,
+  "manifest_sha256": "d92b05d91e208aafd26d9665fabafef8014802943cd60707b7c43cce56d52793",
+  "baseline": null,
+  "baseline_sha256": null,
+  "baseline_manifest_path": null,
+  "baseline_manifest": null,
+  "baseline_manifest_sha256": null,
+  "baseline_n_dropped_unknown_items": null,
+  "baseline_dropped_unknown_item_ids": null,
+  "model_starts": {
+    "llama-3.1-8b-instruct": 1791918060.115765
+  },
+  "experiments": [
+    "foundations"
+  ],
+  "n_rows": 20448,
+  "n_rated_rows": 5595,
+  "n_dropped_unknown_items": 0,
+  "dropped_unknown_item_ids": [],
+  "stage": "full",
+  "gate": {
+    "blocking": [
+      "number_rate: llama-3.1-8b-instruct foundations blame w1 0.24 < 0.90",
+      "number_rate: llama-3.1-8b-instruct foundations blame w2 0.46 < 0.90",
+      "number_rate: llama-3.1-8b-instruct foundations blame w3r 0.28 < 0.90",
+      "number_rate: llama-3.1-8b-instruct foundations fnd_authority w1 0.18 < 0.90",
+      "number_rate: llama-3.1-8b-instruct foundations fnd_fairness w1 0.44 < 0.90",
+      "number_rate: llama-3.1-8b-instruct foundations fnd_harm w1 0.25 < 0.90",
+      "number_rate: llama-3.1-8b-instruct foundations fnd_loyalty w1 0.35 < 0.90",
+      "number_rate: llama-3.1-8b-instruct foundations fnd_purity w1 0.41 < 0.90",
+      "number_rate: llama-3.1-8b-instruct foundations intentionality w1 0.10 < 0.90",
+      "number_rate: llama-3.1-8b-instruct foundations intentionality w2 0.37 < 0.90",
+      "number_rate: llama-3.1-8b-instruct foundations intentionality w3r 0.30 < 0.90",
+      "number_rate: llama-3.1-8b-instruct foundations praise w1 0.35 < 0.90",
+      "number_rate: llama-3.1-8b-instruct foundations praise w2 0.41 < 0.90",
+      "number_rate: llama-3.1-8b-instruct foundations praise w3r 0.34 < 0.90",
+      "number_rate: llama-3.1-8b-instruct foundations significance w1 0.13 < 0.90"
+    ],
+    "findings": [
+      "example_copying: llama-3.1-8b-instruct foundations blame no_data (no no-examples baseline rows)",
+      "example_copying: llama-3.1-8b-instruct foundations fnd_authority no_data (no no-examples baseline rows)",
+      "example_copying: llama-3.1-8b-instruct foundations fnd_fairness no_data (no no-examples baseline rows)",
+      "example_copying: llama-3.1-8b-instruct foundations fnd_harm no_data (no no-examples baseline rows)",
+      "example_copying: llama-3.1-8b-instruct foundations fnd_loyalty no_data (no no-examples baseline rows)",
+      "example_copying: llama-3.1-8b-instruct foundations fnd_purity no_data (no no-examples baseline rows)",
+      "example_copying: llama-3.1-8b-instruct foundations intentionality no_data (no no-examples baseline rows)",
+      "example_copying: llama-3.1-8b-instruct foundations praise no_data (no no-examples baseline rows)",
+      "example_copying: llama-3.1-8b-instruct foundations significance no_data (no no-examples baseline rows)"
+    ]
+  }
+}

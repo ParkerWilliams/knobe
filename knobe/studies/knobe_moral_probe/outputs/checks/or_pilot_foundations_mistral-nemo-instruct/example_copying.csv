@@ -1,0 +1,10 @@
+model_key,tuning_status,family,experiment,qkey,n_with,n_without,n_paired,share_with,share_without,excess,status
+mistral-nemo-instruct,finetuned,mistral,foundations,blame,1586,0,0,,,,no_data
+mistral-nemo-instruct,finetuned,mistral,foundations,fnd_authority,419,0,0,,,,no_data
+mistral-nemo-instruct,finetuned,mistral,foundations,fnd_fairness,340,0,0,,,,no_data
+mistral-nemo-instruct,finetuned,mistral,foundations,fnd_harm,1590,0,0,,,,no_data
+mistral-nemo-instruct,finetuned,mistral,foundations,fnd_loyalty,380,0,0,,,,no_data
+mistral-nemo-instruct,finetuned,mistral,foundations,fnd_purity,224,0,0,,,,no_data
+mistral-nemo-instruct,finetuned,mistral,foundations,intentionality,1916,0,0,,,,no_data
+mistral-nemo-instruct,finetuned,mistral,foundations,praise,2095,0,0,,,,no_data
+mistral-nemo-instruct,finetuned,mistral,foundations,significance,2047,0,0,,,,no_data

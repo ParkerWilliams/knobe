@@ -1,0 +1,10 @@
+model_key,tuning_status,family,experiment,qkey,n_items,r,mean_diff
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,blame,80,-0.9243377301203513,-2.9234375
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,intentionality,80,-0.8246125769967159,-1.0625
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,praise,80,-0.8692499227769203,6.4140625
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,blame,52,-0.6333475199124855,-2.36656746031746
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,intentionality,63,-0.5235664373670539,0.5099962207105065
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,praise,65,-0.4384106678929238,8.065714285714284
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,blame,77,-0.7038785568514033,-3.2848292760630424
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,intentionality,80,-0.6015134622601248,-3.4862010212010213
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,praise,80,-0.8301963894797157,8.009244470806971

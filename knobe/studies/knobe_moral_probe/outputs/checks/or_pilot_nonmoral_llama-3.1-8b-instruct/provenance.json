@@ -1,0 +1,84 @@
+{
+  "timestamp_utc": "2026-10-13T19:42:50+00:00",
+  "argv": [
+    "--results",
+    "outputs/elicit/or_pilot_nonmoral_llama-3.1-8b-instruct.jsonl",
+    "--items",
+    "stimuli/pilot/pilot_nonmoral.csv",
+    "--out-dir",
+    "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/checks/or_pilot_nonmoral_llama-3.1-8b-instruct",
+    "--stage",
+    "full"
+  ],
+  "cwd": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe",
+  "git_commit": "68f1ec20913603b6b92814d84ce56de0ecd8fddd",
+  "git_dirty": true,
+  "results": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_pilot_nonmoral_llama-3.1-8b-instruct.jsonl",
+  "results_sha256": "61c26b6ac9fa47e8ae0ba894711dddcff47b7422f4118310a2c6983e36e77771",
+  "items": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/stimuli/pilot/pilot_nonmoral.csv",
+  "items_sha256": "043b946a9c665c00843572a54a4e28f137bc23043a29a4252914915a9520bbf7",
+  "number_rate_min": 0.9,
+  "copy_excess_max": 0.1,
+  "example_answers": [
+    0,
+    5,
+    9
+  ],
+  "manifest_path": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_pilot_nonmoral_llama-3.1-8b-instruct.jsonl.manifest.json",
+  "manifest": {
+    "release": "knobe_moral_probe",
+    "runner_version": "knobe_moral_probe_elicit-0.1",
+    "max_tokens": 10,
+    "engine": "openrouter",
+    "model_keys": [
+      "llama-3.1-8b-instruct"
+    ],
+    "examples": true
+  },
+  "fake_engine": false,
+  "manifest_sha256": "97c29818aaaaddc2ecb8030d6986394a124342b72cad061b1124f108478cc47f",
+  "baseline": null,
+  "baseline_sha256": null,
+  "baseline_manifest_path": null,
+  "baseline_manifest": null,
+  "baseline_manifest_sha256": null,
+  "baseline_n_dropped_unknown_items": null,
+  "baseline_dropped_unknown_item_ids": null,
+  "model_starts": {
+    "llama-3.1-8b-instruct": 1791915514.218669
+  },
+  "experiments": [
+    "nonmoral"
+  ],
+  "n_rows": 40320,
+  "n_rated_rows": 10352,
+  "n_dropped_unknown_items": 0,
+  "dropped_unknown_item_ids": [],
+  "stage": "full",
+  "gate": {
+    "blocking": [
+      "number_rate: llama-3.1-8b-instruct nonmoral blame w1 0.17 < 0.90",
+      "number_rate: llama-3.1-8b-instruct nonmoral blame w2 0.34 < 0.90",
+      "number_rate: llama-3.1-8b-instruct nonmoral blame w3r 0.20 < 0.90",
+      "number_rate: llama-3.1-8b-instruct nonmoral domain_moral w1 0.32 < 0.90",
+      "number_rate: llama-3.1-8b-instruct nonmoral domain_procedural w1 0.28 < 0.90",
+      "number_rate: llama-3.1-8b-instruct nonmoral domain_prudential w1 0.27 < 0.90",
+      "number_rate: llama-3.1-8b-instruct nonmoral intentionality w1 0.09 < 0.90",
+      "number_rate: llama-3.1-8b-instruct nonmoral intentionality w2 0.34 < 0.90",
+      "number_rate: llama-3.1-8b-instruct nonmoral intentionality w3r 0.29 < 0.90",
+      "number_rate: llama-3.1-8b-instruct nonmoral praise w1 0.28 < 0.90",
+      "number_rate: llama-3.1-8b-instruct nonmoral praise w2 0.32 < 0.90",
+      "number_rate: llama-3.1-8b-instruct nonmoral praise w3r 0.29 < 0.90",
+      "number_rate: llama-3.1-8b-instruct nonmoral significance w1 0.15 < 0.90"
+    ],
+    "findings": [
+      "example_copying: llama-3.1-8b-instruct nonmoral blame no_data (no no-examples baseline rows)",
+      "example_copying: llama-3.1-8b-instruct nonmoral domain_moral no_data (no no-examples baseline rows)",
+      "example_copying: llama-3.1-8b-instruct nonmoral domain_procedural no_data (no no-examples baseline rows)",
+      "example_copying: llama-3.1-8b-instruct nonmoral domain_prudential no_data (no no-examples baseline rows)",
+      "example_copying: llama-3.1-8b-instruct nonmoral intentionality no_data (no no-examples baseline rows)",
+      "example_copying: llama-3.1-8b-instruct nonmoral praise no_data (no no-examples baseline rows)",
+      "example_copying: llama-3.1-8b-instruct nonmoral significance no_data (no no-examples baseline rows)"
+    ]
+  }
+}

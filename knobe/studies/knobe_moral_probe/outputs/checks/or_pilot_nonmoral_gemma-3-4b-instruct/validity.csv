@@ -1,0 +1,4 @@
+model_key,tuning_status,family,experiment,check,value,status
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,blame_bad_minus_good,0.9611111111111112,pass
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,praise_good_minus_bad,0.584027777777778,pass
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,significance_moral_minus_procedural,2.9052083333333334,pass

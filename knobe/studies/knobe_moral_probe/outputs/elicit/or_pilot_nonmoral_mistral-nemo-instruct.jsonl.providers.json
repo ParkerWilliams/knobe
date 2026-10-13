@@ -1,0 +1,11 @@
+{
+  "providers": {
+    "Io Net": 40320
+  },
+  "errors": {
+    "429": 5971,
+    "TimeoutError": 20,
+    "URLError": 17,
+    "502": 2
+  }
+}

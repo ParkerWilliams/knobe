@@ -1,0 +1,4 @@
+model_key,tuning_status,family,experiment,qkey,n_items,r,mean_diff
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,blame,174,-0.6238317114599424,-0.5981276226965883
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,intentionality,203,-0.5126251220691468,-1.231228008444757
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,praise,208,-0.6039362190958546,6.109494525239717

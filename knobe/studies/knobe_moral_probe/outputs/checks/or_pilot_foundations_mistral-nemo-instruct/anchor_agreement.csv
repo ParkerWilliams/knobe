@@ -1,0 +1,4 @@
+model_key,tuning_status,family,experiment,qkey,n_items,r,mean_diff
+mistral-nemo-instruct,finetuned,mistral,foundations,blame,143,-0.6637277102985273,-4.024844658061441
+mistral-nemo-instruct,finetuned,mistral,foundations,intentionality,145,-0.6126585208038314,-4.860220191685709
+mistral-nemo-instruct,finetuned,mistral,foundations,praise,150,-0.825259260713892,6.082315434565435

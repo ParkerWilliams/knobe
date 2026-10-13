@@ -1,0 +1,11 @@
+{
+  "providers": {
+    "DeepInfra": 26880,
+    "Io Net": 13440
+  },
+  "errors": {
+    "429": 4221,
+    "URLError": 12,
+    "TimeoutError": 95
+  }
+}

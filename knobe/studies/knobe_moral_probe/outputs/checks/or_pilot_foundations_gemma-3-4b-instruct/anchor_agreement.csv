@@ -1,0 +1,4 @@
+model_key,tuning_status,family,experiment,qkey,n_items,r,mean_diff
+gemma-3-4b-instruct,finetuned,gemma,foundations,blame,152,-0.9454859763190078,-2.983963815789474
+gemma-3-4b-instruct,finetuned,gemma,foundations,intentionality,152,-0.8068155713621983,-2.0583881578947367
+gemma-3-4b-instruct,finetuned,gemma,foundations,praise,152,-0.8681961989367928,5.328947368421052

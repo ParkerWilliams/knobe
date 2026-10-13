@@ -1,0 +1,2 @@
+model_key,tuning_status,family,rows,seconds,rows_per_second,start_recorded
+gemma-3-4b-instruct,finetuned,gemma,40320,2195.562089920044,18.36431781415407,True

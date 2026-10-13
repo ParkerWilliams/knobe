@@ -1,0 +1,106 @@
+{
+  "timestamp_utc": "2026-10-13T15:30:01+00:00",
+  "argv": [
+    "--results",
+    "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_ngo_verbatim.jsonl",
+    "--items",
+    "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/stimuli/ngo_verbatim.csv",
+    "--out-dir",
+    "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/checks/or_ngo_verbatim",
+    "--stage",
+    "full",
+    "--baseline",
+    "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_ngo_verbatim_noex.jsonl"
+  ],
+  "cwd": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe",
+  "git_commit": "68f1ec20913603b6b92814d84ce56de0ecd8fddd",
+  "git_dirty": true,
+  "results": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_ngo_verbatim.jsonl",
+  "results_sha256": "ee2261f7b72e7771ce8dbaa571820fbe111b55fce0e348aacd67906d1750a6fc",
+  "items": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/stimuli/ngo_verbatim.csv",
+  "items_sha256": "dca5a29bf606e25b98c2368d0b8a25c353e02d9271dff1468804921bda1cb504",
+  "number_rate_min": 0.9,
+  "copy_excess_max": 0.1,
+  "example_answers": [
+    0,
+    5,
+    9
+  ],
+  "manifest_path": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_ngo_verbatim.jsonl.manifest.json",
+  "manifest": {
+    "release": "knobe_moral_probe",
+    "runner_version": "knobe_moral_probe_elicit-0.1",
+    "max_tokens": 10,
+    "engine": "openrouter",
+    "model_keys": [
+      "gemma-3-4b-instruct",
+      "llama-3.1-8b-instruct",
+      "mistral-nemo-instruct"
+    ],
+    "examples": true
+  },
+  "fake_engine": false,
+  "manifest_sha256": "e26236f9e40129ddb25bcda2e76d8cfdb16665694a891da6b0562f395c464207",
+  "baseline": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_ngo_verbatim_noex.jsonl",
+  "baseline_sha256": "f2759502d29bc2d2ac2037ae718856e0eb0f87936c4315b4be5a9226d392cc23",
+  "baseline_manifest_path": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_ngo_verbatim_noex.jsonl.manifest.json",
+  "baseline_manifest": {
+    "release": "knobe_moral_probe",
+    "runner_version": "knobe_moral_probe_elicit-0.1",
+    "max_tokens": 10,
+    "engine": "openrouter",
+    "model_keys": [
+      "gemma-3-4b-instruct",
+      "llama-3.1-8b-instruct",
+      "mistral-nemo-instruct"
+    ],
+    "examples": false
+  },
+  "baseline_manifest_sha256": "9f7b953d66b97d258717d163978a2e1237e5a1bbaa0040eaaa91c7e2ccdf575b",
+  "baseline_n_dropped_unknown_items": 0,
+  "baseline_dropped_unknown_item_ids": [],
+  "model_starts": {
+    "gemma-3-4b-instruct": 1791868268.786782,
+    "llama-3.1-8b-instruct": 1791868795.273674,
+    "mistral-nemo-instruct": 1791869366.479826
+  },
+  "experiments": [
+    "ngo_verbatim"
+  ],
+  "n_rows": 40320,
+  "n_rated_rows": 24519,
+  "n_dropped_unknown_items": 0,
+  "dropped_unknown_item_ids": [],
+  "stage": "full",
+  "gate": {
+    "blocking": [
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim blame w1 0.17 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim blame w2 0.38 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim blame w3r 0.16 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim domain_moral w1 0.33 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim domain_procedural w1 0.25 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim domain_prudential w1 0.31 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim intentionality w1 0.09 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim intentionality w2 0.29 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim intentionality w3r 0.29 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim praise w1 0.22 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim praise w2 0.37 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim praise w3r 0.28 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim significance w1 0.11 < 0.90",
+      "number_rate: mistral-nemo-instruct ngo_verbatim blame w1 0.45 < 0.90",
+      "number_rate: mistral-nemo-instruct ngo_verbatim blame w2 0.45 < 0.90",
+      "number_rate: mistral-nemo-instruct ngo_verbatim blame w3r 0.34 < 0.90",
+      "number_rate: mistral-nemo-instruct ngo_verbatim domain_moral w1 0.61 < 0.90",
+      "number_rate: mistral-nemo-instruct ngo_verbatim domain_procedural w1 0.71 < 0.90",
+      "number_rate: mistral-nemo-instruct ngo_verbatim domain_prudential w1 0.66 < 0.90",
+      "number_rate: mistral-nemo-instruct ngo_verbatim intentionality w1 0.57 < 0.90",
+      "number_rate: mistral-nemo-instruct ngo_verbatim intentionality w2 0.41 < 0.90",
+      "number_rate: mistral-nemo-instruct ngo_verbatim intentionality w3r 0.47 < 0.90",
+      "number_rate: mistral-nemo-instruct ngo_verbatim praise w1 0.61 < 0.90",
+      "number_rate: mistral-nemo-instruct ngo_verbatim praise w2 0.70 < 0.90",
+      "number_rate: mistral-nemo-instruct ngo_verbatim praise w3r 0.62 < 0.90",
+      "number_rate: mistral-nemo-instruct ngo_verbatim significance w1 0.52 < 0.90"
+    ],
+    "findings": []
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "providers": {
+    "DeepInfra": 40320
+  },
+  "errors": {
+    "429": 147,
+    "TimeoutError": 26,
+    "URLError": 16
+  }
+}

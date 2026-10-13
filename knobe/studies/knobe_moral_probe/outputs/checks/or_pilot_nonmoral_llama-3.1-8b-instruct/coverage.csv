@@ -1,0 +1,14 @@
+model_key,experiment,qkey,wording_key,expected_model,n_rows
+llama-3.1-8b-instruct,nonmoral,blame,w1,True,1920
+llama-3.1-8b-instruct,nonmoral,blame,w2,True,1920
+llama-3.1-8b-instruct,nonmoral,blame,w3r,True,1920
+llama-3.1-8b-instruct,nonmoral,domain_moral,w1,True,5760
+llama-3.1-8b-instruct,nonmoral,domain_procedural,w1,True,5760
+llama-3.1-8b-instruct,nonmoral,domain_prudential,w1,True,5760
+llama-3.1-8b-instruct,nonmoral,intentionality,w1,True,1920
+llama-3.1-8b-instruct,nonmoral,intentionality,w2,True,1920
+llama-3.1-8b-instruct,nonmoral,intentionality,w3r,True,1920
+llama-3.1-8b-instruct,nonmoral,praise,w1,True,1920
+llama-3.1-8b-instruct,nonmoral,praise,w2,True,1920
+llama-3.1-8b-instruct,nonmoral,praise,w3r,True,1920
+llama-3.1-8b-instruct,nonmoral,significance,w1,True,5760

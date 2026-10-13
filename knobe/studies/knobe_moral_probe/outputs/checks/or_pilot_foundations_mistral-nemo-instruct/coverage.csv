@@ -1,0 +1,16 @@
+model_key,experiment,qkey,wording_key,expected_model,n_rows
+mistral-nemo-instruct,foundations,blame,w1,True,1216
+mistral-nemo-instruct,foundations,blame,w2,True,1216
+mistral-nemo-instruct,foundations,blame,w3r,True,1216
+mistral-nemo-instruct,foundations,fnd_authority,w1,True,624
+mistral-nemo-instruct,foundations,fnd_fairness,w1,True,624
+mistral-nemo-instruct,foundations,fnd_harm,w1,True,3648
+mistral-nemo-instruct,foundations,fnd_loyalty,w1,True,624
+mistral-nemo-instruct,foundations,fnd_purity,w1,True,336
+mistral-nemo-instruct,foundations,intentionality,w1,True,1216
+mistral-nemo-instruct,foundations,intentionality,w2,True,1216
+mistral-nemo-instruct,foundations,intentionality,w3r,True,1216
+mistral-nemo-instruct,foundations,praise,w1,True,1216
+mistral-nemo-instruct,foundations,praise,w2,True,1216
+mistral-nemo-instruct,foundations,praise,w3r,True,1216
+mistral-nemo-instruct,foundations,significance,w1,True,3648

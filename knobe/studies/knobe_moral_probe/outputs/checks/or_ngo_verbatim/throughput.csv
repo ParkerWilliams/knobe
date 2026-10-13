@@ -1,0 +1,4 @@
+model_key,tuning_status,family,rows,seconds,rows_per_second,start_recorded
+gemma-3-4b-instruct,finetuned,gemma,13440,526.4747791290283,25.528288405827183,True
+llama-3.1-8b-instruct,finetuned,llama,13440,36583.75128078461,0.36737621292158956,True
+mistral-nemo-instruct,finetuned,mistral,13440,36010.700289964676,0.3732224003359748,True

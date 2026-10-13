@@ -1,0 +1,4 @@
+model_key,tuning_status,family,experiment,check,value,status
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,blame_bad_minus_good,1.9938102147796641,pass
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,praise_good_minus_bad,1.6535359920315673,pass
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,significance_moral_minus_procedural,1.207868027903356,pass

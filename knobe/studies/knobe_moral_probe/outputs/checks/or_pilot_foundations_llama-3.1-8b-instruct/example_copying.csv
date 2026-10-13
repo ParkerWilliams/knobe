@@ -1,0 +1,10 @@
+model_key,tuning_status,family,experiment,qkey,n_with,n_without,n_paired,share_with,share_without,excess,status
+llama-3.1-8b-instruct,finetuned,llama,foundations,blame,1196,0,0,,,,no_data
+llama-3.1-8b-instruct,finetuned,llama,foundations,fnd_authority,115,0,0,,,,no_data
+llama-3.1-8b-instruct,finetuned,llama,foundations,fnd_fairness,273,0,0,,,,no_data
+llama-3.1-8b-instruct,finetuned,llama,foundations,fnd_harm,911,0,0,,,,no_data
+llama-3.1-8b-instruct,finetuned,llama,foundations,fnd_loyalty,221,0,0,,,,no_data
+llama-3.1-8b-instruct,finetuned,llama,foundations,fnd_purity,138,0,0,,,,no_data
+llama-3.1-8b-instruct,finetuned,llama,foundations,intentionality,933,0,0,,,,no_data
+llama-3.1-8b-instruct,finetuned,llama,foundations,praise,1336,0,0,,,,no_data
+llama-3.1-8b-instruct,finetuned,llama,foundations,significance,472,0,0,,,,no_data

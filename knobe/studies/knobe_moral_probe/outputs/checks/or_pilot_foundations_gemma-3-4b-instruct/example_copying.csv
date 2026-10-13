@@ -1,0 +1,10 @@
+model_key,tuning_status,family,experiment,qkey,n_with,n_without,n_paired,share_with,share_without,excess,status
+gemma-3-4b-instruct,finetuned,gemma,foundations,blame,3648,0,0,,,,no_data
+gemma-3-4b-instruct,finetuned,gemma,foundations,fnd_authority,624,0,0,,,,no_data
+gemma-3-4b-instruct,finetuned,gemma,foundations,fnd_fairness,624,0,0,,,,no_data
+gemma-3-4b-instruct,finetuned,gemma,foundations,fnd_harm,3648,0,0,,,,no_data
+gemma-3-4b-instruct,finetuned,gemma,foundations,fnd_loyalty,624,0,0,,,,no_data
+gemma-3-4b-instruct,finetuned,gemma,foundations,fnd_purity,336,0,0,,,,no_data
+gemma-3-4b-instruct,finetuned,gemma,foundations,intentionality,3648,0,0,,,,no_data
+gemma-3-4b-instruct,finetuned,gemma,foundations,praise,3648,0,0,,,,no_data
+gemma-3-4b-instruct,finetuned,gemma,foundations,significance,3648,0,0,,,,no_data

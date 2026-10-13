@@ -1,0 +1,4 @@
+model_key,tuning_status,family,experiment,check,value,status
+mistral-nemo-instruct,finetuned,mistral,nonmoral,blame_bad_minus_good,2.169552989154318,pass
+mistral-nemo-instruct,finetuned,mistral,nonmoral,praise_good_minus_bad,1.4458574319550719,pass
+mistral-nemo-instruct,finetuned,mistral,nonmoral,significance_moral_minus_procedural,0.723125884016973,pass
