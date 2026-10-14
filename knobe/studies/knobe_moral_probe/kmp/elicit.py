@@ -3,7 +3,7 @@
 Reuses knobe's engine (vLLM on the cluster, FakeEngine for tests), model
 registry, seed derivation (sha256 of RELEASE, prompt_id, model_key,
 sample_idx) and ResultRecord. The readout is the written number only
-(parse_rating); logprobs are not requested, which also skips vLLM's 11
+(kmp.answer.extract_rating); logprobs are not requested, which also skips vLLM's 11
 forced-scoring passes per prompt.
 
 main() appends to --out and resumes by job_id. A sidecar run manifest
@@ -52,11 +52,11 @@ from knobe.elicit_vllm import (
     resolve_model_id,
 )
 from knobe.jobs import derive_temperature_and_seed
-from knobe.parsing import parse_rating
 from knobe.registry import load_registry, model_key_for
 from knobe.schemas import ResultRecord, append_jsonl
 
 from kmp import prompts, protocol
+from kmp.answer import extract_rating
 from kmp.items import design_problems, load_items
 from kmp.prompts import PromptSpec
 
@@ -90,7 +90,18 @@ def build_jobs(specs: list[PromptSpec], model_keys: list[str]) -> list[Job]:
     return jobs
 
 
-def to_request(job: Job, max_tokens: int) -> EngineRequest:
+def max_tokens_by_format(override: int | None = None) -> dict[str, int]:
+    """The answer budget per prompt format: protocol.MAX_TOKENS (a per-format
+    mapping, or one int for every format), or --max-tokens for every format."""
+    if override is not None:
+        return {"raw": override, "chat": override}
+    mt = protocol.MAX_TOKENS
+    return {"raw": mt, "chat": mt} if isinstance(mt, int) else dict(mt)
+
+
+def to_request(job: Job, max_tokens: int | dict[str, int]) -> EngineRequest:
+    if not isinstance(max_tokens, int):
+        max_tokens = max_tokens[job.fmt]
     temperature, seed = derive_temperature_and_seed(protocol.RELEASE, job.prompt_id, job.model_key, job.sample_idx)
     if job.fmt == "raw":
         wrapper = {"text": job.text}
@@ -105,7 +116,8 @@ def to_request(job: Job, max_tokens: int) -> EngineRequest:
 def to_result(job: Job, request: EngineRequest, response: EngineResponse, model_revision: str) -> ResultRecord:
     if response.job_id != job.job_id:
         raise ValueError(f"response job_id {response.job_id!r} does not match job_id {job.job_id!r}")
-    value, ok, raw = parse_rating(response.raw_response)
+    value, ok, _rule = extract_rating(response.raw_response)   # kmp.answer: the number written, nothing else
+    raw = response.raw_response
     return ResultRecord(
         job_id=job.job_id, prompt_id=job.prompt_id, model_key=job.model_key, sample_idx=job.sample_idx,
         temperature=request.temperature, seed=request.seed, raw_response=raw,
@@ -136,7 +148,7 @@ def manifest_path(out: Path) -> Path:
     return out.with_name(out.name + ".manifest.json")
 
 
-def build_manifest(jobs: list[Job], engine: str, model_keys: list[str], max_tokens: int,
+def build_manifest(jobs: list[Job], engine: str, model_keys: list[str], max_tokens: int | dict[str, int],
                    examples: bool = True) -> dict:
     return {
         "release": protocol.RELEASE,
@@ -247,11 +259,13 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--model-keys", help=f"comma-separated subset of {', '.join(MODEL_KEYS)}")
     p.add_argument("--registry", type=Path, help="models.yaml (default: the repo's configs/models.yaml)")
     p.add_argument("--batch-size", type=int, default=64)
-    p.add_argument("--max-tokens", type=int, default=protocol.MAX_TOKENS)
+    p.add_argument("--max-tokens", type=int, default=None,
+                   help="answer budget for every format (default: protocol.MAX_TOKENS, per format)")
     p.add_argument("--no-examples", action="store_true",
                    help="omit the worked examples (DESIGN.md section 8 example check). "
                         "Job IDs match a normal run, so use a separate --out file.")
     args = p.parse_args(argv)
+    args.max_tokens = max_tokens_by_format(args.max_tokens)
 
     model_keys = (sorted(dict.fromkeys(k.strip() for k in args.model_keys.split(",")))
                   if args.model_keys else list(MODEL_KEYS))

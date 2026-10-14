@@ -15,8 +15,13 @@ from types import MappingProxyType
 from knobe import constants
 
 RELEASE = "knobe_moral_probe"                      # seed namespace (knobe.jobs)
-RUNNER_VERSION = "knobe_moral_probe_elicit-0.1"
-MAX_TOKENS = 10                                    # revisited in the pilot (DESIGN.md section 8)
+RUNNER_VERSION = "knobe_moral_probe_elicit-0.2"   # 0.2: per-format MAX_TOKENS + kmp.answer readout
+# Answer budget per prompt format (DESIGN.md amendment 2026-10-13, "answer format"):
+# chat (instruct) models often explain before the number, so 10 tokens cut most
+# answers off. 256 from the 2026-10-13 calibration (outputs/first_look/or_calibration_max_tokens.csv):
+# the smallest budget at which cut-off replies fall below 2% for every instruct model.
+# raw (pretrained) stays at 10 until the cluster pilot measures it.
+MAX_TOKENS: Mapping[str, int] = MappingProxyType({"raw": 10, "chat": 256})
 REVIEW_MAX_TOKENS = 8
 # Screening reviewer (a Claude model ID, never a subject; DESIGN.md section 4), pinned
 # by the researcher (DESIGN.md amendment 2026-10-01, reviewer pin). The reviewer client

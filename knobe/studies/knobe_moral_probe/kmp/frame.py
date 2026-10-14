@@ -70,6 +70,7 @@ from knobe.registry import load_registry
 from knobe.schemas import ResultRecord, read_jsonl
 
 from kmp import protocol
+from kmp.answer import extract_rating
 from kmp.items import Item
 from kmp.prompts import parse_prompt_id
 
@@ -78,8 +79,15 @@ SIGN_C = {"bad": 0.5, "good": -0.5}
 TUNING_C = {"finetuned": 0.5, "pretrained": -0.5}
 
 
-def load_frame(results_path: str | Path, items: list[Item], registry: dict | None = None) -> pd.DataFrame:
-    """registry: a loaded model registry (default: the repo's configs/models.yaml)."""
+REPARSE = False   # module default for load_frame(reparse=None); analysis entry points may set it
+
+
+def load_frame(results_path: str | Path, items: list[Item], registry: dict | None = None,
+               reparse: bool | None = None) -> pd.DataFrame:
+    """registry: a loaded model registry (default: the repo's configs/models.yaml).
+    reparse: re-read every raw_response with kmp.answer.extract_rating, replacing the
+    stored parsed_rating/parse_ok -- for rows written before runner 0.2, whose
+    first-integer parser scored refusals and scale restatements (default: REPARSE)."""
     records = list(read_jsonl(results_path, ResultRecord))
     if not records:
         raise ValueError(f"{results_path}: no result records")
@@ -89,6 +97,10 @@ def load_frame(results_path: str | Path, items: list[Item], registry: dict | Non
         raise ValueError(f"{results_path}: {len(dups)} duplicate job_id(s), e.g. {dups[:5]}")
 
     df = pd.DataFrame([r.model_dump() for r in records]).rename(columns={"parsed_rating": "parsed_rating_raw"})
+    if REPARSE if reparse is None else reparse:
+        read = [extract_rating(t) for t in df["raw_response"]]
+        df["parsed_rating_raw"] = [v for v, _, _ in read]
+        df["parse_ok"] = [ok for _, ok, _ in read]
 
     index = build_model_key_index(registry if registry is not None else load_registry(default_registry_path()))
     unknown = sorted(set(df["model_key"]) - set(index))

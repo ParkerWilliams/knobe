@@ -151,7 +151,7 @@ def cmd_elicit(a: argparse.Namespace) -> int:
     engine = OpenRouterEngine(api_key, concurrency=a.concurrency)
     elicit.build_engine = lambda name: engine          # the only swap: everything else is kmp's
     run_args = argparse.Namespace(out=a.out, engine="openrouter", registry=REGISTRY,
-                                  batch_size=a.batch_size, max_tokens=protocol.MAX_TOKENS,
+                                  batch_size=a.batch_size, max_tokens=elicit.max_tokens_by_format(a.max_tokens),
                                   no_examples=a.no_examples)
     a.out.parent.mkdir(parents=True, exist_ok=True)
     print(f"[openrouter] {len(jobs)} jobs, models {model_keys}, examples={not a.no_examples} -> {a.out}")
@@ -177,7 +177,8 @@ def cmd_elicit(a: argparse.Namespace) -> int:
 
 def cmd_analyze(a: argparse.Namespace) -> int:
     import kmp.frame
-    kmp.frame.default_registry_path = lambda: REGISTRY   # kmp.frame's registry lookup, nothing else changed
+    kmp.frame.default_registry_path = lambda: REGISTRY   # kmp.frame's registry lookup
+    kmp.frame.REPARSE = a.reparse                        # re-read pre-0.2 rows with kmp.answer
     from kmp import checks
     sys.path.insert(0, str(STUDY / "analysis"))
     import first_look
@@ -209,12 +210,16 @@ def main() -> int:
     e.add_argument("--batch-size", type=int, default=256)
     e.add_argument("--limit", type=int, default=0, help="smoke test: first N storylines only")
     e.add_argument("--items", type=Path, default=ITEMS, help="kmp items CSV (default: Ngo verbatim)")
+    e.add_argument("--max-tokens", type=int, default=None,
+                   help="answer budget for every format (default: protocol.MAX_TOKENS per format)")
     e.add_argument("--allow-draft", action="store_true",
                    help="run draft items as written (pilot texts), skipping the approval and design checks")
     an = sub.add_parser("analyze")
     an.add_argument("--results", type=Path, nargs="+", help="results files (default: the Ngo verbatim run)")
     an.add_argument("--items", type=Path, default=ITEMS)
     an.add_argument("--name", help="output name prefix (default or_ngo_verbatim)")
+    an.add_argument("--reparse", action="store_true",
+                    help="re-read raw_response with kmp.answer (for rows from runner 0.1)")
     a = p.parse_args()
     return cmd_elicit(a) if a.cmd == "elicit" else cmd_analyze(a)
 
