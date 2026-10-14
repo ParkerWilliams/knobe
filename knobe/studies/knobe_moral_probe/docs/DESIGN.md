@@ -59,6 +59,47 @@ generation would need a protocol change. Screening worst case ≈ 6,200 calls,
 ≈ $3.50.
 Pretrained models get the same numbers as findings.
 
+**Amended 2026-10-13 (answer format; Parker, with Claude; for Mer's review):**
+This sets two §6/§12 open items. The prompt text is unchanged.
+- **Answer budget per format:** `protocol.MAX_TOKENS = {"raw": 10, "chat": 256}`.
+  With 10 tokens, chat-format instruct models often begin with an
+  explanation and are cut off before the number. On the OpenRouter stand-ins
+  that cost Llama-3.1-8B-Instruct about 67% of its answers and Mistral-Nemo
+  about 41%, and Mistral-Nemo's losses were lopsided by sign (up to 22
+  points).
+- **How 256 was chosen:** a calibration on 6 Ngo storylines × all questions
+  × 3 models at budgets of 32, 64, 128 and 256
+  (`outputs/first_look/or_calibration_max_tokens.csv`). 256 is the smallest
+  budget at which cut-off replies fall below 2% for every model. At 256,
+  Mistral-Nemo's worst model × question × wording cell is 92% numeric with a
+  1-point sign gap, and Gemma-3-4B is at 100% throughout.
+- **Raw stays at 10** until the cluster pilot can measure pretrained models,
+  which OpenRouter does not serve.
+- **Readout:** `kmp.answer.extract_rating` replaces `knobe.parsing.parse_rating`
+  in kmp. The old parser took the first 0–10 integer anywhere in the reply,
+  so refusals and scale restatements ("I cannot provide a number from 0 to…",
+  "On a scale of 0 to 10") were scored, almost always as 0. The new reader:
+  - reads a leading number, an explicit answer phrase, a labelled line, a
+    final number-only line or, as a fallback, the first-line number;
+  - ignores scale restatements;
+  - returns no answer for refusals, worked-example lists and ranges ("9 or
+    10");
+  - reads decimals exactly (8.5).
+
+  On all 262,944 OpenRouter replies it agrees with the old parser on 99.4%.
+  Every difference is a fix: 1,228 non-answers no longer scored, 330 decimals
+  read exactly. `knobe.parsing` is untouched, so the pilots and the main run
+  keep their published parsing. Earlier kmp rows can be re-scored with
+  `load_frame(..., reparse=True)`. Runner version 0.2.
+- **Still open, for Mer.** Llama-3.1-8B-Instruct stays below the 90% gate
+  even at 256 (83% overall, worst cell 54%), and not because of truncation:
+  - "Did X intentionally Y?" (`intentionality` w1) is a yes/no question, and
+    Llama often just answers "Yes" (55% numeric);
+  - it refuses to rate praise for harmful acts (9% of replies).
+
+  These cells are reported per §8, not silently analyzed. Whether
+  `intentionality` w1 should become a scale wording is a design decision.
+
 ## 1. What the study asks
 
 **Background.** In Ngo et al. (2015), people rate an agent as acting more

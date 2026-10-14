@@ -1,0 +1,9 @@
+{
+  "providers": {
+    "DeepInfra": 4032,
+    "Io Net": 2016
+  },
+  "errors": {
+    "429": 146
+  }
+}

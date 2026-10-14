@@ -1,0 +1,13 @@
+model_key,budget,numeric_rate,worst_cell_numeric_rate,bad_minus_good_numeric_rate,refusal_share,cut_off_share,n_replies
+gemma-3-4b-instruct,32,1.0,1.0,0.0,0.0,0.0,2016
+gemma-3-4b-instruct,64,1.0,1.0,0.0,0.0,0.0,2016
+gemma-3-4b-instruct,128,1.0,1.0,0.0,0.0,0.0,2016
+gemma-3-4b-instruct,256,1.0,1.0,0.0,0.0,0.0,2016
+llama-3.1-8b-instruct,32,0.4697,0.1979,0.1062,0.0928,0.4851,2016
+llama-3.1-8b-instruct,64,0.6652,0.3854,0.0903,0.0818,0.2381,2016
+llama-3.1-8b-instruct,128,0.8046,0.6042,-0.0179,0.0923,0.0655,2016
+llama-3.1-8b-instruct,256,0.8259,0.5417,-0.0605,0.0868,0.0114,2016
+mistral-nemo-instruct,32,0.5799,0.3333,0.1062,0.0,0.4167,2016
+mistral-nemo-instruct,64,0.6984,0.4583,0.123,0.0,0.2981,2016
+mistral-nemo-instruct,128,0.9216,0.8542,0.0317,0.0,0.0536,2016
+mistral-nemo-instruct,256,0.9514,0.9167,0.0099,0.0,0.004,2016
