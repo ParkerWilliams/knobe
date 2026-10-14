@@ -187,8 +187,8 @@ def cmd_analyze(a: argparse.Namespace) -> int:
     name = a.name or "or_ngo_verbatim"
     results = a.results or [out / "elicit" / "or_ngo_verbatim.jsonl"]
     rc = 0
-    for res in results:                                   # kmp.checks is per results file
-        argv = ["--results", str(res), "--items", str(a.items), "--out-dir",
+    for res in ([] if a.no_checks else results):          # kmp.checks is per results file
+        argv =["--results", str(res), "--items", str(a.items), "--out-dir",
                 str(out / "checks" / res.name.removesuffix(".jsonl")), "--stage", "full"]
         noex = res.with_name(res.name.removesuffix(".jsonl") + "_noex.jsonl")
         if noex.exists():
@@ -220,6 +220,9 @@ def main() -> int:
     an.add_argument("--name", help="output name prefix (default or_ngo_verbatim)")
     an.add_argument("--reparse", action="store_true",
                     help="re-read raw_response with kmp.answer (for rows from runner 0.1)")
+    an.add_argument("--no-checks", action="store_true",
+                    help="sign-effect table only: kmp.checks writes outputs/checks/<results name>/, which "
+                         "would overwrite that run's committed checks (e.g. a --reparse of an old run)")
     a = p.parse_args()
     return cmd_elicit(a) if a.cmd == "elicit" else cmd_analyze(a)
 
