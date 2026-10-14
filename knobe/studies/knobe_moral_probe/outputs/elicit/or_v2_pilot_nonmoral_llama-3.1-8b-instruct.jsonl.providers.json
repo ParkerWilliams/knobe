@@ -1,0 +1,8 @@
+{
+  "providers": {
+    "DeepInfra": 40320
+  },
+  "errors": {
+    "429": 655
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "providers": {
+    "Io Net": 13440
+  },
+  "errors": {
+    "429": 68,
+    "URLError": 1
+  }
+}
