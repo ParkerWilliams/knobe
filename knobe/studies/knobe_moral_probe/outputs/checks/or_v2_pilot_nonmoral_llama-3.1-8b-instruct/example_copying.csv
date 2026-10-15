@@ -1,0 +1,8 @@
+model_key,tuning_status,family,experiment,qkey,n_with,n_without,n_paired,share_with,share_without,excess,status
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,blame,4908,0,0,,,,no_data
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,domain_moral,4975,0,0,,,,no_data
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,domain_procedural,5150,0,0,,,,no_data
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,domain_prudential,5235,0,0,,,,no_data
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,intentionality,4544,0,0,,,,no_data
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,praise,4810,0,0,,,,no_data
+llama-3.1-8b-instruct,finetuned,llama,nonmoral,significance,4937,0,0,,,,no_data

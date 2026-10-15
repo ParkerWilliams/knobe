@@ -1,0 +1,4 @@
+model_key,tuning_status,family,experiment,qkey,n_items,r,mean_diff
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,blame,80,-0.7369608310143292,-3.018102678571428
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,intentionality,80,-0.38403581570787554,-1.6724441964285717
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,praise,80,-0.6256207753778393,7.027239583333333

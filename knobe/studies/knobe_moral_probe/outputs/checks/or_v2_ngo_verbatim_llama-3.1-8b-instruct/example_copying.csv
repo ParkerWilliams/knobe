@@ -1,0 +1,8 @@
+model_key,tuning_status,family,experiment,qkey,n_with,n_without,n_paired,share_with,share_without,excess,status
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,blame,1486,1202,1012,0.3567193675889328,0.31521739130434784,0.04150197628458496,pass
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,domain_moral,1543,1429,1198,0.27796327212020033,0.31385642737896496,-0.03589315525876463,pass
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,domain_procedural,1696,1428,1286,0.6329704510108864,0.6073094867807154,0.025660964230171057,pass
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,domain_prudential,1664,1352,1217,0.7838948233360723,0.6729663105998357,0.1109285127362366,fail
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,intentionality,1395,1073,825,0.5321212121212121,0.5490909090909091,-0.016969696969696968,pass
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,praise,1320,991,848,0.7629716981132075,0.7382075471698113,0.024764150943396235,pass
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,significance,1505,1153,970,0.32061855670103095,0.3618556701030928,-0.04123711340206182,pass

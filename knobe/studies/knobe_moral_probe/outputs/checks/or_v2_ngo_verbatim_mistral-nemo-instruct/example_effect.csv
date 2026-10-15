@@ -1,0 +1,8 @@
+model_key,tuning_status,family,experiment,qkey,n_items,r,mean_diff
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,blame,80,0.7184300768230892,-0.21624163403573063
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,domain_moral,80,0.9172062632462353,0.5630679235106775
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,domain_procedural,80,0.7384352970907616,0.5952595823798628
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,domain_prudential,80,0.7046420726423671,0.2729013801796982
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,intentionality,80,0.787438535627439,0.3571298539291245
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,praise,80,0.5279479559646839,-0.19574676253380488
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,significance,80,0.88117642416736,-0.45471261218758363

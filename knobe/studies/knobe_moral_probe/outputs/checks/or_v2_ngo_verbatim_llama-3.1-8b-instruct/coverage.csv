@@ -1,0 +1,14 @@
+model_key,experiment,qkey,wording_key,expected_model,n_rows
+llama-3.1-8b-instruct,ngo_verbatim,blame,w1,True,640
+llama-3.1-8b-instruct,ngo_verbatim,blame,w2,True,640
+llama-3.1-8b-instruct,ngo_verbatim,blame,w3r,True,640
+llama-3.1-8b-instruct,ngo_verbatim,domain_moral,w1,True,1920
+llama-3.1-8b-instruct,ngo_verbatim,domain_procedural,w1,True,1920
+llama-3.1-8b-instruct,ngo_verbatim,domain_prudential,w1,True,1920
+llama-3.1-8b-instruct,ngo_verbatim,intentionality,w1,True,640
+llama-3.1-8b-instruct,ngo_verbatim,intentionality,w2,True,640
+llama-3.1-8b-instruct,ngo_verbatim,intentionality,w3r,True,640
+llama-3.1-8b-instruct,ngo_verbatim,praise,w1,True,640
+llama-3.1-8b-instruct,ngo_verbatim,praise,w2,True,640
+llama-3.1-8b-instruct,ngo_verbatim,praise,w3r,True,640
+llama-3.1-8b-instruct,ngo_verbatim,significance,w1,True,1920

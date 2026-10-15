@@ -1,0 +1,14 @@
+model_key,tuning_status,family,experiment,qkey,wording_key,number_rate,passes
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,blame,w1,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,blame,w2,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,blame,w3r,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,domain_moral,w1,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,domain_procedural,w1,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,domain_prudential,w1,0.9994791666666667,True
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,intentionality,w1,0.9994791666666667,True
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,intentionality,w2,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,intentionality,w3r,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,praise,w1,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,praise,w2,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,praise,w3r,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,significance,w1,1.0,True

@@ -1,0 +1,73 @@
+{
+  "timestamp_utc": "2026-10-14T18:18:17+00:00",
+  "argv": [
+    "--results",
+    "outputs/elicit/or_v2_pilot_nonmoral_gemma-3-4b-instruct.jsonl",
+    "--items",
+    "stimuli/pilot/pilot_nonmoral.csv",
+    "--out-dir",
+    "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/checks/or_v2_pilot_nonmoral_gemma-3-4b-instruct",
+    "--stage",
+    "full"
+  ],
+  "cwd": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe",
+  "git_commit": "70a57035f69e13fad7988490e46ed13610de2962",
+  "git_dirty": true,
+  "results": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_v2_pilot_nonmoral_gemma-3-4b-instruct.jsonl",
+  "results_sha256": "2080dfea37e63f44062cabfad2c858a2cf5812b66397cbfb863ec14a9548238e",
+  "items": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/stimuli/pilot/pilot_nonmoral.csv",
+  "items_sha256": "043b946a9c665c00843572a54a4e28f137bc23043a29a4252914915a9520bbf7",
+  "number_rate_min": 0.9,
+  "copy_excess_max": 0.1,
+  "example_answers": [
+    0,
+    5,
+    9
+  ],
+  "manifest_path": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_v2_pilot_nonmoral_gemma-3-4b-instruct.jsonl.manifest.json",
+  "manifest": {
+    "release": "knobe_moral_probe",
+    "runner_version": "knobe_moral_probe_elicit-0.2",
+    "max_tokens": {
+      "chat": 256,
+      "raw": 10
+    },
+    "engine": "openrouter",
+    "model_keys": [
+      "gemma-3-4b-instruct"
+    ],
+    "examples": true
+  },
+  "fake_engine": false,
+  "manifest_sha256": "37b3840fa9a19558d6b5afe299b11a6fee9a1de969745015c322a4c58e2cbc0a",
+  "baseline": null,
+  "baseline_sha256": null,
+  "baseline_manifest_path": null,
+  "baseline_manifest": null,
+  "baseline_manifest_sha256": null,
+  "baseline_n_dropped_unknown_items": null,
+  "baseline_dropped_unknown_item_ids": null,
+  "model_starts": {
+    "gemma-3-4b-instruct": 1791947437.288939
+  },
+  "experiments": [
+    "nonmoral"
+  ],
+  "n_rows": 40320,
+  "n_rated_rows": 40316,
+  "n_dropped_unknown_items": 0,
+  "dropped_unknown_item_ids": [],
+  "stage": "full",
+  "gate": {
+    "blocking": [],
+    "findings": [
+      "example_copying: gemma-3-4b-instruct nonmoral blame no_data (no no-examples baseline rows)",
+      "example_copying: gemma-3-4b-instruct nonmoral domain_moral no_data (no no-examples baseline rows)",
+      "example_copying: gemma-3-4b-instruct nonmoral domain_procedural no_data (no no-examples baseline rows)",
+      "example_copying: gemma-3-4b-instruct nonmoral domain_prudential no_data (no no-examples baseline rows)",
+      "example_copying: gemma-3-4b-instruct nonmoral intentionality no_data (no no-examples baseline rows)",
+      "example_copying: gemma-3-4b-instruct nonmoral praise no_data (no no-examples baseline rows)",
+      "example_copying: gemma-3-4b-instruct nonmoral significance no_data (no no-examples baseline rows)"
+    ]
+  }
+}

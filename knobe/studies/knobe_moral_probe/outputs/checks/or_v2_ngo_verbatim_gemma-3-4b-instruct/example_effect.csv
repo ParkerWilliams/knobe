@@ -1,0 +1,8 @@
+model_key,tuning_status,family,experiment,qkey,n_items,r,mean_diff
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,blame,80,0.7280712619013069,-0.34322916666666664
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,domain_moral,80,0.7384371926143813,-2.30625
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,domain_procedural,80,0.4995773639798088,-3.1942708333333334
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,domain_prudential,80,0.7433807529264436,-1.8371603260869562
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,intentionality,80,0.6344478554813257,-0.6137907608695652
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,praise,80,0.5070848551755297,0.146875
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,significance,80,0.8488659613339099,-0.6213541666666667

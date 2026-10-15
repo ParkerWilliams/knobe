@@ -1,0 +1,14 @@
+model_key,tuning_status,family,experiment,qkey,wording_key,number_rate,passes
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,blame,w1,0.7359375,False
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,blame,w2,0.796875,False
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,blame,w3r,0.7890625,False
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,domain_moral,w1,0.8036458333333333,False
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,domain_procedural,w1,0.8833333333333333,False
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,domain_prudential,w1,0.8666666666666667,False
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,intentionality,w1,0.515625,False
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,intentionality,w2,0.8109375,False
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,intentionality,w3r,0.853125,False
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,praise,w1,0.6078125,False
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,praise,w2,0.7375,False
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,praise,w3r,0.7171875,False
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,significance,w1,0.7838541666666666,False

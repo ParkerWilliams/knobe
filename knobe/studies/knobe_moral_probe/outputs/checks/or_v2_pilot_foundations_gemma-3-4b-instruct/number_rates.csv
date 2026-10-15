@@ -1,0 +1,16 @@
+model_key,tuning_status,family,experiment,qkey,wording_key,number_rate,passes
+gemma-3-4b-instruct,finetuned,gemma,foundations,blame,w1,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,foundations,blame,w2,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,foundations,blame,w3r,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,foundations,fnd_authority,w1,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,foundations,fnd_fairness,w1,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,foundations,fnd_harm,w1,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,foundations,fnd_loyalty,w1,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,foundations,fnd_purity,w1,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,foundations,intentionality,w1,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,foundations,intentionality,w2,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,foundations,intentionality,w3r,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,foundations,praise,w1,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,foundations,praise,w2,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,foundations,praise,w3r,1.0,True
+gemma-3-4b-instruct,finetuned,gemma,foundations,significance,w1,0.9997258771929824,True

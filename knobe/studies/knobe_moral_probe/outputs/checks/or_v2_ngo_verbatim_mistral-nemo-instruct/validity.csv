@@ -1,0 +1,4 @@
+model_key,tuning_status,family,experiment,check,value,status
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,blame_bad_minus_good,1.3660339053106973,pass
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,praise_good_minus_bad,0.513607528997754,pass
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,significance_moral_minus_procedural,,not_applicable

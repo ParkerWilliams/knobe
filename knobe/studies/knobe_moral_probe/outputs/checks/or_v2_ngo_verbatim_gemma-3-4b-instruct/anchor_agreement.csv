@@ -1,0 +1,4 @@
+model_key,tuning_status,family,experiment,qkey,n_items,r,mean_diff
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,blame,80,-0.9234778080210386,-2.90546875
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,intentionality,80,-0.8237028661594239,-1.0109375
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,praise,80,-0.8611916813705695,6.425

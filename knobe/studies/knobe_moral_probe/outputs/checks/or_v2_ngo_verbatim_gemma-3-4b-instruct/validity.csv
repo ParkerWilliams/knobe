@@ -1,0 +1,4 @@
+model_key,tuning_status,family,experiment,check,value,status
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,blame_bad_minus_good,0.515625,pass
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,praise_good_minus_bad,0.40937500000000027,pass
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,significance_moral_minus_procedural,,not_applicable

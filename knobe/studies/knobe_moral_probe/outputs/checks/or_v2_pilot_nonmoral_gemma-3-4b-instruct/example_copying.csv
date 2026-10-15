@@ -1,0 +1,8 @@
+model_key,tuning_status,family,experiment,qkey,n_with,n_without,n_paired,share_with,share_without,excess,status
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,blame,5760,0,0,,,,no_data
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,domain_moral,5760,0,0,,,,no_data
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,domain_procedural,5760,0,0,,,,no_data
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,domain_prudential,5757,0,0,,,,no_data
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,intentionality,5759,0,0,,,,no_data
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,praise,5760,0,0,,,,no_data
+gemma-3-4b-instruct,finetuned,gemma,nonmoral,significance,5760,0,0,,,,no_data

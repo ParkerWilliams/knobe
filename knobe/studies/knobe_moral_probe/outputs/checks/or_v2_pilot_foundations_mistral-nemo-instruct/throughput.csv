@@ -1,0 +1,2 @@
+model_key,tuning_status,family,rows,seconds,rows_per_second,start_recorded
+mistral-nemo-instruct,finetuned,mistral,20448,3597.082393169403,5.684607069003829,True

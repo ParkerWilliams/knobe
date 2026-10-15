@@ -1,0 +1,14 @@
+model_key,tuning_status,family,experiment,qkey,wording_key,number_rate,passes
+mistral-nemo-instruct,finetuned,mistral,nonmoral,blame,w1,0.9453125,True
+mistral-nemo-instruct,finetuned,mistral,nonmoral,blame,w2,0.9614583333333333,True
+mistral-nemo-instruct,finetuned,mistral,nonmoral,blame,w3r,0.9411458333333333,True
+mistral-nemo-instruct,finetuned,mistral,nonmoral,domain_moral,w1,0.9675347222222223,True
+mistral-nemo-instruct,finetuned,mistral,nonmoral,domain_procedural,w1,0.9657986111111111,True
+mistral-nemo-instruct,finetuned,mistral,nonmoral,domain_prudential,w1,0.9644097222222222,True
+mistral-nemo-instruct,finetuned,mistral,nonmoral,intentionality,w1,0.96875,True
+mistral-nemo-instruct,finetuned,mistral,nonmoral,intentionality,w2,0.9619791666666667,True
+mistral-nemo-instruct,finetuned,mistral,nonmoral,intentionality,w3r,0.9515625,True
+mistral-nemo-instruct,finetuned,mistral,nonmoral,praise,w1,0.9541666666666667,True
+mistral-nemo-instruct,finetuned,mistral,nonmoral,praise,w2,0.9734375,True
+mistral-nemo-instruct,finetuned,mistral,nonmoral,praise,w3r,0.9479166666666666,True
+mistral-nemo-instruct,finetuned,mistral,nonmoral,significance,w1,0.9442708333333333,True

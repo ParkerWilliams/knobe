@@ -1,0 +1,16 @@
+model_key,tuning_status,family,experiment,qkey,wording_key,number_rate,passes
+mistral-nemo-instruct,finetuned,mistral,foundations,blame,w1,0.9383223684210527,True
+mistral-nemo-instruct,finetuned,mistral,foundations,blame,w2,0.9481907894736842,True
+mistral-nemo-instruct,finetuned,mistral,foundations,blame,w3r,0.9259868421052632,True
+mistral-nemo-instruct,finetuned,mistral,foundations,fnd_authority,w1,0.9487179487179487,True
+mistral-nemo-instruct,finetuned,mistral,foundations,fnd_fairness,w1,0.9567307692307693,True
+mistral-nemo-instruct,finetuned,mistral,foundations,fnd_harm,w1,0.9089912280701754,True
+mistral-nemo-instruct,finetuned,mistral,foundations,fnd_loyalty,w1,0.9230769230769231,True
+mistral-nemo-instruct,finetuned,mistral,foundations,fnd_purity,w1,0.9553571428571429,True
+mistral-nemo-instruct,finetuned,mistral,foundations,intentionality,w1,0.9720394736842105,True
+mistral-nemo-instruct,finetuned,mistral,foundations,intentionality,w2,0.9588815789473685,True
+mistral-nemo-instruct,finetuned,mistral,foundations,intentionality,w3r,0.9383223684210527,True
+mistral-nemo-instruct,finetuned,mistral,foundations,praise,w1,0.9580592105263158,True
+mistral-nemo-instruct,finetuned,mistral,foundations,praise,w2,0.9629934210526315,True
+mistral-nemo-instruct,finetuned,mistral,foundations,praise,w3r,0.9481907894736842,True
+mistral-nemo-instruct,finetuned,mistral,foundations,significance,w1,0.9317434210526315,True
