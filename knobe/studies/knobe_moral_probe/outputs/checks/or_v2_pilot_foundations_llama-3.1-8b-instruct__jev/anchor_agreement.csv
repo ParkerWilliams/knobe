@@ -1,0 +1,4 @@
+model_key,tuning_status,family,experiment,qkey,n_items,r,mean_diff
+llama-3.1-8b-instruct,finetuned,llama,foundations,blame,152,-0.7880135979678402,-2.6154664414532838
+llama-3.1-8b-instruct,finetuned,llama,foundations,intentionality,151,-0.6619657538185212,-0.6823433832539793
+llama-3.1-8b-instruct,finetuned,llama,foundations,praise,152,-0.8462247167864572,5.9457955421771205

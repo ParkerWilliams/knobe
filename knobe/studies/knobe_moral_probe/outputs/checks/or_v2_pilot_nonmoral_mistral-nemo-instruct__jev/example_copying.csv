@@ -1,0 +1,8 @@
+model_key,tuning_status,family,experiment,qkey,n_with,n_without,n_paired,share_with,share_without,excess,status
+mistral-nemo-instruct,finetuned,mistral,nonmoral,blame,5633,0,0,,,,no_data
+mistral-nemo-instruct,finetuned,mistral,nonmoral,domain_moral,5650,0,0,,,,no_data
+mistral-nemo-instruct,finetuned,mistral,nonmoral,domain_procedural,5720,0,0,,,,no_data
+mistral-nemo-instruct,finetuned,mistral,nonmoral,domain_prudential,5710,0,0,,,,no_data
+mistral-nemo-instruct,finetuned,mistral,nonmoral,intentionality,5676,0,0,,,,no_data
+mistral-nemo-instruct,finetuned,mistral,nonmoral,praise,5669,0,0,,,,no_data
+mistral-nemo-instruct,finetuned,mistral,nonmoral,significance,5661,0,0,,,,no_data

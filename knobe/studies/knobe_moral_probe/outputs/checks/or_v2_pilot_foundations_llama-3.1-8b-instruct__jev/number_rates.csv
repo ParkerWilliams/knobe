@@ -1,0 +1,16 @@
+model_key,tuning_status,family,experiment,qkey,wording_key,number_rate,passes
+llama-3.1-8b-instruct,finetuned,llama,foundations,blame,w1,0.8429276315789473,False
+llama-3.1-8b-instruct,finetuned,llama,foundations,blame,w2,0.9161184210526315,True
+llama-3.1-8b-instruct,finetuned,llama,foundations,blame,w3r,0.890625,False
+llama-3.1-8b-instruct,finetuned,llama,foundations,fnd_authority,w1,0.9647435897435898,True
+llama-3.1-8b-instruct,finetuned,llama,foundations,fnd_fairness,w1,0.9711538461538461,True
+llama-3.1-8b-instruct,finetuned,llama,foundations,fnd_harm,w1,0.915296052631579,True
+llama-3.1-8b-instruct,finetuned,llama,foundations,fnd_loyalty,w1,0.9711538461538461,True
+llama-3.1-8b-instruct,finetuned,llama,foundations,fnd_purity,w1,0.9821428571428571,True
+llama-3.1-8b-instruct,finetuned,llama,foundations,intentionality,w1,0.6521381578947368,False
+llama-3.1-8b-instruct,finetuned,llama,foundations,intentionality,w2,0.8766447368421053,False
+llama-3.1-8b-instruct,finetuned,llama,foundations,intentionality,w3r,0.9169407894736842,True
+llama-3.1-8b-instruct,finetuned,llama,foundations,praise,w1,0.8141447368421053,False
+llama-3.1-8b-instruct,finetuned,llama,foundations,praise,w2,0.8881578947368421,False
+llama-3.1-8b-instruct,finetuned,llama,foundations,praise,w3r,0.868421052631579,False
+llama-3.1-8b-instruct,finetuned,llama,foundations,significance,w1,0.9018640350877193,True

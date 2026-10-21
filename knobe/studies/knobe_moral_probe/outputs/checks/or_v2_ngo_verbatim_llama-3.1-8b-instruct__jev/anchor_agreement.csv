@@ -1,0 +1,4 @@
+model_key,tuning_status,family,experiment,qkey,n_items,r,mean_diff
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,blame,79,-0.7340614214747296,-1.8555690617399483
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,intentionality,79,-0.7993144038575761,0.5827745039770356
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,praise,79,-0.8096285162415567,7.926655974124327

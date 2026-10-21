@@ -1,0 +1,8 @@
+model_key,tuning_status,family,experiment,qkey,n_with,n_without,n_paired,share_with,share_without,excess,status
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,blame,1920,1920,1920,0.08802083333333334,0.29583333333333334,-0.2078125,pass
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,domain_moral,1920,1920,1920,0.06614583333333333,0.17708333333333334,-0.11093750000000001,pass
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,domain_procedural,1920,1920,1920,0.0005208333333333333,0.096875,-0.09635416666666667,pass
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,domain_prudential,1920,1920,1920,0.046875,0.14114583333333333,-0.09427083333333333,pass
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,intentionality,1920,1920,1920,0.11927083333333334,0.22447916666666667,-0.10520833333333333,pass
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,praise,1920,1920,1920,0.015104166666666667,0.11302083333333333,-0.09791666666666667,pass
+gemma-3-4b-instruct,finetuned,gemma,ngo_verbatim,significance,1920,1920,1920,0.1234375,0.15625,-0.032812499999999994,pass

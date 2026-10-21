@@ -1,0 +1,4 @@
+model_key,tuning_status,family,experiment,check,value,status
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,blame_bad_minus_good,1.685661876498811,pass
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,praise_good_minus_bad,0.9754167820315973,pass
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,significance_moral_minus_procedural,,not_applicable

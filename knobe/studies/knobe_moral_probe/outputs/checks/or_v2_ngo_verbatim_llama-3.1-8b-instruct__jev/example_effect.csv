@@ -1,0 +1,8 @@
+model_key,tuning_status,family,experiment,qkey,n_items,r,mean_diff
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,blame,75,0.3730139239731457,0.10943055603804017
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,domain_moral,78,0.8160038945686385,0.46100971688669845
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,domain_procedural,73,0.404268659221501,-0.2232686858684891
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,domain_prudential,77,0.3267240737163289,-0.1543739390569687
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,intentionality,70,0.4799535050893936,-1.094784234878869
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,praise,64,0.07474326676293822,1.1027855023495
+llama-3.1-8b-instruct,finetuned,llama,ngo_verbatim,significance,70,0.7712033902852182,-0.02419482519395024

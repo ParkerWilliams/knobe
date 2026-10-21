@@ -1,0 +1,8 @@
+model_key,tuning_status,family,experiment,qkey,n_with,n_without,n_paired,share_with,share_without,excess,status
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,blame,1855,1841,1781,0.3054463784390792,0.3043234138124649,0.0011229646266142645,pass
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,domain_moral,1880,1848,1810,0.23314917127071824,0.3320441988950276,-0.09889502762430938,pass
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,domain_procedural,1909,1902,1892,0.7605708245243129,0.9492600422832981,-0.18868921775898517,pass
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,domain_prudential,1897,1890,1868,0.6793361884368309,0.8110278372591007,-0.1316916488222698,pass
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,intentionality,1894,1851,1825,0.3852054794520548,0.40493150684931506,-0.01972602739726026,pass
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,praise,1905,1880,1865,0.7195710455764075,0.7839142091152815,-0.06434316353887404,pass
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,significance,1878,1887,1846,0.23293607800650054,0.22914409534127844,0.003791982665222099,pass

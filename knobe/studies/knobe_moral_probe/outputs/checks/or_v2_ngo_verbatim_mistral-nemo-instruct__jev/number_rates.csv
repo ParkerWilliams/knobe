@@ -1,0 +1,14 @@
+model_key,tuning_status,family,experiment,qkey,wording_key,number_rate,passes
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,blame,w1,0.971875,True
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,blame,w2,0.978125,True
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,blame,w3r,0.9484375,True
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,domain_moral,w1,0.9791666666666666,True
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,domain_procedural,w1,0.9942708333333333,True
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,domain_prudential,w1,0.9880208333333333,True
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,intentionality,w1,0.9921875,True
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,intentionality,w2,0.9890625,True
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,intentionality,w3r,0.978125,True
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,praise,w1,0.990625,True
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,praise,w2,0.9984375,True
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,praise,w3r,0.9875,True
+mistral-nemo-instruct,finetuned,mistral,ngo_verbatim,significance,w1,0.978125,True

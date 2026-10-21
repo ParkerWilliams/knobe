@@ -1,0 +1,93 @@
+{
+  "timestamp_utc": "2026-10-21T08:53:45+00:00",
+  "argv": [
+    "--results",
+    "outputs/elicit/or_v2_ngo_verbatim_llama-3.1-8b-instruct.jsonl",
+    "--items",
+    "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/stimuli/ngo_verbatim.csv",
+    "--out-dir",
+    "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/checks/or_v2_ngo_verbatim_llama-3.1-8b-instruct__jev",
+    "--stage",
+    "full",
+    "--baseline",
+    "outputs/elicit/or_v2_ngo_verbatim_llama-3.1-8b-instruct_noex.jsonl"
+  ],
+  "cwd": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe",
+  "git_commit": "a42938a69d6a565e7c3844cedc9ff9e83e4c330a",
+  "git_dirty": true,
+  "results": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_v2_ngo_verbatim_llama-3.1-8b-instruct.jsonl",
+  "results_sha256": "fa18abb3dcda5e5597592332525fb7f972d8e9ccdec19635a4dd1fd5cc7a43c4",
+  "items": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/stimuli/ngo_verbatim.csv",
+  "items_sha256": "dca5a29bf606e25b98c2368d0b8a25c353e02d9271dff1468804921bda1cb504",
+  "number_rate_min": 0.9,
+  "copy_excess_max": 0.1,
+  "example_answers": [
+    0,
+    5,
+    9
+  ],
+  "manifest_path": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_v2_ngo_verbatim_llama-3.1-8b-instruct.jsonl.manifest.json",
+  "manifest": {
+    "release": "knobe_moral_probe",
+    "runner_version": "knobe_moral_probe_elicit-0.2",
+    "max_tokens": {
+      "chat": 256,
+      "raw": 10
+    },
+    "engine": "openrouter",
+    "model_keys": [
+      "llama-3.1-8b-instruct"
+    ],
+    "examples": true
+  },
+  "fake_engine": false,
+  "manifest_sha256": "6955434205f06e07eb6e080ff4c8705972f3560825d3b295df921846eebb2c74",
+  "baseline": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_v2_ngo_verbatim_llama-3.1-8b-instruct_noex.jsonl",
+  "baseline_sha256": "2dbdd5dc9337a420017bb213ed885693782583bed0cf648fbd7e3832158ab3b1",
+  "baseline_manifest_path": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_v2_ngo_verbatim_llama-3.1-8b-instruct_noex.jsonl.manifest.json",
+  "baseline_manifest": {
+    "release": "knobe_moral_probe",
+    "runner_version": "knobe_moral_probe_elicit-0.2",
+    "max_tokens": {
+      "chat": 256,
+      "raw": 10
+    },
+    "engine": "openrouter",
+    "model_keys": [
+      "llama-3.1-8b-instruct"
+    ],
+    "examples": false
+  },
+  "baseline_manifest_sha256": "40640ed20229b719aede785816bc21c68a3359ccb180a3639cbb24d2caeb1831",
+  "baseline_n_dropped_unknown_items": 0,
+  "baseline_dropped_unknown_item_ids": [],
+  "model_starts": {
+    "llama-3.1-8b-instruct": 1791942562.609896
+  },
+  "experiments": [
+    "ngo_verbatim"
+  ],
+  "n_rows": 13440,
+  "n_rated_rows": 11236,
+  "n_dropped_unknown_items": 0,
+  "dropped_unknown_item_ids": [],
+  "stage": "full",
+  "gate": {
+    "blocking": [
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim blame w1 0.77 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim blame w2 0.85 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim blame w3r 0.82 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim domain_moral w1 0.85 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim intentionality w1 0.60 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim intentionality w2 0.83 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim intentionality w3r 0.88 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim praise w1 0.64 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim praise w2 0.79 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim praise w3r 0.73 < 0.90",
+      "number_rate: llama-3.1-8b-instruct ngo_verbatim significance w1 0.85 < 0.90"
+    ],
+    "findings": [
+      "example_copying: llama-3.1-8b-instruct ngo_verbatim domain_prudential excess 0.11 > 0.10 (with 0.78, without 0.67)"
+    ]
+  }
+}

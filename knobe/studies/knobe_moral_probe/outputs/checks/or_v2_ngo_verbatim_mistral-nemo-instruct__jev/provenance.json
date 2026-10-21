@@ -1,0 +1,79 @@
+{
+  "timestamp_utc": "2026-10-21T08:53:45+00:00",
+  "argv": [
+    "--results",
+    "outputs/elicit/or_v2_ngo_verbatim_mistral-nemo-instruct.jsonl",
+    "--items",
+    "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/stimuli/ngo_verbatim.csv",
+    "--out-dir",
+    "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/checks/or_v2_ngo_verbatim_mistral-nemo-instruct__jev",
+    "--stage",
+    "full",
+    "--baseline",
+    "outputs/elicit/or_v2_ngo_verbatim_mistral-nemo-instruct_noex.jsonl"
+  ],
+  "cwd": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe",
+  "git_commit": "a42938a69d6a565e7c3844cedc9ff9e83e4c330a",
+  "git_dirty": true,
+  "results": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_v2_ngo_verbatim_mistral-nemo-instruct.jsonl",
+  "results_sha256": "4273258258adcffad03b6dc94a7dc0e05ba29f6fe8664465043bec843f1a3d6e",
+  "items": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/stimuli/ngo_verbatim.csv",
+  "items_sha256": "dca5a29bf606e25b98c2368d0b8a25c353e02d9271dff1468804921bda1cb504",
+  "number_rate_min": 0.9,
+  "copy_excess_max": 0.1,
+  "example_answers": [
+    0,
+    5,
+    9
+  ],
+  "manifest_path": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_v2_ngo_verbatim_mistral-nemo-instruct.jsonl.manifest.json",
+  "manifest": {
+    "release": "knobe_moral_probe",
+    "runner_version": "knobe_moral_probe_elicit-0.2",
+    "max_tokens": {
+      "chat": 256,
+      "raw": 10
+    },
+    "engine": "openrouter",
+    "model_keys": [
+      "mistral-nemo-instruct"
+    ],
+    "examples": true
+  },
+  "fake_engine": false,
+  "manifest_sha256": "f33508e2c97d90551e198f170db88fac9f8d1206b966d7d43d37655e8c154f94",
+  "baseline": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_v2_ngo_verbatim_mistral-nemo-instruct_noex.jsonl",
+  "baseline_sha256": "107c28bc94528126f0bb4ed812974a5151c7bc505e50d6cb3261889ae0f8a5a4",
+  "baseline_manifest_path": "/Users/prwilliams/Repos/Knobe/knobe/studies/knobe_moral_probe/outputs/elicit/or_v2_ngo_verbatim_mistral-nemo-instruct_noex.jsonl.manifest.json",
+  "baseline_manifest": {
+    "release": "knobe_moral_probe",
+    "runner_version": "knobe_moral_probe_elicit-0.2",
+    "max_tokens": {
+      "chat": 256,
+      "raw": 10
+    },
+    "engine": "openrouter",
+    "model_keys": [
+      "mistral-nemo-instruct"
+    ],
+    "examples": false
+  },
+  "baseline_manifest_sha256": "6c849fb84275f809cf2c9db2ec3573c93f3a5e23227a5a1e9b8609408003ef63",
+  "baseline_n_dropped_unknown_items": 0,
+  "baseline_dropped_unknown_item_ids": [],
+  "model_starts": {
+    "mistral-nemo-instruct": 1791942562.611145
+  },
+  "experiments": [
+    "ngo_verbatim"
+  ],
+  "n_rows": 13440,
+  "n_rated_rows": 13218,
+  "n_dropped_unknown_items": 0,
+  "dropped_unknown_item_ids": [],
+  "stage": "full",
+  "gate": {
+    "blocking": [],
+    "findings": []
+  }
+}
