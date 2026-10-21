@@ -71,11 +71,14 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--items", required=True, type=Path)
     p.add_argument("--registry", type=Path)
     p.add_argument("--reparse", action="store_true", help="re-read raw_response with kmp.answer (runner 0.1 rows)")
+    p.add_argument("--reader", choices=("regex", "jev", "jev_ev"), default="regex",
+                   help="whose reading of each reply: kmp.answer (regex, the reader of record) or Jev's "
+                        "sidecar (kmp/jev.py; tools/jev_read.py)")
     p.add_argument("--out", required=True, type=Path)
     a = p.parse_args(argv)
     items = load_items(a.items)
     registry = load_registry(a.registry) if a.registry else None
-    frame = pd.concat([load_frame(r, items, registry, reparse=a.reparse) for r in a.results], ignore_index=True)
+    frame = pd.concat([load_frame(r, items, registry, reparse=a.reparse, reader=a.reader) for r in a.results], ignore_index=True)
     out = arm_effects(analysis_rows(frame), a.experiment)
     a.out.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(a.out, index=False)

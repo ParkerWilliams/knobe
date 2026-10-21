@@ -179,6 +179,7 @@ def cmd_analyze(a: argparse.Namespace) -> int:
     import kmp.frame
     kmp.frame.default_registry_path = lambda: REGISTRY   # kmp.frame's registry lookup
     kmp.frame.REPARSE = a.reparse                        # re-read pre-0.2 rows with kmp.answer
+    kmp.frame.READER = a.reader                          # or read Jev's sidecar (kmp/jev.py)
     from kmp import checks
     sys.path.insert(0, str(STUDY / "analysis"))
     import first_look
@@ -186,10 +187,12 @@ def cmd_analyze(a: argparse.Namespace) -> int:
     out = STUDY / "outputs"
     name = a.name or "or_ngo_verbatim"
     results = a.results or [out / "elicit" / "or_ngo_verbatim.jsonl"]
+    # Another reader's checks go beside the run's committed (regex) checks, not over them.
+    checks_suffix = "" if a.reader == "regex" else f"__{a.reader}"
     rc = 0
     for res in ([] if a.no_checks else results):          # kmp.checks is per results file
         argv =["--results", str(res), "--items", str(a.items), "--out-dir",
-                str(out / "checks" / res.name.removesuffix(".jsonl")), "--stage", "full"]
+                str(out / "checks" / (res.name.removesuffix(".jsonl") + checks_suffix)), "--stage", "full"]
         noex = res.with_name(res.name.removesuffix(".jsonl") + "_noex.jsonl")
         if noex.exists():
             argv += ["--baseline", str(noex)]
@@ -220,6 +223,9 @@ def main() -> int:
     an.add_argument("--name", help="output name prefix (default or_ngo_verbatim)")
     an.add_argument("--reparse", action="store_true",
                     help="re-read raw_response with kmp.answer (for rows from runner 0.1)")
+    an.add_argument("--reader", choices=("regex", "jev", "jev_ev"), default="regex",
+                    help="whose reading of each reply: kmp.answer (regex, the reader of record) or Jev's sidecar "
+                         "(tools/jev_read.py); checks then go to outputs/checks/<results name>__<reader>/")
     an.add_argument("--no-checks", action="store_true",
                     help="sign-effect table only: kmp.checks writes outputs/checks/<results name>/, which "
                          "would overwrite that run's committed checks (e.g. a --reparse of an old run)")

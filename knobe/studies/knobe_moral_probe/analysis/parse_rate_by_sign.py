@@ -49,6 +49,9 @@ def main(argv: list[str] | None = None) -> int:
                    metavar="NAME ITEMS RESULTS", help="set name, items CSV, then its results files")
     p.add_argument("--registry", type=Path)
     p.add_argument("--reparse", action="store_true", help="re-read raw_response with kmp.answer (runner 0.1 rows)")
+    p.add_argument("--reader", choices=("regex", "jev", "jev_ev"), default="regex",
+                   help="whose reading of each reply: kmp.answer (regex, the reader of record) or Jev's "
+                        "sidecar (kmp/jev.py; tools/jev_read.py)")
     p.add_argument("--out", required=True, type=Path)
     a = p.parse_args(argv)
     registry = load_registry(a.registry) if a.registry else None
@@ -57,7 +60,7 @@ def main(argv: list[str] | None = None) -> int:
         if not results:
             p.error(f"--set {name}: no results files")
         items = load_items(Path(items_path))
-        frame = pd.concat([load_frame(r, items, registry, reparse=a.reparse) for r in results], ignore_index=True)
+        frame = pd.concat([load_frame(r, items, registry, reparse=a.reparse, reader=a.reader) for r in results], ignore_index=True)
         parts.append(rates(frame, name))
     out = pd.concat(parts, ignore_index=True)
     a.out.parent.mkdir(parents=True, exist_ok=True)

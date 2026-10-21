@@ -69,7 +69,7 @@ from knobe.elicit_vllm import default_registry_path
 from knobe.registry import load_registry
 from knobe.schemas import ResultRecord, read_jsonl
 
-from kmp import protocol
+from kmp import jev, protocol
 from kmp.answer import extract_rating
 from kmp.items import Item
 from kmp.prompts import parse_prompt_id
@@ -80,14 +80,24 @@ TUNING_C = {"finetuned": 0.5, "pretrained": -0.5}
 
 
 REPARSE = False   # module default for load_frame(reparse=None); analysis entry points may set it
+READER = "regex"  # module default for load_frame(reader=None); the same
 
 
 def load_frame(results_path: str | Path, items: list[Item], registry: dict | None = None,
-               reparse: bool | None = None) -> pd.DataFrame:
+               reparse: bool | None = None, reader: str | None = None) -> pd.DataFrame:
     """registry: a loaded model registry (default: the repo's configs/models.yaml).
     reparse: re-read every raw_response with kmp.answer.extract_rating, replacing the
     stored parsed_rating/parse_ok -- for rows written before runner 0.2, whose
-    first-integer parser scored refusals and scale restatements (default: REPARSE)."""
+    first-integer parser scored refusals and scale restatements (default: REPARSE).
+    reader: "regex" (the stored reading, kmp.answer), or Jev's readings from the
+    results' <results>.jev.jsonl sidecar (kmp.jev): "jev" the top option, "jev_ev"
+    the expected value where a number is on top (default: READER)."""
+    reader = READER if reader is None else reader
+    if reader not in jev.READERS:
+        raise ValueError(f"reader must be one of {jev.READERS}, not {reader!r}")
+    reparse = REPARSE if reparse is None else reparse
+    if reparse and reader != "regex":
+        raise ValueError(f"reparse re-reads with kmp.answer, so it can't be combined with reader={reader!r}")
     records = list(read_jsonl(results_path, ResultRecord))
     if not records:
         raise ValueError(f"{results_path}: no result records")
@@ -97,10 +107,12 @@ def load_frame(results_path: str | Path, items: list[Item], registry: dict | Non
         raise ValueError(f"{results_path}: {len(dups)} duplicate job_id(s), e.g. {dups[:5]}")
 
     df = pd.DataFrame([r.model_dump() for r in records]).rename(columns={"parsed_rating": "parsed_rating_raw"})
-    if REPARSE if reparse is None else reparse:
+    if reparse:
         read = [extract_rating(t) for t in df["raw_response"]]
         df["parsed_rating_raw"] = [v for v, _, _ in read]
         df["parse_ok"] = [ok for _, ok, _ in read]
+    elif reader != "regex":
+        df["parsed_rating_raw"], df["parse_ok"] = jev.frame_readings(list(df["job_id"]), results_path, reader)
 
     index = build_model_key_index(registry if registry is not None else load_registry(default_registry_path()))
     unknown = sorted(set(df["model_key"]) - set(index))
