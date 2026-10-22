@@ -134,3 +134,74 @@ Loaded storylines for the decision P sensitivity fit: 5, 7, 18, 34, 37, 38.
   between bad and good (B2), or used "tradition" (§4.3 Out).
 
 ## Foundations scaffold roster (Task 14)
+
+Drafted 2026-10-22, for the researcher's review (Task 14 gate). All 56
+storylines are new (decision H): Ngo's harmful actions would fail C5, so
+none is reused. Each shared action is harm-neutral (C5) and set in a group
+setting, so each norm can apply: an agreed equal split (fairness), a rival
+group (loyalty), a body with standing to decide (authority), a sacred
+object (purity). Allocation: storylines 1–6 add purity plus two of F/L/A,
+7–12 add all three of F/L/A, and 13–36 add two (8 each of FL, FA, LA). Role
+nouns are distinct from each other and from `nonmoral.csv`. Purpose-written
+storylines show the planned sacred object or taboo in brackets.
+
+| storyline | scaffold | role noun | action-and-goal sentence (verbatim) | pairs planned | origin (decision H) | batch |
+|---|---|---|---|---|---|---|
+| 1 | shared | the choir director | The choir director moved the choir's rehearsals to the church basement to save on rent. | harm, purity, fairness, authority | new | 08 |
+| 2 | shared | the groundskeeper | The groundskeeper changed the cemetery's mowing route to finish the job sooner. | harm, purity, fairness, authority | new | 08 |
+| 3 | shared | the event planner | The event planner moved the festival's main stage to the riverbank to get better sound. | harm, purity, fairness, loyalty | new | 08 |
+| 4 | shared | the trail steward | The trail steward rerouted the hiking trail to make the climb less steep. | harm, purity, loyalty, authority | new | 08 |
+| 5 | shared | the kitchen manager | The kitchen manager changed the community kitchen's menu to use up the stored rice. | harm, purity, fairness, loyalty | new | 08 |
+| 6 | shared | the building superintendent | The building superintendent redid the lobby's layout to make cleaning easier. | harm, purity, loyalty, authority | new | 08 |
+| 7 | shared | the team captain | The team captain changed the club's practice schedule to fit the new gym hours. | harm, fairness, loyalty, authority | new | 09 |
+| 8 | shared | the band leader | The band leader rewrote the parade's marching order to shorten the route. | harm, fairness, loyalty, authority | new | 09 |
+| 9 | shared | the office manager | The office manager rearranged the office's desks to fit in a new printer. | harm, fairness, loyalty, authority | new | 09 |
+| 10 | shared | the league organizer | The league organizer moved the league's games to Saturday mornings to free up the evenings. | harm, fairness, loyalty, authority | new | 09 |
+| 11 | shared | the housing coordinator | The housing coordinator reassigned the dorm's rooms to finish the paperwork early. | harm, fairness, loyalty, authority | new | 09 |
+| 12 | shared | the scout leader | The scout leader moved the troop's campsite closer to the parking lot to save walking time. | harm, fairness, loyalty, authority | new | 09 |
+| 13 | shared | the quiz host | The quiz host changed the pub quiz's seating plan to fit more tables. | harm, fairness, loyalty | new | 10 |
+| 14 | shared | the carpool organizer | The carpool organizer redrew the carpool's routes to save gas. | harm, fairness, loyalty | new | 10 |
+| 15 | shared | the book club host | The book club host moved the club's meetings to the library to have more space. | harm, fairness, loyalty | new | 10 |
+| 16 | shared | the robotics coach | The robotics coach reorganized the team's workshop to make room for new tools. | harm, fairness, loyalty | new | 10 |
+| 17 | shared | the potluck organizer | The potluck organizer redid the potluck's sign-up sheet to make it easier to read. | harm, fairness, loyalty | new | 10 |
+| 18 | shared | the tour guide | The tour guide changed the walking tour's route to avoid the construction. | harm, fairness, loyalty | new | 10 |
+| 19 | shared | the debate coach | The debate coach moved the team's practice to the auditorium to use the microphones. | harm, fairness, loyalty | new | 11 |
+| 20 | shared | the race organizer | The race organizer moved the fun run's starting line to the park entrance to simplify the setup. | harm, fairness, loyalty | new | 11 |
+| 21 | shared | the librarian | The librarian rearranged the reading room to fit more shelves. | harm, fairness, authority | new | 11 |
+| 22 | shared | the market manager | The market manager redrew the farmers market's stall map to widen the aisles. | harm, fairness, authority | new | 11 |
+| 23 | shared | the pool manager | The pool manager changed the pool's lane setup to make cleaning easier. | harm, fairness, authority | new | 11 |
+| 24 | shared | the parking coordinator | The parking coordinator repainted the lot's lines to fit a bike rack. | harm, fairness, authority | new | 11 |
+| 25 | shared | the lab manager | The lab manager changed the lab's booking system to cut down on paperwork. | harm, fairness, authority | new | 12 |
+| 26 | shared | the camp counselor | The camp counselor changed the camp's activity schedule to finish the day earlier. | harm, fairness, authority | new | 12 |
+| 27 | shared | the theater manager | The theater manager reorganized the backstage area to store the new props. | harm, fairness, authority | new | 12 |
+| 28 | shared | the shift planner | The shift planner redid the warehouse's break schedule to simplify the roster. | harm, fairness, authority | new | 12 |
+| 29 | shared | the station chief | The station chief moved the fire station's training day to Thursday to free up the weekend. | harm, loyalty, authority | new | 12 |
+| 30 | shared | the editor | The editor redesigned the school paper's front page to fit more photos. | harm, loyalty, authority | new | 12 |
+| 31 | shared | the orchestra manager | The orchestra manager moved the spring concert to the new hall to sell more tickets. | harm, loyalty, authority | new | 13 |
+| 32 | shared | the stage manager | The stage manager moved the school play's rehearsals to the gym to save on heating. | harm, loyalty, authority | new | 13 |
+| 33 | shared | the fair organizer | The fair organizer moved the county fair's livestock tent to the north field to shorten the setup. | harm, loyalty, authority | new | 13 |
+| 34 | shared | the regatta organizer | The regatta organizer moved the rowing club's launch to the east dock to speed up the mornings. | harm, loyalty, authority | new | 13 |
+| 35 | shared | the dance teacher | The dance teacher changed the studio's class lineup to fit in a new beginners' class. | harm, loyalty, authority | new | 13 |
+| 36 | shared | the transit planner | The transit planner redrew the campus shuttle's route to cut the trip time. | harm, loyalty, authority | new | 13 |
+| 101 | purpose | the surveyor | The surveyor marked a new property line to finish the survey early. | purity (an ancient burial mound) | new | 14 |
+| 102 | purpose | the caterer | The caterer changed the feast's main dish to cut costs. | purity (a food taboo for the holy day) | new | 14 |
+| 103 | purpose | the mover | The mover packed the house's boxes in a new order to finish faster. | purity (a household shrine) | new | 14 |
+| 104 | purpose | the plumber | The plumber rerouted a water pipe to finish the repair sooner. | purity (a well of holy water) | new | 14 |
+| 105 | purpose | the photographer | The photographer set up the lights in a new spot to get a brighter picture. | purity (a temple altar) | new | 14 |
+| 106 | purpose | the electrician | The electrician ran a new cable through the chapel to save wire. | purity (a relic niche) | new | 14 |
+| 107 | purpose | the painter | The painter repainted the old meeting hall to brighten the room. | purity (a memorial wall) | new | 14 |
+| 108 | purpose | the landscaper | The landscaper moved the flower beds to cut the watering time. | purity (a sacred grove) | new | 14 |
+| 109 | purpose | the delivery driver | The delivery driver parked the van in a new spot to unload faster. | purity (a sacred stone) | new | 14 |
+| 110 | purpose | the architect | The architect moved the new library's entrance to the east side to catch more light. | purity (a shrine stone) | new | 14 |
+| 111 | purpose | the sculptor | The sculptor bought clay from a new supplier to save money. | purity (clay from a sacred riverbank) | new | 14 |
+| 112 | purpose | the tailor | The tailor cut the festival robes from a new fabric to finish the order sooner. | purity (a ritual-fabric taboo) | new | 14 |
+| 113 | purpose | the baker | The baker changed the bread recipe to make the dough rise faster. | purity (the holy-day bread rule) | new | 14 |
+| 114 | purpose | the janitor | The janitor changed the cleaning order to finish the shift sooner. | purity (a prayer-room shrine) | new | 14 |
+| 115 | purpose | the florist | The florist switched suppliers to get cheaper flowers. | purity (flowers from a sacred garden) | new | 14 |
+| 116 | purpose | the roofer | The roofer set the ladder in a new spot to finish the roof faster. | purity (a carved holy stone) | new | 14 |
+| 117 | purpose | the carpenter | The carpenter reused old timber to save on wood. | purity (timber from a sacred grove) | new | 14 |
+| 118 | purpose | the archivist | The archivist reboxed the old records to save shelf space. | purity (a sacred scroll) | new | 14 |
+| 119 | purpose | the camper | The camper pitched the tent in a new spot to get out of the wind. | purity (a ring of standing stones) | new | 14 |
+| 120 | purpose | the beekeeper | The beekeeper moved the hives to a new field to get more sun. | purity (a sacred hilltop) | new | 14 |
+
+Pairs planned: harm 36, fairness 26, loyalty 26, authority 26, purity 26 (6 shared + 20 purpose). Total 140 pairs = 280 items. Targets: ≥ 26 each for fairness, loyalty, authority and purity, and 30–40 harm.
