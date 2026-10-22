@@ -108,5 +108,29 @@ Loaded storylines for the decision P sensitivity fit: 5, 7, 18, 34, 37, 38.
 |---|---|---|---|---|---|---|---|
 | 02_nm_moral_01-20 | nonmoral.csv | 1–20 / moral (adapted Ngo) | 40 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
 | 03_nm_moral_21-40 | nonmoral.csv | 21–40 / moral (adapted Ngo) | 40 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
+| 04_nm_prudential_01-20 | nonmoral.csv | 1–20 / prudential | 40 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
+| 05_nm_prudential_21-40 | nonmoral.csv | 21–40 / prudential | 40 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
+| 06_nm_procedural_01-20 | nonmoral.csv | 1–20 / procedural | 40 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
+| 07_nm_procedural_21-40 | nonmoral.csv | 21–40 / procedural | 40 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
+
+### Drafting notes, batches 04–07
+
+- Clause 1 reuses the adapted moral bad sentence (decision E) except for
+  the 15 `fresh_action` pairs in `nonmoral_log.csv`. Those are prudential
+  7, 28, 30, 34, 37, 40 and procedural 7, 22, 23, 27, 28, 30, 34, 37, 40.
+  Where Ngo's action is itself wrongdoing (28, 30, 34, 40), both arms use
+  a fresh action (§4.2 Out).
+- Reused actions that still carry moral content, kept under decision E:
+  storyline 10 (placing an uncle in a home), 17 (cutting shelter spending
+  for the director's own salary, close to the §4.2 wrongdoing case), 22
+  (inducing labor, with the baby's health). The domain screen will show
+  whether that bleeds into the arm; a fresh action is the fix if it does.
+- A7 reads "name no damage to anyone's welfare" for prudential items too.
+  §4.2's own example drains the agent's savings, so A7 is read as anyone
+  other than the agent.
+- `source = pilot` (decision Q) for prudential 1, 4, 9, 11, 15, 20, 21, 32,
+  where a pilot variant's side-effect idea was the starting point. Every
+  procedural pair is `new`: the pilot ones mostly changed the action
+  between bad and good (B2), or used "tradition" (§4.3 Out).
 
 ## Foundations scaffold roster (Task 14)
