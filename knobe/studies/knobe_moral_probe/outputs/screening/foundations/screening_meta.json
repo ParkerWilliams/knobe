@@ -10,17 +10,17 @@
     "--allow-draft",
     "--rescreen-changed"
   ],
-  "calls": 280,
+  "calls": 240,
   "concurrency": 8,
   "engine": "openrouter",
-  "finished_utc": "2026-10-22T18:33:47+00:00",
-  "git_commit": "0ee5007b28620c632dbc9a5da26c09bcc29f4e39",
+  "finished_utc": "2026-10-22T18:35:25+00:00",
+  "git_commit": "62b7a8064812bfe862c16dc4884bedd4aeb873ac",
   "git_dirty": true,
-  "input_tokens": 53254,
+  "input_tokens": 48234,
   "items_path": "stimuli/foundations.csv",
-  "items_sha256": "4bf3fa36514e1114e5b791c2ba66fe1634f90e3cdc2fd978807c33480bbb86c3",
+  "items_sha256": "90e3c98a570b88986d9cc52d1350c0d4e7bca5af289fcc213bbefc2d17af4508",
   "n_prompts": 1680,
-  "output_tokens": 1400,
+  "output_tokens": 1200,
   "pairs_by_arm": {
     "authority": {
       "pairs": 26,
@@ -28,7 +28,7 @@
     },
     "fairness": {
       "pairs": 26,
-      "pairs_passed": 11
+      "pairs_passed": 26
     },
     "harm": {
       "pairs": 36,
@@ -43,8 +43,8 @@
       "pairs_passed": 24
     }
   },
-  "prompts_asked": 280,
-  "prompts_reused": 1400,
+  "prompts_asked": 240,
+  "prompts_reused": 1440,
   "providers": [
     "Anthropic"
   ],
@@ -66,7 +66,7 @@
     34
   ],
   "shared_without_nonharm": [],
-  "started_utc": "2026-10-22T18:33:10+00:00",
+  "started_utc": "2026-10-22T18:34:53+00:00",
   "target_min": 6,
   "valence_bad_max": 3,
   "valence_by_arm": {
