@@ -8,25 +8,23 @@
     "--engine",
     "openrouter",
     "--allow-draft",
-    "--rescreen-changed",
-    "--concurrency",
-    "8"
+    "--rescreen-changed"
   ],
-  "calls": 804,
+  "calls": 54,
   "concurrency": 8,
   "engine": "openrouter",
-  "finished_utc": "2026-10-22T20:29:16+00:00",
-  "git_commit": "82e57e253f7f42eaa4ab8887bace9c823d1212d2",
+  "finished_utc": "2026-10-22T20:30:06+00:00",
+  "git_commit": "7331f26d2cb81d50c58c6cc4397a00fcd2059039",
   "git_dirty": true,
-  "input_tokens": 152256,
+  "input_tokens": 10425,
   "items_path": "stimuli/foundations.csv",
-  "items_sha256": "b6af3820fe66f7f255abf9cbf77a2950f6c786e1a7edae4471fb9c23b3fd1af7",
+  "items_sha256": "3d98da29cf83a4d296b3f43ae8c6110fd1862ef5bc882e2fcc4239c4ba31c9e7",
   "n_prompts": 1680,
-  "output_tokens": 4020,
+  "output_tokens": 270,
   "pairs_by_arm": {
     "authority": {
       "pairs": 26,
-      "pairs_passed": 23
+      "pairs_passed": 24
     },
     "fairness": {
       "pairs": 26,
@@ -34,19 +32,19 @@
     },
     "harm": {
       "pairs": 36,
-      "pairs_passed": 31
+      "pairs_passed": 33
     },
     "loyalty": {
       "pairs": 26,
-      "pairs_passed": 21
+      "pairs_passed": 22
     },
     "purity": {
       "pairs": 26,
-      "pairs_passed": 23
+      "pairs_passed": 24
     }
   },
-  "prompts_asked": 804,
-  "prompts_reused": 876,
+  "prompts_asked": 54,
+  "prompts_reused": 1626,
   "providers": [
     "Anthropic"
   ],
@@ -63,12 +61,10 @@
   "shared_without_harm": [
     2,
     6,
-    20,
-    24,
     34
   ],
   "shared_without_nonharm": [],
-  "started_utc": "2026-10-22T20:27:30+00:00",
+  "started_utc": "2026-10-22T20:29:58+00:00",
   "target_min": 6,
   "valence_bad_max": 3,
   "valence_by_arm": {
