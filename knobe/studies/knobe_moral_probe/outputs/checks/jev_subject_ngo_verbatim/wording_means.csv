@@ -1,0 +1,14 @@
+model_key,qkey,wording_key,reversed,bad,good,bad_minus_good
+jev-1.14-instruct,blame,w1,False,9.3,0.575,8.725000000000001
+jev-1.14-instruct,blame,w2,False,9.975,1.25,8.725
+jev-1.14-instruct,blame,w3r,True,0.55,9.425,-8.875
+jev-1.14-instruct,domain_moral,w1,False,9.25,8.775,0.47499999999999964
+jev-1.14-instruct,domain_procedural,w1,False,0.0,0.0,0.0
+jev-1.14-instruct,domain_prudential,w1,False,0.0,0.0,0.0
+jev-1.14-instruct,intentionality,w1,False,10.0,0.5,9.5
+jev-1.14-instruct,intentionality,w2,False,9.95,0.5,9.45
+jev-1.14-instruct,intentionality,w3r,True,10.0,2.775,7.225
+jev-1.14-instruct,praise,w1,False,0.0,1.275,-1.275
+jev-1.14-instruct,praise,w2,False,0.0,0.3,-0.3
+jev-1.14-instruct,praise,w3r,True,10.0,8.675,1.3249999999999993
+jev-1.14-instruct,significance,w1,False,8.175,6.85,1.325000000000001
