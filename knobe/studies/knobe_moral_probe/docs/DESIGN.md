@@ -135,6 +135,18 @@ the 2026-10-22 screen (`ANALYSIS_LOG.md`; `outputs/screening/`).
   - Under the new limits 38 of 40 procedural pairs pass (13 under the
     general limits; the other 2 fail the domain check). The analysis plan reports the threshold, and a
     sensitivity fit keeps only the 13 pairs that pass the general limits.
+- **Fairness question names both poles** (`protocol.QUESTIONS["fnd_fairness"]`,
+  asked of the reviewer and of the subject models): "…fair or unfair
+  treatment, such as equal or unequal treatment, playing fair or cheating,
+  or keeping or going back on a deal". It was "…such as unequal treatment,
+  cheating or going back on a deal". Justification: it was the only
+  foundation question whose examples named only the negative pole. Harm
+  says "or care for them", loyalty "loyalty to, or betrayal of", authority
+  "respecting or undermining", purity "honoring or violating". On the
+  screen, fairness bad versions rated 8–10 while the good versions rated
+  0–3 even when the text said "treating every member fairly" (2/26 pairs,
+  then 5/26 after two rounds of item fixes). No subject-model data has used
+  the question yet, so nothing collected is affected.
 
 ## 1. What the study asks
 

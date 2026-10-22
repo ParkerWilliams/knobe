@@ -101,8 +101,9 @@ QUESTIONS: Mapping[str, tuple[Wording, ...]] = MappingProxyType({
                       "physically or emotionally" + _EXTENT),
     ),
     "fnd_fairness": (
-        Wording("w1", _LEAD + "To what extent does this side effect involve fair or unfair treatment, such as unequal "
-                      "treatment, cheating or going back on a deal" + _EXTENT),
+        # Both poles in the examples, like the other foundations (DESIGN.md amendment 2026-10-22).
+        Wording("w1", _LEAD + "To what extent does this side effect involve fair or unfair treatment, such as equal or "
+                      "unequal treatment, playing fair or cheating, or keeping or going back on a deal" + _EXTENT),
     ),
     "fnd_loyalty": (
         Wording("w1", _LEAD + "To what extent does this side effect involve loyalty to, or betrayal of, one's group, "

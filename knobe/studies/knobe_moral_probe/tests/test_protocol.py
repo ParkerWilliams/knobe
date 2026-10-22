@@ -96,3 +96,11 @@ def test_every_arm_has_a_question_key():
         assert f"fnd_{arm}" in protocol.QUESTIONS, arm
     for arm in ARMS["nonmoral"]:
         assert f"domain_{arm}" in protocol.QUESTIONS, arm
+
+
+def test_fairness_question_names_both_poles_like_the_other_foundations():
+    # DESIGN amendment 2026-10-22: the negative-only examples scored fair outcomes as 0-3.
+    text = protocol.QUESTIONS["fnd_fairness"][0].template
+    for both in ("fair or unfair treatment", "equal or unequal treatment", "playing fair or cheating",
+                 "keeping or going back on a deal"):
+        assert both in text
