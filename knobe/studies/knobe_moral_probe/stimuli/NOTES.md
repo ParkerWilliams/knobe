@@ -301,7 +301,7 @@ adapted moral drafts that failed the first screen stay draft and out of the
 run (decision G).
 
 Round 4 (MM's sheet 22 notes on loyalty and purity): 13 pairs redrafted, 11
-pass the re-screen and are on sheet `23_mf_round4` (22 items). Loyalty 18
+pass the re-screen; their 18 revised items are on sheet `23_mf_round4`. Loyalty 18
 and 32 failed valence (helping the rival reads as kind) and stay draft, out
 of the run. The other sheet 21–22 revise items (nonmoral, harm 10 and 24)
 weren't redrafted: their arms are above target without them.
