@@ -1,10 +1,247 @@
-# Review sheet: 03_nm_moral_21-40
+# Review sheet: 15_nm_surv_moral
 
-Items: `stimuli/nonmoral.csv`, 40 draft items. Checklist: `docs/DEFINITIONS_AND_CHECKLIST.md` section 6.
+Items: `stimuli/nonmoral.csv`, 44 draft items. Checklist: `docs/DEFINITIONS_AND_CHECKLIST.md` section 6.
 
-Record one decision per item in `stimuli/review/03_nm_moral_21-40_decisions.csv`: `approved`, `rejected` or `revise`, your initials as reviewer, the date (YYYY-MM-DD), and a note for every rejected or revise row naming the failed check (e.g. "B4: good version is bigger"). Then run `../../.venv/bin/python -m tools.review apply --items stimuli/nonmoral.csv --decisions stimuli/review/03_nm_moral_21-40_decisions.csv` yourself.
+Record one decision per item in `stimuli/review/15_nm_surv_moral_decisions.csv`: `approved`, `rejected` or `revise`, your initials as reviewer, the date (YYYY-MM-DD), and a note for every rejected or revise row naming the failed check (e.g. "B4: good version is bigger"). Then run `../../.venv/bin/python -m tools.review apply --items stimuli/nonmoral.csv --decisions stimuli/review/15_nm_surv_moral_decisions.csv` yourself.
 
 Automated checks (design_problems and tools.lint_stimuli) were clean when this sheet was made.
+
+## Storyline 1: the engineer (nonmoral; storyline checks C1 C2 C3)
+
+### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
+
+**bad** `kmp-nm-001-moral-bad`
+
+> The engineer released a gadget to make a deadline. The engineer did not care at all about the effect the gadget would have on babies. The engineer knew the gadget would kill babies.
+
+- agent: `the engineer`
+- effect: `cause the death of babies`
+- Ngo's original: Bill released a gadget to make a deadline. Bill did not care at all about the effect the gadget would have on babies. Bill knew his gadget would kill babies.
+- Ngo's effect: `cause the death of babies`
+
+**good** `kmp-nm-001-moral-good`
+
+> The engineer released an invention to make a deadline. The engineer did not care at all about the effect the invention would have on toddlers. The engineer knew the invention would help toddlers.
+
+- agent: `the engineer`
+- effect: `help toddlers`
+- Ngo's original: Robyn released an invention to make a deadline. Robyn did not care at all about the effect the invention would have on toddlers. Robyn knew her invention would help toddlers.
+- Ngo's effect: `help toddlers`
+
+## Storyline 2: the board chair (nonmoral; storyline checks C1 C2 C3)
+
+### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
+
+**bad** `kmp-nm-002-moral-bad`
+
+> The board chair started a plan to increase profits. The board chair did not care at all about the effect the plan would have on the environment. The board chair knew the plan would harm the environment.
+
+- agent: `the board chair`
+- effect: `harm the environment`
+- Ngo's original: The CEO started a plan to increase profits. She did not care at all about the effect the plan would have on the environment. She knew her plan would harm the environment.
+- Ngo's effect: `harm the environment`
+
+**good** `kmp-nm-002-moral-good`
+
+> The board chair started a plan to increase profits. The board chair did not care at all about the effect the plan would have on the environment. The board chair knew the plan would help the environment.
+
+- agent: `the board chair`
+- effect: `help the environment`
+- Ngo's original: The chairman started a plan to increase revenue. He did not care at all about the effect the plan would have on the environment. He knew his plan would help the environment.
+- Ngo's effect: `help the environment`
+- log (goal, scenario): 'to increase revenue' -> 'to increase profits'. bad version's goal (B2)
+
+## Storyline 3: the investor (nonmoral; storyline checks C1 C2 C3)
+
+### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
+
+**bad** `kmp-nm-003-moral-bad`
+
+> The investor enacted a financial scheme to buy a house. The investor did not care at all about the effect the scheme would have on old retirees. The investor knew the plan would bankrupt old retirees.
+
+- agent: `the investor`
+- effect: `bankrupt old retirees`
+- Ngo's original: Roger enacted a financial scheme to buy a house. Roger did not care at all about the effect the scheme would have on old retirees. Roger knew his plan would bankrupt old retirees.
+- Ngo's effect: `bankrupt old retirees`
+
+**good** `kmp-nm-003-moral-good`
+
+> The investor enacted a financial scheme to buy a house. The investor did not care at all about the effect the scheme would have on old retirees. The investor knew the plan would help old retirees.
+
+- agent: `the investor`
+- effect: `help old retirees`
+- Ngo's original: Renee enacted a financial scheme to buy a car. Renee did not care at all about the effect the scheme would have on old retirees. Renee knew her plan would help old retirees.
+- Ngo's effect: `help old retirees`
+- log (goal, scenario): 'to buy a car' -> 'to buy a house'. bad version's goal (B2)
+
+## Storyline 7: the bomber pilot (nonmoral; storyline checks C1 C2 C3)
+
+### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
+
+**bad** `kmp-nm-007-moral-bad`
+
+> The bomber pilot bombed a factory to reduce the enemy's steel production. The bomber pilot did not care at all about the effect the bombing would have on innocent civilians. The bomber pilot knew the bombing would kill innocent civilians.
+
+- agent: `the bomber pilot`
+- effect: `kill innocent civilians`
+- Ngo's original: The airplane bomber bombed a factory to reduce enemy’s steel production. He did not care at all about the effect the bombing would have on innocent civilians. He knew his bombing would kill innocent civilians.
+- Ngo's effect: `kill innocent civilians`
+- log (typo, scenario): "to reduce enemy's steel production" -> "to reduce the enemy's steel production". missing article (decision C)
+
+**good** `kmp-nm-007-moral-good`
+
+> The bomber pilot bombed a facility to reduce the enemy's steel production. The bomber pilot did not care at all about the effect the bombing would have on the townsfolk. The bomber pilot knew the bombing would liberate the townsfolk.
+
+- agent: `the bomber pilot`
+- effect: `liberate the townsfolk`
+- Ngo's original: The bomber pilot bombed a facility to reduce the enemy’s iron production. She did not care at all about the effect the bombing would have on the townsfolk. She knew her bombing would liberate the townsfolk.
+- Ngo's effect: `liberate the townsfolk`
+- log (goal, scenario): "to reduce the enemy's iron production" -> "to reduce the enemy's steel production". bad version's goal (B2), with the bad version's article fix
+
+## Storyline 9: the grower (nonmoral; storyline checks C1 C2 C3)
+
+### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
+
+**bad** `kmp-nm-009-moral-bad`
+
+> The grower spread weed killer to protect the grower's crops. The grower did not care at all about the effect this would have on the neighbor's crops. The grower knew the pesticide would harm the neighbor's crops.
+
+- agent: `the grower`
+- effect: `harm the neighbor's crops`
+- Ngo's original: Jenny spread weed killer to protect her crops. Jenny did not care at all about the effect this would have on Susie-Ann’s crops. Jenny knew her pesticide would harm Susie-Ann's crops.
+- Ngo's effect: `harm her neighbor's crops`
+- log (other_name, scenario): "Susie-Ann's crops" -> "the neighbor's crops". non-agent name to role (decision L); the effect already says neighbor (MM 2026-10-12)
+
+**good** `kmp-nm-009-moral-good`
+
+> The grower spread anti-fungals to protect the grower's crops. The grower did not care at all about the effect this would have on the neighbor's crops. The grower knew the anti-fungals would protect the neighbor's crops.
+
+- agent: `the grower`
+- effect: `protect the neighbor's crops`
+- Ngo's original: Stanley spread anti-fungals to protect his crops. Stanley did not care at all about the effect this would have on Billy-Bob’s crops. Stanley knew his anti-fungals would protect Billy-Bob’s crops.
+- Ngo's effect: `protect Billy-Bob’s crops`
+- log (other_name, scenario): "Billy-Bob's crops" -> "the neighbor's crops". non-agent name to role (decision L)
+- log (other_name, effect): "Billy-Bob's crops" -> "the neighbor's crops". non-agent name to role (decision L)
+
+## Storyline 13: the merchant (nonmoral; storyline checks C1 C2 C3)
+
+### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
+
+**bad** `kmp-nm-013-moral-bad`
+
+> The merchant opened a kiosk to make more money. The merchant did not care at all about the effect the kiosk would have on nearby vendors. The merchant knew the kiosk would harm nearby vendors.
+
+- agent: `the merchant`
+- effect: `harm nearby vendors`
+- Ngo's original: Joe opened a kiosk to make more money. Joe did not care at all about the effect the kiosk would have on nearby vendors. Joe knew his kiosk would harm nearby vendors.
+- Ngo's effect: `harm nearby vendors`
+
+**good** `kmp-nm-013-moral-good`
+
+> The merchant opened a new store to make more money. The merchant did not care at all about the effect the store would have on other businesses. The merchant knew the store would help other businesses.
+
+- agent: `the merchant`
+- effect: `help other businesses`
+- Ngo's original: Helen opened a new store to increase revenue. Helen did not care at all about the effect the store would have on other businesses. Helen knew her store would help other businesses.
+- Ngo's effect: `help other businesses`
+- log (goal, scenario): 'to increase revenue' -> 'to make more money'. bad version's goal (B2)
+
+## Storyline 15: the student (nonmoral; storyline checks C1 C2 C3)
+
+### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
+
+**bad** `kmp-nm-015-moral-bad`
+
+> The student threw a party to be more popular. The student did not care at all about the effect this would have on the roommate. The student knew the party would make the roommate fail the morning's exam.
+
+- agent: `the student`
+- effect: `make the roommate fail the morning's exam`
+- Ngo's original: Jacob threw a party to be more popular. Jacob did not care at all about the effect this would have on his roommate, Curtis. Jacob knew his party would make Curtis fail the morning's exam.
+- Ngo's effect: `make Curtis fail the morning's exam`
+- log (other_name, scenario): 'his roommate, Curtis' -> 'the roommate'. non-agent name to role (decision L)
+- log (other_name, scenario): 'make Curtis fail' -> 'make the roommate fail'. non-agent name to role (decision L)
+- log (other_name, effect): 'make Curtis fail' -> 'make the roommate fail'. non-agent name to role (decision L)
+
+**good** `kmp-nm-015-moral-good`
+
+> The student threw a party to be more popular. The student did not care at all about the effect this would have on the roommate. The student knew the party would help the roommate make new friends.
+
+- agent: `the student`
+- effect: `help the roommate make new friends`
+- Ngo's original: Rachel threw a party to have fun. Rachel did not care at all about the effect this would have on her roommate, Jackie. Rachel knew her party would help Jackie make new friends.
+- Ngo's effect: `help Jackie make new friends`
+- log (goal, scenario): 'to have fun' -> 'to be more popular'. bad version's goal (B2)
+- log (other_name, scenario): 'her roommate, Jackie' -> 'the roommate'. non-agent name to role (decision L)
+- log (other_name, scenario): 'help Jackie make' -> 'help the roommate make'. non-agent name to role (decision L)
+- log (other_name, effect): 'help Jackie make' -> 'help the roommate make'. non-agent name to role (decision L)
+
+## Storyline 16: the gardener (nonmoral; storyline checks C1 C2 C3)
+
+### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
+
+**bad** `kmp-nm-016-moral-bad`
+
+> The gardener planted a tree to decorate the gardener's yard. The gardener did not care at all about the effect the tree would have on the neighbor. The gardener knew the tree would make the neighbor unhappy.
+
+- agent: `the gardener`
+- effect: `make the neighbor unhappy`
+- Ngo's original: Russell planted a tree to decorate his yard. Russell did not care at all about the effect the tree would have on his neighbor. Russell knew his tree would make his neighbor unhappy.
+- Ngo's effect: `make his neighbor unhappy`
+
+**good** `kmp-nm-016-moral-good`
+
+> The gardener planted a tree to decorate the gardener's yard. The gardener did not care at all about the effect the tree would have on the neighbor. The gardener knew the tree would make the neighbor happy.
+
+- agent: `the gardener`
+- effect: `make the neighbor happy`
+- Ngo's original: Vicky planted a tree to have fruit in the fall. Vicky did not care at all about the effect the tree would have on her neighbor. Vicky knew her tree would make her neighbor happy.
+- Ngo's effect: `make her neighbor happy`
+- log (goal, scenario): 'to have fruit in the fall' -> "to decorate the gardener's yard". bad version's goal (B2)
+
+## Storyline 18: the surgeon general (nonmoral; storyline checks C1 C2 C3)
+
+### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
+
+**bad** `kmp-nm-018-moral-bad`
+
+> The surgeon general implemented the policy to keep the position. The surgeon general did not care at all about the effect the policy would have on rates of influenza. The surgeon general knew the policy would increase rates of influenza.
+
+- agent: `the surgeon general`
+- effect: `increase rates of influenza`
+- Ngo's original: The Surgeon General implemented the policy to keep his position. He did not care at all about the effect the policy would have on rates of influenza. He knew his policy would increase rates of influenza.
+- Ngo's effect: `increase rates of influenza`
+
+**good** `kmp-nm-018-moral-good`
+
+> The surgeon general implemented the policy to keep the position. The surgeon general did not care at all about the effect the policy would have on rates of deaths. The surgeon general knew the policy would decrease deaths.
+
+- agent: `the surgeon general`
+- effect: `decrease deaths`
+- Ngo's original: The Defense Secretary implemented the policy to remain politically popular. She did not care at all about the effect the policy would have on rates of deaths. She knew her policy would decrease deaths.
+- Ngo's effect: `decrease deaths`
+- log (goal, scenario): 'to remain politically popular' -> 'to keep the position'. bad version's goal (B2)
+
+## Storyline 19: the employer (nonmoral; storyline checks C1 C2 C3)
+
+### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
+
+**bad** `kmp-nm-019-moral-bad`
+
+> The employer enacted the plan to increase earnings. The employer did not care at all about the effect the plan would have on the employer's employees. The employer knew the plan would make employees unhappy.
+
+- agent: `the employer`
+- effect: `make employees unhappy`
+- Ngo's original: Carolyn enacted the plan to increase earnings. Carolyn did not care at all about the effect the plan would have on her employees. Carolyn knew her plan would make employees unhappy.
+- Ngo's effect: `make employees unhappy`
+
+**good** `kmp-nm-019-moral-good`
+
+> The employer enacted the plan to increase earnings. The employer did not care at all about the effect the plan would have on the employer's employees. The employer knew the plan would make employees happy.
+
+- agent: `the employer`
+- effect: `make employees happy`
+- Ngo's original: Christopher enacted the plan to increase earnings. Christopher did not care at all about the effect the plan would have on his employees. Christopher knew his plan would make employees happy.
+- Ngo's effect: `make employees happy`
 
 ## Storyline 21: the hunter (nonmoral; storyline checks C1 C2 C3)
 
@@ -52,54 +289,6 @@ Automated checks (design_problems and tools.lint_stimuli) were clean when this s
 - Ngo's effect: `improve the health for her baby`
 - log (goal, scenario): 'to get her pregnancy over with' -> 'to reduce the pregnancy pains'. bad version's goal (B2)
 
-## Storyline 23: the spectator (nonmoral; storyline checks C1 C2 C3)
-
-### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
-
-**bad** `kmp-nm-023-moral-bad`
-
-> The spectator screams during a tennis match to express excitement. The spectator did not care at all about the effect this would have on the tennis player. The spectator knew the yelling would cause the tennis player to lose.
-
-- agent: `the spectator`
-- effect: `cause the tennis player to lose`
-- Ngo's original: Eugene screams during a tennis match to express his excitement. Eugene did not care at all about the effect this would have on the tennis player. Eugene knew his yelling would cause the tennis player to lose.
-- Ngo's effect: `cause the tennis player to lose`
-
-**good** `kmp-nm-023-moral-good`
-
-> The spectator yells out during a golf tournament to express excitement. The spectator did not care at all about the effect the yelling would have on the golfer. The spectator knew the yelling would cause the golfer to win.
-
-- agent: `the spectator`
-- effect: `cause the golfer to win`
-- Ngo's original: Margaret yells out during a golf tournament to express her excitement. Margaret did not care at all about the effect the yelling would have on the golfer. Margaret knew her yelling would cause golfer to win.
-- Ngo's effect: `cause the golfer to win`
-- log (typo, scenario): 'cause golfer to win' -> 'cause the golfer to win'. missing article (decision C, item 46)
-
-## Storyline 24: the protester (nonmoral; storyline checks C1 C2 C3)
-
-### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
-
-**bad** `kmp-nm-024-moral-bad`
-
-> The protester protests in support of political prisoners to get on TV. The protester did not care at all about the effect the protests would have on the prisoners. The protester knew the protests would cause the execution of the political prisoners.
-
-- agent: `the protester`
-- effect: `cause the execution of the political prisoners`
-- Ngo's original: Rebecca protests in support of political prisoners to get on TV. Rebecca did not care at all about the effect her protests would have on the prisoners. Rebecca knew her protests would cause the execution of the political prisoners.
-- Ngo's effect: `cause the execution of the political prisoners`
-- capitalised words (R1: names?): TV
-
-**good** `kmp-nm-024-moral-good`
-
-> The protester protests in support of the death row inmate to get on TV. The protester did not care at all about the effect this would have on the death row inmate. The protester knew the protests would cause the release of the death row inmate.
-
-- agent: `the protester`
-- effect: `cause the release of the death row inmate`
-- Ngo's original: Sean protests in support of the death row inmate to get onto newspapers. Sean did not care at all about the effect this would have on the death row inmate. Sean knew his protests would cause the release of the death row inmate.
-- Ngo's effect: `cause the release of the death row inmate`
-- log (goal, scenario): 'to get onto newspapers' -> 'to get on TV'. bad version's goal (B2)
-- capitalised words (R1: names?): TV
-
 ## Storyline 25: the blogger (nonmoral; storyline checks C1 C2 C3)
 
 ### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
@@ -144,29 +333,6 @@ Automated checks (design_problems and tools.lint_stimuli) were clean when this s
 - effect: `improve the health of army recruits`
 - Ngo's original: Martin enacted the health plan to cut costs. Martin did not care at all about the effect this would have on the health of army recruits. Martin knew his new plan would improve the health of army recruits.
 - Ngo's effect: `improve the health of army recruits`
-
-## Storyline 27: the adult child (nonmoral; storyline checks C1 C2 C3)
-
-### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
-
-**bad** `kmp-nm-027-moral-bad`
-
-> The adult child told the mother the adult child's views to make a point. The adult child did not care at all about the effect this would have on the mother. The adult child knew the views would devastate the mother.
-
-- agent: `the adult child`
-- effect: `devastate the mother`
-- Ngo's original: Philip told his mother his views to make a point. Phillip did not care at all about the effect this would have on his mother. Phillip knew his views would devastate his mother.
-- Ngo's effect: `devastate his mother`
-- log (typo, scenario): 'Phillip' -> 'The adult child'. Ngo spells the agent Philip and Phillip (decision C, item 53)
-
-**good** `kmp-nm-027-moral-good`
-
-> The adult child told the mother the adult child's opinions to make a point. The adult child did not care at all about the effect this would have on the mother. The adult child knew the opinions would make the mother happy.
-
-- agent: `the adult child`
-- effect: `make the mother happy`
-- Ngo's original: Alice told her mother her opinions to make a point. Alice did not care at all about the effect this would have on her mother. Alice knew her opinions would make her mother happy.
-- Ngo's effect: `make her mother happy`
 
 ## Storyline 28: the dog owner (nonmoral; storyline checks C1 C2 C3)
 
@@ -236,84 +402,6 @@ Automated checks (design_problems and tools.lint_stimuli) were clean when this s
 - Ngo's original: Ernest faked his own death to get back at his mother. Ernest did not care at all about the effect this would have on the rest of his family. Ernest knew his scheme would benefit the family with life insurance payments.
 - Ngo's effect: `benefit the family with life insurance payments`
 
-## Storyline 31: the resident (nonmoral; storyline checks C1 C2 C3)
-
-### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
-
-**bad** `kmp-nm-031-moral-bad`
-
-> The resident protested in front of the church to express the resident's views. The resident did not care at all about the effect the protests would have on the church. The resident knew the messages would offend the church.
-
-- agent: `the resident`
-- effect: `offend the church`
-- Ngo's original: Norman protested in front of the church to express his views. Norman did not care at all about the effect the protests would have on the church. Norman knew his messages would offend the church.
-- Ngo's effect: `offend the church`
-
-**good** `kmp-nm-031-moral-good`
-
-> The resident protested in front of the church to express the resident's views. The resident did not care at all about the effect the protests would have on the church. The resident knew the messages would earn the church good publicity.
-
-- agent: `the resident`
-- effect: `earn the church good publicity`
-- Ngo's original: Angela protested in front of the church to express her views. Angela did not care at all about the effect the protests would have on the church. Angela knew her messages would earn the church good publicity.
-- Ngo's effect: `earn the church good publicity`
-
-## Storyline 32: the author (nonmoral; storyline checks C1 C2 C3)
-
-### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
-
-**bad** `kmp-nm-032-moral-bad`
-
-> The author wrote a book to provide a sensational account of the Civil War hero. The author did not care at all about the effect the book would have on the hero's reputation. The author knew the book would severely destroy the hero's reputation.
-
-- agent: `the author`
-- effect: `destroy the hero's reputation`
-- Ngo's original: Jo wrote a book to provide a sensational account of the Civil War hero. Jo did not care at all about the effect the book would have on the hero's reputation. Jo knew her book would severely destroy the hero's reputation.
-- Ngo's effect: `destroy the hero's reputation`
-- capitalised words (R1: names?): Civil, War
-
-**good** `kmp-nm-032-moral-good`
-
-> The author wrote a book to provide a sensational account of the Civil War hero. The author did not care at all about the effect the book would have on the hero's reputation. The author knew the book would reinforce the hero's great reputation.
-
-- agent: `the author`
-- effect: `reinforce the hero's great reputation`
-- Ngo's original: Kurt wrote a book to provide an enthralling account of the World War II hero. Kurt did not care at all about the effect the book would have on the hero's reputation. Kurt knew his book would reinforce the hero's great reputation.
-- Ngo's effect: `reinforce the hero's great reputation`
-- log (goal, scenario): 'to provide an enthralling account of the World War II hero' -> 'to provide a sensational account of the Civil War hero'. bad version's goal (B2); the hero is part of the goal, so the good version's hero is now the Civil War hero too
-- capitalised words (R1: names?): Civil, War
-
-## Storyline 33: the newlywed (nonmoral; storyline checks C1 C2 C3)
-
-### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
-
-**bad** `kmp-nm-033-moral-bad`
-
-> The newlywed married their wife to finally settle down with a family. The newlywed did not care at all about the effect the marriage would have on their parents. The newlywed knew their parents would be miserable because of this marriage.
-
-- agent: `the newlywed`
-- effect: `cause their parents to be miserable`
-- Ngo's original: Keith married his wife to finally settle down with a family. Keith did not care at all about the effect the marriage would have on his parents. Keith knew his parents would be miserable because of this marriage.
-- Ngo's effect: `cause his parents to be miserable`
-- log (pronoun, scenario): 'married his wife' -> 'married their wife'. singular their (review ruling 4)
-- log (pronoun, scenario): 'on his parents' -> 'on their parents'. singular their (review ruling 4)
-- log (pronoun, scenario): 'knew his parents' -> 'knew their parents'. singular their (review ruling 4)
-- log (pronoun, effect): 'cause his parents' -> 'cause their parents'. singular their (review ruling 4)
-
-**good** `kmp-nm-033-moral-good`
-
-> The newlywed married their husband to finally settle down with a family. The newlywed did not care at all about the effect the marriage would have on their parents. The newlywed knew their parents would be very happy because of this marriage.
-
-- agent: `the newlywed`
-- effect: `cause their parents to be happy`
-- Ngo's original: Melissa married her husband for some financial security. Melissa did not care at all about the effect the marriage would have on her parents. Melissa knew her parents would be very happy because of this marriage.
-- Ngo's effect: `cause her parents to be happy`
-- log (pronoun, scenario): 'married her husband' -> 'married their husband'. singular their (review ruling 4)
-- log (goal, scenario): 'for some financial security' -> 'to finally settle down with a family'. bad version's goal (B2)
-- log (pronoun, scenario): 'on her parents' -> 'on their parents'. singular their (review ruling 4)
-- log (pronoun, scenario): 'knew her parents' -> 'knew their parents'. singular their (review ruling 4)
-- log (pronoun, effect): 'cause her parents' -> 'cause their parents'. singular their (review ruling 4)
-
 ## Storyline 34: the activist (nonmoral; storyline checks C1 C2 C3)
 
 ### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
@@ -335,29 +423,6 @@ Automated checks (design_problems and tools.lint_stimuli) were clean when this s
 - effect: `liberate the civilians`
 - Ngo's original: The terrorist bombed the jail to express his outrage. He did not care at all about the effect the bombing would have on innocent civilians. He knew his bombing would liberate innocent civilians from the jail.
 - Ngo's effect: `liberate the civilians`
-
-## Storyline 35: the financial officer (nonmoral; storyline checks C1 C2 C3)
-
-### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
-
-**bad** `kmp-nm-035-moral-bad`
-
-> The financial officer reorganized funding to balance the budget. The financial officer did not care at all about the effect this would have on education. The financial officer knew the new system would harm education.
-
-- agent: `the financial officer`
-- effect: `harm education`
-- Ngo's original: The financial officer reorganized funding to balance the budget. He did not care at all about the effect this would have on education. He knew his new system would harm education.
-- Ngo's effect: `harm education`
-
-**good** `kmp-nm-035-moral-good`
-
-> The financial officer reorganized funding to balance the budget. The financial officer did not care at all about the effect this would have on marketing. The financial officer knew the new system would help marketing.
-
-- agent: `the financial officer`
-- effect: `help marketing`
-- Ngo's original: The treasurer reorganized funding to streamline costs. She did not care at all about the effect this would have on marketing. She knew her new system would help marketing.
-- Ngo's effect: `help marketing`
-- log (goal, scenario): 'to streamline costs' -> 'to balance the budget'. bad version's goal (B2)
 
 ## Storyline 36: the product designer (nonmoral; storyline checks C1 C2 C3)
 
@@ -452,29 +517,4 @@ Automated checks (design_problems and tools.lint_stimuli) were clean when this s
 - Ngo's original: The farmer switched to a new type of lettuce to increase sales. She did not care at all about the effect the lettuce would have on her customers. She knew her new lettuce would be healthy for many customers.
 - Ngo's effect: `improve the health of her customers`
 - log (goal, scenario): 'to increase sales' -> "to decrease the farmer's workload". bad version's goal (B2)
-
-## Storyline 40: the doctor (nonmoral; storyline checks C1 C2 C3)
-
-### moral (source ngo; checks A1 A9 A10 A13 R1 R2 R3 R4 B1 B8)
-
-**bad** `kmp-nm-040-moral-bad`
-
-> The doctor prescribed the Elixir drug to make the drug company happy. The doctor did not care at all about the effect the Elixir drug would have on the patient. The doctor knew the Elixir drug would cause fatal bleeding for the patient.
-
-- agent: `the doctor`
-- effect: `cause the patient to have fatal bleeding`
-- Ngo's original: The doctor prescribed the Elixir drug to make the drug company happy. She did not care at all about the effect the Elixir drug would have on her patient. She knew the Elixir drug would cause fatal bleeding for her patient.
-- Ngo's effect: `cause the patient to have fatal bleeding`
-- capitalised words (R1: names?): Elixir
-
-**good** `kmp-nm-040-moral-good`
-
-> The doctor prescribed the Gastropurge drug to make the drug company happy. The doctor did not care at all about the effect the Gastropurge drug would have on the patient. The doctor knew the Gastropurge drug would finally cure the patient.
-
-- agent: `the doctor`
-- effect: `cure the patient`
-- Ngo's original: The doctor prescribed the Gastropurge drug to please the drug vendor. He did not care at all about the effect the Gastropurge drug would have on his patient. He knew the Gastropurge drug would finally cure his patient.
-- Ngo's effect: `cure his patient`
-- log (goal, scenario): 'to please the drug vendor' -> 'to make the drug company happy'. bad version's goal (B2)
-- capitalised words (R1: names?): Gastropurge
 

@@ -185,3 +185,14 @@ def test_apply_a_batch_while_a_later_sheet_is_blank(tmp_path):
     assert review.main(_apply_args(path, second)) == 0
     assert _record_ok(tmp_path, path)
     assert {i.review_status for i in load_items(path)} == {"approved", "rejected"}
+
+
+def test_sheet_only_takes_the_items_listed_in_a_file(tmp_path, capsys):
+    # 2026-10-22: screening ran on drafts; the researcher reviews the survivors (selected_items.csv).
+    items = pair() + pair(arm="procedural")
+    path, sheet_args = _setup(tmp_path, items)
+    survivors = tmp_path / "selected_items.csv"
+    write_items([i for i in items if i.arm == "procedural"], survivors)
+    assert review.main([*sheet_args, "--batch", "01_surv", "--only", str(survivors)]) == 0
+    sheet = (tmp_path / "review" / "01_surv.md").read_text(encoding="utf-8")
+    assert "### procedural" in sheet and "prudential" not in sheet

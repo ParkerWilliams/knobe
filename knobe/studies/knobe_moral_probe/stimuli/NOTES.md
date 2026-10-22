@@ -120,6 +120,19 @@ Loaded storylines for the decision P sensitivity fit: 5, 7, 18, 34, 37, 38.
 | 13_mf_shared_31-36 | foundations.csv | 31–36 | 36 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
 | 14_mf_purity_101-120 | foundations.csv | 101–120 / purity (purpose) | 40 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
 
+| 15_nm_surv_moral | nonmoral.csv | screening survivors / moral | 44 | (batches 02–03) | 2026-10-22 | the commit that adds this row | |
+| 16_nm_surv_prudential | nonmoral.csv | screening survivors / prudential | 78 | (batches 04–05) | 2026-10-22 | the commit that adds this row | |
+| 17_nm_surv_procedural | nonmoral.csv | screening survivors / procedural | 26 | (batches 06–07) | 2026-10-22 | the commit that adds this row | |
+| 18_mf_surv_01-18 | foundations.csv | screening survivors / 1–18 | 82 | (batches 08–10) | 2026-10-22 | the commit that adds this row | |
+| 19_mf_surv_19-36_101-120 | foundations.csv | screening survivors / 19–36, 101–120 | 102 | (batches 11–14) | 2026-10-22 | the commit that adds this row | |
+
+**2026-10-22, screen first (MM).** Drafts were screened before review
+(`kmp.screen --allow-draft`; ANALYSIS_LOG.md). Sheets 02–14 were removed
+unfilled, and are still in git history (a268b1d and earlier). Sheets 15–19
+list only the items in each set's `outputs/screening/<set>/selected_items.csv`
+(`tools.review sheet --only`). Items that failed screening stay `draft` in the
+files until they are redrafted or dropped.
+
 ### Drafting notes, batches 04–07
 
 - Clause 1 reuses the adapted moral bad sentence (decision E) except for
