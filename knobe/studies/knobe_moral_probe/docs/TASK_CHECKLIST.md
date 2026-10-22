@@ -59,20 +59,20 @@ waits for you. `HANDOFF.md` has the detail.
 
 - [x] OpenRouter route + `--allow-draft`; reply line; ~$2.30 in all (`ANALYSIS_LOG.md`)
 - [x] Procedural valence limits, balanced fairness question, purity and fairness rewrites (DESIGN amendment 2026-10-22)
-- [ ] **(you)** Review survivor sheets 15-19 (452 items) and `tools.review apply` each
+- [x] **(you)** Reviews 15-23 (MM 2026-10-22), applied
 
 ## Before the pilot (`docs/PILOT.md`)
 
 - [x] No cut-off reasoning: chat budget 512, finish reasons recorded, `cut_off` gate
 - [x] Llama intentionality wording test (w1a/w1b fix the format misses; refusals remain)
 - [x] **(you)** Intentionality w1 wording: w1a (MM 2026-10-22), applied
-- [ ] Agent: `tools.pilot_select` once sheets 15-19 are applied, commit, push
+- [x] Agent: `tools.pilot_select` (re-picked 2026-10-22 from the final approved set), pushed
 - [ ] **(Parker, cluster)** `docs/PILOT.md` steps 1-4 (about 1.2-3 h GPU)
 - [ ] Agent: gates (step 5), log, report; **STOP (you):** refusals and any gate failures
 
 ## Full run (`docs/FULL_RUN.md`)
 
-- [ ] Agent: `tools.pilot_select --full` once sheets 15-19 are applied, commit, push
+- [x] Agent: `tools.pilot_select --full` (2026-10-22, after sheets 15-23): 236 pairs, 432,288 rows; pilot re-picked from the current approved set
 - [ ] **(Parker)** Pilot checks, then `tools.go_no_go` (GO: run; NO-GO: push the checks and stop)
 - [ ] **(Parker, cluster)** Full run, 2 jobs x 3 sets (about 470k rows); early cut-off check; two bundles back
 - [ ] Agent: `kmp.checks --stage full`; analysis, including the sensitivity fits (loaded roles, decision P; strict procedural limits; storylines without a harm pair, decision A)

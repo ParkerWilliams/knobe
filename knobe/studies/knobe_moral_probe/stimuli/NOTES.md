@@ -305,3 +305,14 @@ pass the re-screen; their 18 revised items are on sheet `23_mf_round4`. Loyalty 
 and 32 failed valence (helping the rival reads as kind) and stay draft, out
 of the run. The other sheet 21–22 revise items (nonmoral, harm 10 and 24)
 weren't redrafted: their arms are above target without them.
+
+### Final item set, 2026-10-22
+
+Sheet 23 (MM): 12 approved, 6 revise (loyalty 15 and 29 good, 17 good;
+purity 115 good, 121 bad), which stay out. `tools.pilot_select --full` →
+`stimuli/full_run/`: ngo_verbatim 30 pairs; nonmoral moral 19, prudential
+34, procedural 33; foundations harm 31, fairness 26, authority 24, purity
+22, loyalty 17. Loyalty is below the 20 target but above the floor of 15
+(DESIGN §3.3, D2). The pilot was re-picked from this set, before any pilot
+run: one fairness pair changed (3 for 7), harm 16 has its current text, and
+one nonmoral pair changed.

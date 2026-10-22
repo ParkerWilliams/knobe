@@ -51,11 +51,11 @@ into three groups:
 
 Go to step 3. First work out the time: `throughput.csv` in each pilot
 checks folder gives rows per second for each model. The full run is about
-**78,000 rows per model** (470,592 for all six if every survivor is
-approved; `tools.pilot_select --full` prints the exact item counts). Time
-per model is its rows ÷ its rows per second. As a guide: 20 rows/s is
-about 6.5 h for all six models, and 8 rows/s is about 16 h. The time is
-your call.
+**72,048 rows per model**, 432,288 for all six (the items in
+`stimuli/full_run/`, built 2026-10-22: 30 verbatim pairs, 86 nonmoral, 120
+foundations). Time per model is its rows ÷ its rows per second. As a
+guide: 20 rows/s is about 6 h for all six models, and 8 rows/s is about
+15 h. The time is your call.
 
 ### If NO-GO
 
@@ -109,7 +109,7 @@ the job run to the end.
 
 ## 4. Hand back
 
-The results are about 52 MB compressed in all, so there's one bundle per
+The results are about 48 MB compressed in all, so there's one bundle per
 job (GitHub warns over 50 MB). The glob includes the `.starts.jsonl` and
 `.finish.jsonl` sidecars, which the checks need:
 
