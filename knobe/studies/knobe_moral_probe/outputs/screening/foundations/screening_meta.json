@@ -1,0 +1,75 @@
+{
+  "allow_draft": true,
+  "argv": [
+    "--items",
+    "stimuli/foundations.csv",
+    "--out-dir",
+    "outputs/screening/foundations",
+    "--engine",
+    "openrouter",
+    "--allow-draft",
+    "--concurrency",
+    "8"
+  ],
+  "calls": 1680,
+  "concurrency": 8,
+  "engine": "openrouter",
+  "finished_utc": "2026-10-22T18:08:52+00:00",
+  "git_commit": "ab3633abb75295d071bf554ca792d14ca435984d",
+  "git_dirty": true,
+  "input_tokens": 294562,
+  "items_path": "stimuli/foundations.csv",
+  "items_sha256": "1ce8bc78ea6025f85f61c33b2aca1f6f0a6800712d9aa63b5981b154db06bded",
+  "n_prompts": 1680,
+  "output_tokens": 8400,
+  "pairs_by_arm": {
+    "authority": {
+      "pairs": 26,
+      "pairs_passed": 24
+    },
+    "fairness": {
+      "pairs": 26,
+      "pairs_passed": 2
+    },
+    "harm": {
+      "pairs": 36,
+      "pairs_passed": 31
+    },
+    "loyalty": {
+      "pairs": 26,
+      "pairs_passed": 22
+    },
+    "purity": {
+      "pairs": 26,
+      "pairs_passed": 13
+    }
+  },
+  "prompts_asked": 1680,
+  "prompts_reused": 0,
+  "providers": [
+    "Anthropic"
+  ],
+  "raw_reviewer_models": [
+    "claude-sonnet-4-6"
+  ],
+  "review_max_tokens": 8,
+  "reviewer_model": "claude-sonnet-4-6",
+  "reviewer_temperature": 0.0,
+  "served_models": [
+    "anthropic/claude-sonnet-4.6"
+  ],
+  "shared_without_harm": [
+    2,
+    3,
+    6,
+    24,
+    34
+  ],
+  "shared_without_nonharm": [
+    13
+  ],
+  "started_utc": "2026-10-22T18:05:19+00:00",
+  "target_min": 6,
+  "valence_bad_max": 3,
+  "valence_good_min": 7
+}

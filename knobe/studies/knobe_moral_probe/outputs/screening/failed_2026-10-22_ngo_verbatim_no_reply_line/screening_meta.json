@@ -1,0 +1,50 @@
+{
+  "allow_draft": false,
+  "argv": [
+    "--items",
+    "stimuli/ngo_verbatim.csv",
+    "--out-dir",
+    "outputs/screening/ngo_verbatim",
+    "--engine",
+    "openrouter",
+    "--concurrency",
+    "8"
+  ],
+  "calls": 502,
+  "concurrency": 8,
+  "engine": "openrouter",
+  "finished_utc": "2026-10-22T17:57:42+00:00",
+  "git_commit": "96db31690c06501f4c3e15ec6e863d42bb951a34",
+  "git_dirty": true,
+  "input_tokens": 71248,
+  "items_path": "stimuli/ngo_verbatim.csv",
+  "items_sha256": "dca5a29bf606e25b98c2368d0b8a25c353e02d9271dff1468804921bda1cb504",
+  "n_prompts": 320,
+  "output_tokens": 3587,
+  "pairs_by_arm": {
+    "moral": {
+      "pairs": 40,
+      "pairs_passed": 0
+    }
+  },
+  "prompts_asked": 320,
+  "prompts_reused": 0,
+  "providers": [
+    "Anthropic"
+  ],
+  "raw_reviewer_models": [
+    "claude-sonnet-4-6"
+  ],
+  "review_max_tokens": 8,
+  "reviewer_model": "claude-sonnet-4-6",
+  "reviewer_temperature": 0.0,
+  "served_models": [
+    "anthropic/claude-sonnet-4.6"
+  ],
+  "shared_without_harm": [],
+  "shared_without_nonharm": [],
+  "started_utc": "2026-10-22T17:56:23+00:00",
+  "target_min": 6,
+  "valence_bad_max": 3,
+  "valence_good_min": 7
+}
