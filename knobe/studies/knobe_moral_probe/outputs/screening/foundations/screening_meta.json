@@ -12,9 +12,9 @@
   "calls": 0,
   "concurrency": 8,
   "engine": "openrouter",
-  "finished_utc": "2026-10-22T18:09:31+00:00",
-  "git_commit": "535490ef37ab91ae24d27ca4974d727048519fc6",
-  "git_dirty": true,
+  "finished_utc": "2026-10-22T18:09:42+00:00",
+  "git_commit": "189c55f16225c3ad2ad38842f968454927418439",
+  "git_dirty": false,
   "input_tokens": 0,
   "items_path": "stimuli/foundations.csv",
   "items_sha256": "1ce8bc78ea6025f85f61c33b2aca1f6f0a6800712d9aa63b5981b154db06bded",
@@ -62,7 +62,7 @@
   "shared_without_nonharm": [
     13
   ],
-  "started_utc": "2026-10-22T18:09:31+00:00",
+  "started_utc": "2026-10-22T18:09:42+00:00",
   "target_min": 6,
   "valence_bad_max": 3,
   "valence_good_min": 7
