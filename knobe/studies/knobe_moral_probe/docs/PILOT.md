@@ -9,27 +9,27 @@ instruct) for the first time.
 **Spending:** cluster GPU time only, about 1.2–3 h (estimate below). Parker
 runs it and decides on it. Nothing here calls a paid API.
 
-## 0. Before Parker starts (MM and the agent)
+## 0. Before Parker starts: done 2026-10-22
 
-These must be done and pushed first. Step 1 refuses otherwise.
+Nothing to do here. **Parker: start at step 1.**
 
-1. **MM:** review the survivor sheets (`stimuli/review/15`–`19`) and run
-   `tools.review apply` on each. The pilot needs at least 4 approved,
-   screened pairs in each nonmoral arm and 2 in each foundations arm.
-2. ~~MM: decide the intentionality w1 wording~~ Done 2026-10-22: w1a, applied
-   in `kmp/protocol.py` (DESIGN amendment 2026-10-22).
-3. **Agent:** pick the pilot items, commit, push:
-
-       ../../.venv/bin/python -m tools.pilot_select
-
-   `tools.pilot_select` takes approved pairs that passed screening, ranked
-   by sha256 of a fixed seed and the pair (reproducible, not hand-picked),
-   and writes `stimuli/pilot_run/{nonmoral,foundations}.csv`. Don't run
-   `tools.lint_stimuli` on these files. Its authoring rule that every shared
-   foundations storyline keep its harm pair doesn't apply to a sample, and
-   §8's gates don't use within-storyline contrasts. `kmp.elicit` runs the
-   design check that applies to a selected set (`stage="selected"`, clean
-   on a simulated pick 2026-10-22).
+- MM reviewed and approved the items (sheets 15–23), and the decisions are
+  applied.
+- The intentionality w1 wording is decided (w1a, `kmp/protocol.py`; DESIGN
+  amendment 2026-10-22).
+- The agent picked the pilot items: `stimuli/pilot_run/{nonmoral,foundations}.csv`,
+  44 approved, screened items, drawn reproducibly by `tools.pilot_select`.
+  It also built the full run's items (`stimuli/full_run/`) for
+  `docs/FULL_RUN.md`.
+- Dry run 2026-10-22, fake engine: every step-3 command, step 5's checks
+  and `tools.go_no_go` ran end to end on these files. `cut_off` was clean,
+  with no coverage or number-rate stops. The verdict was NO-GO only
+  because the fake engine answers at random, which fails validity by
+  chance.
+- Don't run `tools.lint_stimuli` on the pilot or full-run files. Its
+  authoring rule that every shared foundations storyline keeps its harm
+  pair doesn't apply to a sample. `kmp.elicit` runs the check that applies
+  (`stage="selected"`).
 
 ## Cluster notes (unchanged from FIRST_LOOK.md)
 
