@@ -39,7 +39,7 @@ sys.path.insert(0, str(STUDY_DIR / "analysis"))
 from knobe.registry import load_registry  # noqa: E402
 
 from first_look import fit, seed_for  # noqa: E402
-from kmp.frame import analysis_rows, load_frame  # noqa: E402
+from kmp.frame import REFUSAL_BOUNDS, analysis_rows, load_frame, with_refusal_bound  # noqa: E402
 from kmp.items import load_items  # noqa: E402
 
 QUESTIONS = ["intentionality", "blame", "praise"]
@@ -75,11 +75,14 @@ def main(argv: list[str] | None = None) -> int:
                    help="whose reading of each reply: kmp.answer (regex, the reader of record) or Jev's "
                         "sidecar (kmp/jev.py; tools/jev_read.py)")
     p.add_argument("--out", required=True, type=Path)
+    p.add_argument("--refusals", choices=REFUSAL_BOUNDS, default="drop",
+                   help="drop: refusals stay missing (primary); min / max: refusals filled to the smallest / "
+                        "largest bad - good gap they allow (DESIGN.md amendment 2026-10-22, option C)")
     a = p.parse_args(argv)
     items = load_items(a.items)
     registry = load_registry(a.registry) if a.registry else None
     frame = pd.concat([load_frame(r, items, registry, reparse=a.reparse, reader=a.reader) for r in a.results], ignore_index=True)
-    out = arm_effects(analysis_rows(frame), a.experiment)
+    out = arm_effects(analysis_rows(with_refusal_bound(frame, a.refusals)), a.experiment).assign(refusals=a.refusals)
     a.out.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(a.out, index=False)
     cols = ["model_key", "qkey", "arm", "term", "n_rows", "n_storylines", "mean_bad", "mean_good", "beta_obs", "p_wcb"]

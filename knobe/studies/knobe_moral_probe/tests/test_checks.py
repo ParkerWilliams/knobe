@@ -769,3 +769,15 @@ def test_main_writes_the_cut_off_table_from_the_elicit_sidecar(tmp_path):
     checks.main(["--results", str(out), "--items", str(items_path), "--out-dir", str(tmp_path / "c")])
     co = pd.read_csv(tmp_path / "c" / "cut_off.csv")
     assert set(co["status"]) == {"pass"} and (co["n_length"] == 0).all()
+
+
+def test_refusal_rates_by_sign_are_reported_not_gated():
+    rows = [_row("llama-3.1-8b-instruct", "i1", "praise", "w1", False, "moral", "bad", None) for _ in range(4)]
+    rows += [_row("llama-3.1-8b-instruct", "i2", "praise", "w1", False, "moral", "good", 5) for _ in range(4)]
+    df = _frame(rows)
+    df["refusal"] = [True, True, False, False] + [False] * 4
+    t = checks.refusal_rates(df).set_index("sign")
+    assert t.loc["bad", "refusal_share"] == 0.5 and t.loc["good", "refusal_share"] == 0.0
+    assert t.loc["bad", "n_rows"] == 4
+    gate = checks.gate_summary({**checks.run_checks(df, [], []), "refusal_rates": checks.refusal_rates(df)})
+    assert not any(b.startswith("refusal") for b in gate["blocking"] + gate["findings"])

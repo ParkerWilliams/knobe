@@ -314,6 +314,21 @@ def cut_off(frame: pd.DataFrame, finish: dict[str, dict] | None) -> pd.DataFrame
     return _with_model_cols(g, frame)[cols]
 
 
+REFUSAL_KEYS = ["model_key", "experiment", "qkey", "sign"]
+
+
+def refusal_rates(frame: pd.DataFrame) -> pd.DataFrame:
+    """Per model x experiment x question x sign: share of replies that are refusals (kmp.frame's
+    refusal column). Reported, never gated: under option C (DESIGN.md amendment 2026-10-22) refusal
+    is an outcome of its own, and the fits bound its effect. Empty for frames without the column."""
+    cols = [*MODEL_COLS, *REFUSAL_KEYS[1:], "n_rows", "n_refusals", "refusal_share"]
+    if "refusal" not in frame.columns:
+        return pd.DataFrame(columns=cols)
+    g = frame.groupby(REFUSAL_KEYS)["refusal"].agg(n_rows="size", n_refusals="sum").reset_index()
+    g["refusal_share"] = g["n_refusals"] / g["n_rows"]
+    return _with_model_cols(g, frame)[cols]
+
+
 def expected_cells(items: list[Item]) -> set[tuple[str, str, str]]:
     """(experiment, qkey, wording_key) cells the items should produce for every model."""
     return {(item.experiment, qkey, w.key)
@@ -457,7 +472,8 @@ def run_checks(frame: pd.DataFrame, items: list[Item], model_keys: list[str],
     return {"coverage": coverage(frame, items, model_keys), "number_rates": number_rates(frame),
             "anchor_agreement": anchor_agreement(frame), "validity": validity(frame),
             "example_copying": example_copying(frame, baseline), "example_effect": example_effect(frame, baseline),
-            "throughput": throughput(frame, model_starts), "cut_off": cut_off(frame, finish)}
+            "throughput": throughput(frame, model_starts), "cut_off": cut_off(frame, finish),
+            "refusal_rates": refusal_rates(frame)}
 
 
 STAGES = ("pilot", "full")

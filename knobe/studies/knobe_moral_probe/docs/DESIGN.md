@@ -176,6 +176,29 @@ the 2026-10-22 screen (`ANALYSIS_LOG.md`; `outputs/screening/`).
   14–16%) remain under every wording: that's model behavior, for the
   analysis plan. Earlier kmp runs (the OpenRouter stand-ins) used the old
   w1. w2 and w3r are unchanged.
+- **Refusals (MM chose option C; fixed before any study-model data).**
+  Applies to every model, not only Llama-3.1-8B-Instruct. A refusal is a
+  reply with no rating that `kmp.answer` reads as a refusal ("I cannot …",
+  "I can't …", "Unfortunately …"; the frame's `refusal` column).
+  - **Primary fits:** answered rows only (refusals missing).
+  - **Refusal as an outcome:** refusal share per model × experiment ×
+    question × sign (`kmp.checks` `refusal_rates.csv`), reported for every
+    run. A model that refuses more on bad items is itself a finding about
+    the asymmetry.
+  - **Bounds:** each sign-effect fit is repeated with refusals filled at
+    the extremes they allow, on the recoded scale (`frame.with_refusal_bound`;
+    `--refusals min|max` in `analysis/first_look.py` and
+    `analysis/arm_effects.py`). **min:** bad → 0, good → 10, the smallest
+    bad − good gap. **max:** bad → 10, good → 0, the largest. An effect is
+    robust to refusals if it keeps its sign and significance under both.
+    Otherwise it is reported as not robust to refusals.
+  - **Why not the alternatives:** dropping refusals alone hides a selection
+    effect, because refusals cluster on bad items (Llama: 14–16% vs 5–7%).
+    Coding them as a value imposes a reading, which a refusal to rate
+    intentionality doesn't support. Dropping the model loses it on the core
+    questions.
+  - Non-refusal misses (prose with no number) stay missing under every
+    bound. The number-rate gate reports them.
 
 ## 1. What the study asks
 

@@ -30,6 +30,11 @@ Column contract:
                     recorded. Fit on this.
   parsed_rating_raw the number as written, NOT recoded. Never fit on it.
   parse_ok, raw_response  kept from the result record
+  refusal           True where the row has no rating and kmp.answer reads the reply as a
+                    refusal ("I cannot ...", "I can't ...", "Unfortunately ..."). Re-derived
+                    from raw_response, since ResultRecord.parse_method can't hold it.
+                    with_refusal_bound fills these rows for the bounds (DESIGN.md amendment
+                    2026-10-22, option C).
   model_family, tuning_status   from the registry via
                     knobe.analysis.ingest.build_model_key_index
                     (tuning_status is "finetuned" / "pretrained")
@@ -148,11 +153,32 @@ def load_frame(results_path: str | Path, items: list[Item], registry: dict | Non
     d["reversed"] = [protocol.is_reversed(q, w) for q, w in zip(d["qkey"], d["wording_key"])]
     raw = pd.to_numeric(d["parsed_rating_raw"], errors="coerce").astype(float).where(d["parse_ok"].astype(bool))
     d["rating"] = np.where(d["reversed"], 10 - raw, raw)
+    d["refusal"] = [bool(np.isnan(r)) and extract_rating(t)[2] == "refusal"
+                    for r, t in zip(d["rating"], d["raw_response"])]
     d["sign_c"] = d["sign"].map(SIGN_C)
     d["tuning_c"] = d["tuning_status"].map(TUNING_C)
     d.attrs["n_dropped_unknown_items"] = n_dropped
     d.attrs["dropped_unknown_item_ids"] = dropped_ids
     return d
+
+
+REFUSAL_BOUNDS = ("drop", "min", "max")
+
+
+def with_refusal_bound(frame: pd.DataFrame, bound: str) -> pd.DataFrame:
+    """Option C's refusal handling (DESIGN.md amendment 2026-10-22), on the recoded rating scale.
+    drop: refusals stay missing (the primary fit). min: bad-version refusals -> 0, good -> 10, the
+    smallest bad - good gap the refusals allow. max: bad -> 10, good -> 0, the largest. Non-refusal
+    misses stay missing under every bound."""
+    if bound not in REFUSAL_BOUNDS:
+        raise ValueError(f"bound must be one of {REFUSAL_BOUNDS}, not {bound!r}")
+    out = frame.copy()
+    if bound == "drop":
+        return out
+    bad_value, good_value = (0.0, 10.0) if bound == "min" else (10.0, 0.0)
+    fill = np.where(out["sign"] == "bad", bad_value, good_value)
+    out["rating"] = np.where(out["refusal"], fill, out["rating"])
+    return out
 
 
 def analysis_rows(frame: pd.DataFrame) -> pd.DataFrame:
