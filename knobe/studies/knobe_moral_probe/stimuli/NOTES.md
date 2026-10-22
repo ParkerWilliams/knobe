@@ -284,3 +284,18 @@ from the same session (sheet 20, `20_mm_rulings_decisions.csv`):
 Pilot items (`stimuli/pilot_run/`) were drawn from the approved set the
 same day, before the revisions. The pilot tests the protocol, not these
 items.
+
+### Revisions after the survivor review, 2026-10-22
+
+Drafted (`claude-opus-5-5`) from MM's notes, re-screened (only the changed
+items, `--rescreen-changed`), and put on two sheets:
+
+| batch | file | content | items |
+|---|---|---|---|
+| 21_nm_revised | nonmoral.csv | revised prudential and procedural pairs that passed the re-screen | 54 |
+| 22_mf_revised | foundations.csv | the 14 rebuilt storylines, item fixes, purpose 109/111/113/114/116/120, new 121 | 132 |
+
+Five revised foundations pairs failed the first re-screen and passed after
+one more fix (20 harm, 24 harm, 32 loyalty, 9 authority, 120 purity). The
+adapted moral drafts that failed the first screen stay draft and out of the
+run (decision G).
