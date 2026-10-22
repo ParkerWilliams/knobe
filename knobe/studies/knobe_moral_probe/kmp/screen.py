@@ -2,7 +2,8 @@
 item; pairs pass only if both versions pass.
 
 Pass rule per item:
-  valence              bad <= 3, good >= 7
+  valence              bad <= 3, good >= 7; procedural items bad <= 4, good >= 6
+                       (VALENCE_BY_ARM, DESIGN.md amendment 2026-10-22)
   nonmoral item        intended domain >= 6 and strictly highest of the three
                        (ngo_verbatim items are screened exactly like nonmoral moral)
   foundation item      intended foundation >= 6 and strictly higher than harm
@@ -24,6 +25,11 @@ from kmp.items import Item, pair_key
 
 VALENCE_BAD_MAX = 3
 VALENCE_GOOD_MIN = 7
+# Per-arm (bad max, good min) where an arm's definition rules out the welfare stakes that would push
+# its valence to the extremes (decision F). Procedural, DESIGN.md amendment 2026-10-22: on the
+# 2026-10-22 screen every procedural bad version rated valence 3 or 4 (25 of 40 at 4) and every good
+# version 6 to 8, so the general limits failed the arm on a definition-faithful reading.
+VALENCE_BY_ARM: dict[str, tuple[int, int]] = {"procedural": (4, 6)}
 # Starting value from configs/curation.yaml moral_min=6 (the main study's instrument).
 # Deliberately NOT read from that config, so main-pipeline edits can't silently change kmp screening.
 TARGET_MIN = 6
@@ -68,18 +74,24 @@ def intended_check(item: Item) -> str:
     raise protocol.unknown_experiment(experiment)
 
 
+def valence_limits(item: Item) -> tuple[int, int]:
+    """(bad max, good min) for this item's arm."""
+    return VALENCE_BY_ARM.get(item.arm, (VALENCE_BAD_MAX, VALENCE_GOOD_MIN))
+
+
 def item_failures(item: Item, scores: dict[str, int | None] | None) -> list[str]:
     """scores=None (or empty) means the item was never rated."""
     if not scores:
         return ["not rated"]
     failures = []
     v = scores.get("valence")
+    bad_max, good_min = valence_limits(item)
     if v is None:
         failures.append("valence unparsed")
-    elif item.sign == "bad" and v > VALENCE_BAD_MAX:
-        failures.append(f"valence {v} > {VALENCE_BAD_MAX} for a bad item")
-    elif item.sign == "good" and v < VALENCE_GOOD_MIN:
-        failures.append(f"valence {v} < {VALENCE_GOOD_MIN} for a good item")
+    elif item.sign == "bad" and v > bad_max:
+        failures.append(f"valence {v} > {bad_max} for a bad item")
+    elif item.sign == "good" and v < good_min:
+        failures.append(f"valence {v} < {good_min} for a good item")
 
     target_key = intended_check(item)
     t = scores.get(target_key)

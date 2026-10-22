@@ -100,6 +100,42 @@ This sets two §6/§12 open items. The prompt text is unchanged.
   These cells are reported per §8, not silently analyzed. Whether
   `intentionality` w1 should become a scale wording is a design decision.
 
+**Amended 2026-10-22 (screening; MM, with Claude):** three changes, each from
+the 2026-10-22 screen (`ANALYSIS_LOG.md`; `outputs/screening/`).
+- **Reply line.** Screening prompts end "Reply with only the number." before
+  "Answer:" (`protocol.SCREENING_REPLY`; subject-model prompts unchanged).
+  Without it, the pinned reviewer opened with reasoning and the 8-token
+  budget cut it off: 355 of 502 answers were unparsed, and 0/40 verbatim pairs
+  passed. With it, all 2,960 answers parsed on the first call. The pass rule
+  uses only the 0–10 ratings, so no information the screen needs is lost.
+- **Route and order.** The pinned reviewer is reached through OpenRouter,
+  served by Anthropic only, with no fallbacks
+  (`kmp.screen --engine openrouter`; the meta records served model and
+  provider). Drafts are screened before the researcher's item review
+  (`--allow-draft`), and the researcher reviews the survivors. A failing item
+  stays `draft` until it is redrafted or dropped.
+- **Procedural valence limits: bad ≤ 4, good ≥ 6** (`screen.VALENCE_BY_ARM`;
+  every other arm keeps ≤ 3 / ≥ 7). Justification:
+  - The procedural definition says no one's welfare is at stake. A valence
+    question about effects "for those it affects" therefore has little range
+    to work with: a faithful procedural item should sit just off the
+    midpoint, not at the extremes.
+  - The real distribution shows exactly that. All 40 bad versions rated 3
+    or 4 (25 at 4), all 40 good versions 6–8, and no item fell on the wrong
+    side of 5. The direction was right in every pair; only the distance from
+    5 was short.
+  - Decision F (DEFINITIONS §7, resolved 2026-10-01) anticipated this case:
+    author to the definition, and if procedural items fail valence in bulk,
+    revisit the threshold against the real distribution and record the
+    change. It rules out the alternative, adding welfare stakes to push
+    valence out, because that turns procedural items into moral ones.
+  - The other procedural checks are unchanged (procedural ≥ 6 and highest
+    of the three domains), so the domain reading is what still guards the
+    arm.
+  - Under the new limits 38 of 40 procedural pairs pass (13 under the
+    general limits; the other 2 fail the domain check). The analysis plan reports the threshold, and a
+    sensitivity fit keeps only the 13 pairs that pass the general limits.
+
 ## 1. What the study asks
 
 **Background.** In Ngo et al. (2015), people rate an agent as acting more
@@ -222,7 +258,7 @@ authors.
 
 | check | pass |
 |---|---|
-| valence | bad version ≤ 3, good version ≥ 7 |
+| valence | bad version ≤ 3, good version ≥ 7 (procedural: ≤ 4 / ≥ 6, amendment 2026-10-22) |
 | nonmoral domain | the intended domain rates ≥ 6 and highest of the three |
 | foundation item | the intended foundation rates ≥ 6 and higher than harm |
 | harm control | harm rates ≥ 6 |

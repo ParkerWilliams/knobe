@@ -701,3 +701,18 @@ def test_openrouter_engine_needs_a_key(tmp_path, nonmoral_items, monkeypatch, ca
     assert screen_run.main(["--items", str(_write(nonmoral_items, tmp_path)), "--out-dir", str(tmp_path / "s"),
                             "--engine", "openrouter"]) == 2
     assert "OPENROUTER_API_KEY" in capsys.readouterr().err
+
+
+# --- procedural valence thresholds (DESIGN amendment 2026-10-22, decision F) ---
+
+def test_procedural_valence_limits_are_bad_4_good_6_and_others_unchanged(nonmoral_items):
+    good_domains = {"domain_moral": 1, "domain_prudential": 1, "domain_procedural": 8}
+    bad = _get(nonmoral_items, "procedural", "bad")
+    good = _get(nonmoral_items, "procedural", "good")
+    assert screen.item_failures(bad, {"valence": 4, **good_domains}) == []
+    assert screen.item_failures(bad, {"valence": 5, **good_domains}) == ["valence 5 > 4 for a bad item"]
+    assert screen.item_failures(good, {"valence": 6, **good_domains}) == []
+    assert screen.item_failures(good, {"valence": 5, **good_domains}) == ["valence 5 < 6 for a good item"]
+    prud = _get(nonmoral_items, "prudential", "bad")
+    assert screen.item_failures(prud, {"valence": 4, **NM_GOOD_SCORES}) == ["valence 4 > 3 for a bad item"]
+    assert screen.valence_limits(prud) == (screen.VALENCE_BAD_MAX, screen.VALENCE_GOOD_MIN)

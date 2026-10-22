@@ -59,6 +59,7 @@ from kmp.prompts import ScreeningPrompt, build_screening_prompts
 from kmp.screen import (
     TARGET_MIN,
     VALENCE_BAD_MAX,
+    VALENCE_BY_ARM,
     VALENCE_GOOD_MIN,
     ScreeningRawResult,
     select_pairs,
@@ -439,6 +440,7 @@ def main(argv: list[str] | None = None) -> int:
         "review_max_tokens": protocol.REVIEW_MAX_TOKENS,
         "valence_bad_max": VALENCE_BAD_MAX,
         "valence_good_min": VALENCE_GOOD_MIN,
+        "valence_by_arm": {arm: list(lim) for arm, lim in VALENCE_BY_ARM.items()},
         "target_min": TARGET_MIN,
         "n_prompts": n,
         "calls": len(asked),
