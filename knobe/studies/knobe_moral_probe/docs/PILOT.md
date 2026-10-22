@@ -16,8 +16,8 @@ These must be done and pushed first. Step 1 refuses otherwise.
 1. **MM:** review the survivor sheets (`stimuli/review/15`–`19`) and run
    `tools.review apply` on each. The pilot needs at least 4 approved,
    screened pairs in each nonmoral arm and 2 in each foundations arm.
-2. **MM:** decide the intentionality w1 wording (see "Open decision"
-   below). It changes the prompt text, so it has to come before the pilot.
+2. ~~MM: decide the intentionality w1 wording~~ Done 2026-10-22: w1a, applied
+   in `kmp/protocol.py` (DESIGN amendment 2026-10-22).
 3. **Agent:** pick the pilot items, commit, push:
 
        ../../.venv/bin/python -m tools.pilot_select
@@ -138,7 +138,7 @@ check, anchor reversal, throughput, and the cut-off gate).
 - **Pretrained models may fail validity** (§8 check 2). A finding, not a
   blocker.
 
-## Open decision (MM, before step 0.3): intentionality w1 wording
+## Decided 2026-10-22 (MM): intentionality w1 wording is w1a
 
 w1 is Ngo's yes/no question, "Did {agent} intentionally {effect}?". On
 Llama-3.1-8B-Instruct, appending a scale fixes the format misses

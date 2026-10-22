@@ -33,7 +33,8 @@ def test_subject_prompts_unique_and_rendered(nonmoral_items):
     assert len({s.stem for s in specs}) == len(specs)
     spec = next(s for s in specs if s.qkey == "intentionality" and s.wording_key == "w1")
     item = next(i for i in nonmoral_items if i.item_id == spec.item_id)
-    assert f"Question: Did {item.agent} intentionally {item.effect}?\nAnswer:" in spec.text
+    assert (f"Question: Did {item.agent} intentionally {item.effect}? Answer on a scale from 0 (definitely not) "
+            f"to 10 (definitely yes).\nAnswer:") in spec.text
     assert spec.n_samples == protocol.N_PER_WORDING
     assert next(s for s in specs if s.qkey == "significance").n_samples == protocol.N_SINGLE
 

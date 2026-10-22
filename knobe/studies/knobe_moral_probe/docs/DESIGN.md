@@ -162,6 +162,20 @@ the 2026-10-22 screen (`ANALYSIS_LOG.md`; `outputs/screening/`).
   only: base models have no end-of-answer token and always run to their
   10-token budget, and they write the number right after "Answer:". Runner
   version 0.3.
+- **Intentionality w1 gets a scale (MM chose w1a).** w1 is now "Did {agent}
+  intentionally {effect}? Answer on a scale from 0 (definitely not) to 10
+  (definitely yes)." It was Ngo's bare yes/no question. The question itself
+  is unchanged, and the paper reports w1 as Ngo's question with an appended
+  scale. Justification (`outputs/first_look/intentionality_wording_test.csv`,
+  Llama-3.1-8B-Instruct on OpenRouter, Ngo's 80 items × 8 samples): as a
+  yes/no question, 53% of answers were numbers, and the misses leaned to bad
+  items (39% vs 34%). With w1a, 84% were numbers, with format misses at 4%
+  and 7%. The sign effect (bad − good) rose from 1.7 to 3.9. The
+  alternative w1b ("…0 (no) to 10 (yes)") was 86% numeric but less even
+  across bad and good (80% vs 92%). Refusals to rate harm (bad items
+  14–16%) remain under every wording: that's model behavior, for the
+  analysis plan. Earlier kmp runs (the OpenRouter stand-ins) used the old
+  w1. w2 and w3r are unchanged.
 
 ## 1. What the study asks
 

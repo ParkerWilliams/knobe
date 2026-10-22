@@ -63,7 +63,11 @@ _EXTENT = ", on a scale from 0 (not at all) to 10 (entirely)?"
 
 QUESTIONS: Mapping[str, tuple[Wording, ...]] = MappingProxyType({
     "intentionality": (
-        Wording("w1", "Did {agent} intentionally {effect}?"),
+        # Ngo's question with a 0-10 scale appended (DESIGN.md amendment 2026-10-22, MM: w1a). As a bare
+        # yes/no question it drew "Yes"/"No" or prose without a number (Llama-3.1-8B-Instruct: 53% numeric;
+        # w1a 84%, outputs/first_look/intentionality_wording_test.csv).
+        Wording("w1", "Did {agent} intentionally {effect}? Answer on a scale from 0 (definitely not) "
+                      "to 10 (definitely yes)."),
         Wording("w2", "To what extent did {agent} {effect} on purpose, on a scale from 0 (not at all) to 10 (completely)?"),
         Wording("w3r", "How intentionally did {agent} {effect}, on a scale from 0 (completely intentionally) "
                        "to 10 (not at all intentionally)?", reversed=True),

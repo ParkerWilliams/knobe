@@ -65,8 +65,8 @@ waits for you. `HANDOFF.md` has the detail.
 
 - [x] No cut-off reasoning: chat budget 512, finish reasons recorded, `cut_off` gate
 - [x] Llama intentionality wording test (w1a/w1b fix the format misses; refusals remain)
-- [ ] **(you)** Decide intentionality w1 wording (w1a recommended)
-- [ ] Agent: apply the wording, `tools.pilot_select`, commit, push
+- [x] **(you)** Intentionality w1 wording: w1a (MM 2026-10-22), applied
+- [ ] Agent: `tools.pilot_select` once sheets 15-19 are applied, commit, push
 - [ ] **(Parker, cluster)** `docs/PILOT.md` steps 1-4 (about 1.2-3 h GPU)
 - [ ] Agent: gates (step 5), log, report; **STOP (you):** refusals and any gate failures
 

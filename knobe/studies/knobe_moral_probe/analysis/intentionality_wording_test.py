@@ -35,11 +35,12 @@ from kmp.items import load_items
 from tools.openrouter_first_look import OpenRouterEngine
 
 STUDY = Path(__file__).resolve().parents[1]
-W1 = protocol.QUESTIONS["intentionality"][0]
+# Ngo's question, as w1 read before the 2026-10-22 change (protocol's w1 is now the w1a below).
+NGO_W1 = "Did {agent} intentionally {effect}?"
 CANDIDATES = {
-    "w1": W1.template,
-    "w1a": W1.template + " Answer on a scale from 0 (definitely not) to 10 (definitely yes).",
-    "w1b": W1.template + " Answer with a number from 0 (no) to 10 (yes).",
+    "w1": NGO_W1,
+    "w1a": NGO_W1 + " Answer on a scale from 0 (definitely not) to 10 (definitely yes).",
+    "w1b": NGO_W1 + " Answer with a number from 0 (no) to 10 (yes).",
 }
 MODEL_KEY, MODEL_ID = "llama-3.1-8b-instruct", "meta-llama/llama-3.1-8b-instruct"
 

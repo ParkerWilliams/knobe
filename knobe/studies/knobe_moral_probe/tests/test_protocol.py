@@ -26,7 +26,9 @@ def test_reversed_wordings_put_the_high_pole_at_zero():
 
 
 def test_w1_matches_the_pilot_and_production_wording():
-    assert protocol.wording("intentionality", "w1").template == "Did {agent} intentionally {effect}?"
+    # intentionality w1 is Ngo's question with a scale appended (DESIGN.md amendment 2026-10-22).
+    assert protocol.wording("intentionality", "w1").template == (
+        "Did {agent} intentionally {effect}? Answer on a scale from 0 (definitely not) to 10 (definitely yes).")
     for qkey in ("blame", "praise"):
         ours = protocol.wording(qkey, "w1").template.format(agent="the CEO", effect="x")
         theirs = constants.QUESTIONS[f"q_{qkey}"].format(agent_lower="the CEO")
