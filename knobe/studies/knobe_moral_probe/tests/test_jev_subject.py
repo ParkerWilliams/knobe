@@ -184,3 +184,18 @@ def test_analyze_takes_a_registry(monkeypatch, tmp_path):
     monkeypatch.setattr(frame, "REPARSE", frame.REPARSE)
     assert orfl.cmd_analyze(a) == 0
     assert seen["registry"] == reg
+
+
+def test_checks_writes_the_kmp_checks_that_apply_and_the_means_per_wording(tmp_path, monkeypatch):
+    tool = _tool()
+    _, _, out = _elicit(tool, tmp_path, monkeypatch, FakeSubject())   # 8 for bad, 3 for good, every wording
+    items_csv, out_dir = tmp_path / "items.csv", tmp_path / "checks"
+    assert tool.main(["checks", "--results", str(out), "--items", str(items_csv), "--out-dir", str(out_dir)]) == 0
+    assert {p.name for p in out_dir.iterdir()} == {"coverage.csv", "number_rates.csv", "anchor_agreement.csv",
+                                                   "validity.csv", "wording_means.csv"}
+    import pandas as pd
+    anchor = pd.read_csv(out_dir / "anchor_agreement.csv").set_index("qkey")
+    assert anchor.loc["blame", "r"] < 0                     # a fixed answer reads backwards once recoded
+    w = pd.read_csv(out_dir / "wording_means.csv").set_index(["qkey", "wording_key"])
+    assert (w.loc[("blame", "w1"), "bad"], w.loc[("blame", "w3r"), "bad"]) == (8, 2)
+    assert w.loc[("blame", "w1"), "bad_minus_good"] == 5

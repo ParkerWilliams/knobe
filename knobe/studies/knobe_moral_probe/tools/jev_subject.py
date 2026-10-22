@@ -26,6 +26,13 @@ Readouts:
 From the study folder with OPENROUTER_API_KEY set:
     ../../.venv/bin/python tools/jev_subject.py elicit --items <items.csv> --out <run.jsonl> [--allow-draft]
     ../../.venv/bin/python tools/jev_subject.py ev --results <run.jsonl> [...]
+    ../../.venv/bin/python tools/jev_subject.py checks --results <run.jsonl> --items <items.csv> --out-dir <dir>
+
+checks: kmp.checks refuses a no-examples run as --results (its example-copying
+check needs examples), so this writes the kmp.checks tables that do apply --
+coverage, number_rates, anchor_agreement (normal vs reversed wording),
+validity -- with kmp.checks' own functions, plus wording_means: the bad and
+good mean per question x wording, after recoding.
 """
 from __future__ import annotations
 
@@ -44,11 +51,13 @@ from pathlib import Path
 STUDY = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(STUDY))
 
+import pandas as pd  # noqa: E402
 from knobe.elicit_vllm import EngineResponse  # noqa: E402
-from knobe.registry import model_key_for  # noqa: E402
+from knobe.registry import load_registry, model_key_for  # noqa: E402
 from knobe.schemas import ResultRecord, append_jsonl, read_jsonl  # noqa: E402
 
-from kmp import elicit, jev, prompts  # noqa: E402
+from kmp import checks, elicit, jev, prompts  # noqa: E402
+from kmp.frame import analysis_rows, load_frame  # noqa: E402
 from kmp.items import design_problems, load_items  # noqa: E402
 from tools.jev_read import DecisionsClient  # noqa: E402
 
@@ -184,6 +193,27 @@ def cmd_ev(a: argparse.Namespace) -> int:
     return 0
 
 
+def wording_means(frame: pd.DataFrame) -> pd.DataFrame:
+    """Bad and good mean rating per model x question x wording, after recoding."""
+    m = (analysis_rows(frame).groupby(["model_key", "qkey", "wording_key", "reversed", "sign"])["rating"].mean()
+         .unstack("sign").reindex(columns=["bad", "good"]).reset_index())
+    m["bad_minus_good"] = m["bad"] - m["good"]
+    return m
+
+
+def cmd_checks(a: argparse.Namespace) -> int:
+    items = load_items(a.items)
+    frame = load_frame(a.results, items, registry=load_registry(REGISTRY))
+    tables = {"coverage": checks.coverage(frame, items, [MODEL_KEY]), "number_rates": checks.number_rates(frame),
+              "anchor_agreement": checks.anchor_agreement(frame), "validity": checks.validity(frame),
+              "wording_means": wording_means(frame)}
+    a.out_dir.mkdir(parents=True, exist_ok=True)
+    for name, table in tables.items():
+        table.to_csv(a.out_dir / f"{name}.csv", index=False)
+        print(f"\n== {name}\n{table.to_string(index=False)}")
+    return 0
+
+
 def main(argv: list[str] | None = None, transport=None) -> int:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -196,8 +226,14 @@ def main(argv: list[str] | None = None, transport=None) -> int:
                    help="run draft items as written (pilot texts), skipping the approval and design checks")
     v = sub.add_parser("ev")
     v.add_argument("--results", required=True, type=Path, nargs="+")
+    c = sub.add_parser("checks")
+    c.add_argument("--results", required=True, type=Path)
+    c.add_argument("--items", required=True, type=Path)
+    c.add_argument("--out-dir", required=True, type=Path)
     a = p.parse_args(argv)
-    return cmd_elicit(a, transport) if a.cmd == "elicit" else cmd_ev(a)
+    if a.cmd == "elicit":
+        return cmd_elicit(a, transport)
+    return cmd_ev(a) if a.cmd == "ev" else cmd_checks(a)
 
 
 if __name__ == "__main__":
