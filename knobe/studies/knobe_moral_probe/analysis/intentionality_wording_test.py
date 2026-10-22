@@ -9,7 +9,8 @@ and append a scale:
 on Ngo's 80 verbatim items, with everything else as in the real run: the worked examples, the chat
 format, kmp.elicit's job IDs and its seed/temperature rule (knobe.jobs.derive_temperature_and_seed:
 sha256 of RELEASE, prompt_id, model_key, sample_idx), protocol.MAX_TOKENS (chat 512), and kmp.answer
-as the reader. Only sample_idx < --samples is run (default 20 of the protocol's 168).
+as the reader. Only sample_idx < --samples is run (default 20, above kmp's 8 per intentionality
+wording, so every sample runs).
 
 Reuses tools/openrouter_first_look.OpenRouterEngine (the DeepInfra pin, no fallbacks) and
 kmp.elicit.build_jobs / to_request / to_result; nothing about the prompt differs from kmp's except the
@@ -89,7 +90,8 @@ def main(argv: list[str] | None = None) -> int:
     a = p.parse_args(argv)
     items = load_items(a.items)
     jobs = build(items, a.samples)
-    print(f"{len(jobs)} jobs ({len(CANDIDATES)} wordings x {len(items)} items x {a.samples} samples)")
+    per = min(a.samples, protocol.n_samples("intentionality"))
+    print(f"{len(jobs)} jobs ({len(CANDIDATES)} wordings x {len(items)} items x {per} samples)")
     if a.dry_run:
         print(jobs[0].text[-400:])
         return 0
