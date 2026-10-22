@@ -70,8 +70,10 @@ waits for you. `HANDOFF.md` has the detail.
 - [ ] **(Parker, cluster)** `docs/PILOT.md` steps 1-4 (about 1.2-3 h GPU)
 - [ ] Agent: gates (step 5), log, report; **STOP (you):** refusals and any gate failures
 
-## Full run
+## Full run (`docs/FULL_RUN.md`)
 
-- [ ] Cost estimate (about 85k rows per model, about 7–9.5 h for 6 models). **STOP (you):** go-ahead
-- [ ] Full run; `kmp.checks --stage full`
-- [ ] Analysis, including the sensitivity fit without the loaded-role storylines (decision P)
+- [ ] Agent: `tools.pilot_select --full` once sheets 15-19 are applied, commit, push
+- [ ] **(Parker)** Pilot checks, then `tools.go_no_go` (GO: run; NO-GO: push the checks and stop)
+- [ ] **(Parker, cluster)** Full run, 2 jobs x 3 sets (about 470k rows); early cut-off check; two bundles back
+- [ ] Agent: `kmp.checks --stage full`; analysis, including the sensitivity fits (loaded roles, decision P; strict procedural limits; storylines without a harm pair, decision A)
+- [ ] **(you)** How Llama's refusals enter the analysis

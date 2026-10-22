@@ -40,3 +40,11 @@ def test_pick_refuses_too_few_eligible_pairs(tmp_path):
         assert "procedural" in str(exc)
     else:
         raise AssertionError("expected ValueError")
+
+
+def test_full_takes_every_eligible_pair(tmp_path):
+    path, sel = _setup(tmp_path, "nonmoral", 3, drop_status={(2, "moral")})
+    picked = pilot_select.pick_all(load_items(path), load_items(sel))
+    keys = {(i.storyline_id, i.arm) for i in picked}
+    assert len(keys) == 3 * 3 - 2 and (1, "procedural") not in keys and (2, "moral") not in keys
+    assert len(picked) == 2 * len(keys)

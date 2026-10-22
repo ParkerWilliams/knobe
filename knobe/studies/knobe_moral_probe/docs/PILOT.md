@@ -115,7 +115,11 @@ up). The checks need both. From the study folder:
     git commit -m "[knobe_moral_probe] pilot: elicitation results (bundle), manifests, BOS check"
     git push origin knobe_moral_probe
 
-## 5. Local (agent): gates
+## 5. Gates, then go / no-go
+
+**Parker:** go on to `docs/FULL_RUN.md`. Its steps 1–2 run these same
+checks and `tools.go_no_go`, and say whether to start the full run.
+The agent runs them locally too, for the log:
 
     tar -xzf ../../results_dist/results_knobe_moral_probe_pilot.tar.gz
     for e in nonmoral foundations; do for m in gemma llama_mistral; do
