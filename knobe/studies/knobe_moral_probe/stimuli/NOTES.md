@@ -122,9 +122,9 @@ Loaded storylines for the decision P sensitivity fit: 5, 7, 18, 34, 37, 38.
 
 | 15_nm_surv_moral | nonmoral.csv | screening survivors / moral | 44 | (batches 02–03) | 2026-10-22 | the commit that adds this row | |
 | 16_nm_surv_prudential | nonmoral.csv | screening survivors / prudential | 78 | (batches 04–05) | 2026-10-22 | the commit that adds this row | |
-| 17_nm_surv_procedural | nonmoral.csv | screening survivors / procedural | 26 | (batches 06–07) | 2026-10-22 | the commit that adds this row | |
-| 18_mf_surv_01-18 | foundations.csv | screening survivors / 1–18 | 82 | (batches 08–10) | 2026-10-22 | the commit that adds this row | |
-| 19_mf_surv_19-36_101-120 | foundations.csv | screening survivors / 19–36, 101–120 | 102 | (batches 11–14) | 2026-10-22 | the commit that adds this row | |
+| 17_nm_surv_procedural | nonmoral.csv | screening survivors / procedural | 76 (rebuilt after the procedural limits) | (batches 06–07) | 2026-10-22 | the commit that adds this row | |
+| 18_mf_surv_01-18 | foundations.csv | screening survivors / 1–18 | 116 (rebuilt after the purity and fairness rewrites) | (batches 08–10) | 2026-10-22 | the commit that adds this row | |
+| 19_mf_surv_19-36_101-120 | foundations.csv | screening survivors / 19–36, 101–120 | 138 (rebuilt after the purity and fairness rewrites) | (batches 11–14) | 2026-10-22 | the commit that adds this row | |
 
 **2026-10-22, screen first (MM).** Drafts were screened before review
 (`kmp.screen --allow-draft`; ANALYSIS_LOG.md). Sheets 02–14 were removed
@@ -244,3 +244,19 @@ Pairs planned: harm 36, fairness 26, loyalty 26, authority 26, purity 26 (6 shar
   distance from it, as in the §4.8 example. Some may read as "no
   violation" rather than active honoring (§5 mistake 1); the valence
   screen will show it.
+
+### Re-screen fixes, 2026-10-22
+
+- Purity, 13 storylines (3, 6, 101, 103, 105–107, 109, 112, 114, 116, 117,
+  119): both versions now end "…, desecrating it" or a concrete honoring act
+  "…, honoring it". "Leave it untouched" read as neutral (purity 0–5).
+- Fairness, all 26: the background states a standing unfairness, identical
+  in both versions ("…had agreed to share X equally, but the same few had
+  been getting most of it"). The bad version cheats the others out of their
+  share, and the good version puts it right "at last, treating every X
+  fairly". Chores (5, 14, 17) cheat the few doing the work; 11 and 20 are
+  lotteries. Storyline 17's chore is now "the cooking for the potluck"
+  (was "the dishes to bring"). This went with the balanced `fnd_fairness`
+  question (DESIGN amendment 2026-10-22).
+- Shared storylines whose harm pair failed: 2, 3, 6, 24, 34 (decision A:
+  kept, outside the primary pooled contrast).
