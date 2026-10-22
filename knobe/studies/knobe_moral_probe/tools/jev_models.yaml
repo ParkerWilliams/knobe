@@ -1,0 +1,12 @@
+# Registry for Jev as a subject model (tools/jev_subject.py), kept apart from
+# tools/openrouter_models.yaml so `openrouter_first_look.py elicit` (which runs
+# every family there through chat completions) never picks Jev up.
+# Jev (TypeSafe's decision model) answers through OpenRouter's Decisions API,
+# not chat completions; "finetuned" is only the registry's slot for a served
+# model. d_model and n_layers are unpublished and read by no analysis here: 0.
+families:
+  jev-1.14:
+    finetuned: typesafe/jev-1.14
+    d_model: 0
+    n_layers: 0
+    role: extension

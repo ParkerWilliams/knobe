@@ -177,7 +177,7 @@ def cmd_elicit(a: argparse.Namespace) -> int:
 
 def cmd_analyze(a: argparse.Namespace) -> int:
     import kmp.frame
-    kmp.frame.default_registry_path = lambda: REGISTRY   # kmp.frame's registry lookup
+    kmp.frame.default_registry_path = lambda: a.registry  # kmp.frame's registry lookup
     kmp.frame.REPARSE = a.reparse                        # re-read pre-0.2 rows with kmp.answer
     kmp.frame.READER = a.reader                          # or read Jev's sidecar (kmp/jev.py)
     from kmp import checks
@@ -226,6 +226,8 @@ def main() -> int:
     an.add_argument("--reader", choices=("regex", "jev", "jev_ev"), default="regex",
                     help="whose reading of each reply: kmp.answer (regex, the reader of record) or Jev's sidecar "
                          "(tools/jev_read.py); checks then go to outputs/checks/<results name>__<reader>/")
+    an.add_argument("--registry", type=Path, default=REGISTRY,
+                    help="model registry (default: the chat models'; tools/jev_models.yaml for tools/jev_subject.py runs)")
     an.add_argument("--no-checks", action="store_true",
                     help="sign-effect table only: kmp.checks writes outputs/checks/<results name>/, which "
                          "would overwrite that run's committed checks (e.g. a --reparse of an old run)")
