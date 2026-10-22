@@ -150,9 +150,11 @@ Llama-3.1-8B-Instruct, appending a scale fixes the format misses
 
 | wording | appended text | numeric | format misses (bad / good) | bad − good |
 |---|---|---|---|---|
-| w1 | — | 53% | 39% / 34% | 1.7 |
-| w1a | "Answer on a scale from 0 (definitely not) to 10 (definitely yes)." | 84% | 4% / 7% | 3.9 |
-| w1b | "Answer with a number from 0 (no) to 10 (yes)." | 86% | 5% / 3% | 3.9 |
+| w1 | — | 53% (56%) | 39% / 34% | 1.7 |
+| w1a | "Answer on a scale from 0 (definitely not) to 10 (definitely yes)." | 84% (88%) | 4% / 7% | 3.9 |
+| w1b | "Answer with a number from 0 (no) to 10 (yes)." | 86% (88%) | 5% / 3% | 3.9 |
+
+In brackets: re-read with the runner-0.4 reader (DESIGN amendment 2026-10-22, answers after a lead-in), under which w1a is 85% / 91% on bad / good items.
 
 Both keep Ngo's question word for word. Recommendation: **w1a**. It's
 closer to the other wordings' anchored scales, and its number rate is more

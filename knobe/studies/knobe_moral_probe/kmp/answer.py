@@ -20,6 +20,11 @@ extract_rating(text) -> (value | None, ok, rule):
                    "I would answer/rate/say/give ... N", "my rating is N",
                    "a level/degree of N", "N/10", "N out of 10"
        final_line  the last non-empty line is just the number (not a "1." list marker)
+       answer_line after a lead-in line ending in ":" that announces an answer ("I would
+                   rate the answer as:", "I would answer:", "Here it is:"), the next line
+                   is the number, maybe with its anchor label ("10 (definitely yes)"), or
+                   a labelled line ending in the number ("Russell intentionally made his
+                   neighbor unhappy: 10") (2026-10-22)
        first_number  fallback, only if nothing above matched: the first standalone
                    number on the first line, ended by punctuation, a bracket or the
                    line end ("the CEO deserves 0", "Stanley is 7 ("), not "5 people"
@@ -49,8 +54,10 @@ _END = r"(?=[\"'”]?\s*(?:$|[.,;:!?)(\]]|\n))"   # the number ends the clause: 
 _LABELS = (r"(?:answer|rating|score|level|blame(?:worthy|worthiness)?|praise(?:worthy|worthiness)?"
            r"|intentional(?:ity)?|significance)")
 _PHRASES = [
-    re.compile(rf"\banswer\b(?:[^0-9\n]{{0,25}}?\b(?:is|would\s+be|will\s+be))?\s*[:=]?\s*[\"'“]?{_N}(?!\w)",
-               re.IGNORECASE),
+    # "the answer is 7", "the answer to the question about X is: 10", "is a clear 10", "should be 0" (2026-10-22)
+    re.compile(rf"\banswer\b(?:[^0-9\n]{{0,60}}?\b(?:is|would\s+be|will\s+be|should\s+be))?\s*[:=]?\s*"
+               rf"(?:(?:likely|probably|clearly)\s+)?(?:an?\s+(?:clear\s+)?)?[\"'“]?{_N}(?!\w)", re.IGNORECASE),
+    re.compile(rf"\bto\s+answer\s+(?:the|this|your)\s+question\s*:\s*{_N}(?!\w)", re.IGNORECASE),
     re.compile(rf"^\W*{_LABELS}[^:\n0-9]{{0,20}}:\s*{_N}(?!\w)", re.IGNORECASE | re.MULTILINE),
     re.compile(rf"\b(?:level|degree|extent)\s+of\s+{_N}(?!\w)", re.IGNORECASE),
     re.compile(rf"\bI(?:'d|\s+would|\s+will|'ll)?\s+(?:answer|rate|say|give|score|choose|pick|go\s+with)\b"
@@ -65,6 +72,11 @@ _PHRASES = [
     re.compile(rf"(?<![\w.]){_N}\s+out\s+of\s+1(?:0\b|$)", re.IGNORECASE),
 ]
 _FINAL_LINE = re.compile(rf"^\W*{_N}\W*$")
+# A lead-in line announcing the answer, and the answer line after it (2026-10-22).
+_LEAD_IN = re.compile(r"(?:\b(?:answer|rate|rating|rated|say|score|number\s+would\s+be)\b[^:\n]*|\bhere\s+it\s+is)\s*:\s*$",
+                      re.IGNORECASE)
+_ANSWER_LINE = re.compile(rf"^\W*{_N}\s*(?:\([^)\n]*\))?\s*\.?\s*$")
+_LABELLED_LINE = re.compile(rf"^[^:\n]{{3,200}}:\s*{_N}\s*(?:\([^)\n]*\))?\s*\.?\s*$")
 _LIST_MARKER = re.compile(r"^\s*1[.)]\s*$")      # "Here's why:\n\n1." starts a list, it isn't a rating
 # A reply that opens a numbered list is answering the worked examples one by one, not the question.
 _LIST_START = re.compile(r"^\W*1[.)](?:\s|$)")
@@ -104,6 +116,11 @@ def extract_rating(text: str) -> tuple[int | float | None, bool, str]:
         for m in pat.finditer(masked):
             found.append(("phrase", _num(m.group(1))))
     lines = [ln for ln in masked.splitlines() if ln.strip()]
+    for prev, line in zip(lines, lines[1:]):
+        if _LEAD_IN.search(prev) and not _LIST_MARKER.match(line):
+            m = _ANSWER_LINE.match(line) or _LABELLED_LINE.match(line)
+            if m:
+                found.append(("answer_line", _num(m.group(1))))
     if lines:
         m = _FINAL_LINE.match(lines[-1])
         opens_list = len(lines) > 1 and lines[-2].rstrip().endswith(":") and m and _num(m.group(1)) == 1

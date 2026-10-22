@@ -131,6 +131,6 @@ all six files, the analysis, and the log lines.
   failures and Llama's refusals enter the analysis is decided afterwards,
   from the same rows. Holding the run for them gains nothing.
 - **The 70% floor for Llama:** on OpenRouter its intentionality answers
-  were 84% numbers with refusals at 14–16% on bad items
+  were 88% numbers (with the runner-0.4 reader) and refusals 14% on bad items
   (`ANALYSIS_LOG.md`, 2026-10-22). Anything well below that would be a new
   problem, not the known refusals, so it stops.

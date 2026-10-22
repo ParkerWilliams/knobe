@@ -199,6 +199,26 @@ the 2026-10-22 screen (`ANALYSIS_LOG.md`; `outputs/screening/`).
     questions.
   - Non-refusal misses (prose with no number) stay missing under every
     bound. The number-rate gate reports them.
+- **Reader: answers after a lead-in** (`kmp.answer`, runner 0.4). It now
+  also reads:
+  - an answer line after a line that ends in ":" and announces an answer
+    ("I would rate the answer as:\n\n10 (definitely yes)");
+  - a labelled line after such a lead-in ("Russell intentionally made his
+    neighbor unhappy: 10");
+  - "the answer is …" with an article or a hedge ("is a clear 10", "would
+    be a 2", "is likely 0", "should be 0"), with a longer gap ("the answer
+    to the question about X is: 10"), and "To answer the question: 0".
+
+  Why: on Llama's w1a replies, 28 of 35 non-refusal misses had a plain
+  answer. Validation on all 121,265 distinct OpenRouter replies (the
+  2026-10-12/13 corpus Parker validated the reader on, plus the wording
+  test): 66 readings change. 64 replies are newly read; each was checked by
+  hand and is the number the reply gives as its answer. 2 replies that
+  contradict themselves ("9 … the answer should be 10, not 9") go from a
+  number to ambiguous. No reading changes value. 21 new fixtures in
+  `tests/test_answer.py` are real replies or marked guards. w1a on Llama:
+  84.4% → 88.3% numeric (bad 85.3%, good 91.2%). Nearly all of the
+  remaining bad-item misses are refusals (13.8%).
 
 ## 1. What the study asks
 

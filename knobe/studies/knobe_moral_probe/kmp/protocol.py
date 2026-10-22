@@ -15,7 +15,7 @@ from types import MappingProxyType
 from knobe import constants
 
 RELEASE = "knobe_moral_probe"                      # seed namespace (knobe.jobs)
-RUNNER_VERSION = "knobe_moral_probe_elicit-0.3"   # 0.2: per-format MAX_TOKENS + kmp.answer readout; 0.3: chat 512 + finish sidecar
+RUNNER_VERSION = "knobe_moral_probe_elicit-0.4"   # 0.2: per-format MAX_TOKENS + kmp.answer readout; 0.3: chat 512 + finish sidecar; 0.4: kmp.answer answer_line
 # Answer budget per prompt format (DESIGN.md amendment 2026-10-13, "answer format"):
 # chat (instruct) models often explain before the number, so 10 tokens cut most
 # answers off. 256 from the 2026-10-13 calibration (outputs/first_look/or_calibration_max_tokens.csv):

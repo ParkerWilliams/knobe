@@ -32,6 +32,7 @@ import pandas as pd
 from knobe.schemas import append_jsonl, read_jsonl, ResultRecord
 
 from kmp import elicit, prompts, protocol
+from kmp.answer import extract_rating
 from kmp.items import load_items
 from tools.openrouter_first_look import OpenRouterEngine
 
@@ -61,16 +62,20 @@ def build(items, samples: int) -> list[elicit.Job]:
 
 def summarize(rows: list[ResultRecord], finish: dict, items) -> pd.DataFrame:
     sign = {i.item_id: i.sign for i in items}
+    # Re-read with the current kmp.answer, so the table follows reader changes (2026-10-22: answer_line).
+    read = [extract_rating(r.raw_response) for r in rows]
     df = pd.DataFrame([{"wording": r.prompt_id.split("::")[2], "sign": sign[r.prompt_id.split("::")[0]],
-                        "ok": r.parse_ok, "rating": r.parsed_rating, "raw": r.raw_response,
-                        "finish": (finish.get(r.job_id) or {}).get("finish_reason")} for r in rows])
+                        "ok": ok, "rating": v, "raw": r.raw_response, "refusal": rule == "refusal",
+                        "finish": (finish.get(r.job_id) or {}).get("finish_reason")}
+                       for r, (v, ok, rule) in zip(rows, read)])
     out = []
     for w, g in df.groupby("wording"):
         rated = g[g["ok"]]
         yes_no = g["raw"].str.strip().str.match(r"(?i)^(yes|no)\b")
         means = rated.groupby("sign")["rating"].mean()
         out.append({"wording": w, "template": CANDIDATES[w], "n": len(g), "number_rate": g["ok"].mean(),
-                    "yes_no_share": yes_no.mean(), "cut_off_share": (g["finish"] == "length").mean(),
+                    "yes_no_share": yes_no.mean(), "refusal_share": g["refusal"].mean(),
+                    "cut_off_share": (g["finish"] == "length").mean(),
                     "not_recorded": int(g["finish"].isna().sum()),
                     "number_rate_bad": g.loc[g["sign"] == "bad", "ok"].mean(),
                     "number_rate_good": g.loc[g["sign"] == "good", "ok"].mean(),
@@ -87,6 +92,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--summary", type=Path, default=STUDY / "outputs" / "first_look" / "intentionality_wording_test.csv")
     p.add_argument("--concurrency", type=int, default=16)
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--summary-only", action="store_true", help="rebuild --summary from --out, no API calls")
     a = p.parse_args(argv)
     items = load_items(a.items)
     jobs = build(items, a.samples)
@@ -94,6 +100,11 @@ def main(argv: list[str] | None = None) -> int:
     print(f"{len(jobs)} jobs ({len(CANDIDATES)} wordings x {len(items)} items x {per} samples)")
     if a.dry_run:
         print(jobs[0].text[-400:])
+        return 0
+    if a.summary_only:
+        table = summarize(read_jsonl(a.out, ResultRecord), elicit.read_finish(a.out), items)
+        table.to_csv(a.summary, index=False)
+        print(table.drop(columns="template").to_string(index=False))
         return 0
     api_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
     if not api_key:

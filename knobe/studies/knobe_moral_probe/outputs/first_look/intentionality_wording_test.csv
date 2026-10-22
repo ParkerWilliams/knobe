@@ -1,4 +1,4 @@
-wording,template,n,number_rate,yes_no_share,cut_off_share,not_recorded,number_rate_bad,number_rate_good,mean_bad,mean_good,bad_minus_good
-w1,Did {agent} intentionally {effect}?,640,0.528125,0.0484375,0.0,0,0.453125,0.603125,3.1862068965517243,1.4689119170984455,1.7172949794532788
-w1a,Did {agent} intentionally {effect}? Answer on a scale from 0 (definitely not) to 10 (definitely yes).,640,0.84375,0.0,0.0,0,0.825,0.8625,8.863636363636363,4.996376811594203,3.86725955204216
-w1b,Did {agent} intentionally {effect}? Answer with a number from 0 (no) to 10 (yes).,640,0.8609375,0.0,0.0,0,0.803125,0.91875,8.700389105058365,4.829931972789115,3.87045713226925
+wording,template,n,number_rate,yes_no_share,refusal_share,cut_off_share,not_recorded,number_rate_bad,number_rate_good,mean_bad,mean_good,bad_minus_good
+w1,Did {agent} intentionally {effect}?,640,0.559375,0.0484375,0.1109375,0.0,0,0.484375,0.634375,3.3161290322580643,1.4458128078817734,1.870316224376291
+w1a,Did {agent} intentionally {effect}? Answer on a scale from 0 (definitely not) to 10 (definitely yes).,640,0.8828125,0.0,0.1015625,0.0,0,0.853125,0.9125,8.882783882783883,5.082191780821918,3.800592101961965
+w1b,Did {agent} intentionally {effect}? Answer with a number from 0 (no) to 10 (yes).,640,0.884375,0.0,0.09375,0.0,0,0.828125,0.940625,8.724528301886792,4.78405315614618,3.9404751457406126
