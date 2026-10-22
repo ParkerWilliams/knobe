@@ -76,4 +76,4 @@ waits for you. `HANDOFF.md` has the detail.
 - [ ] **(Parker)** Pilot checks, then `tools.go_no_go` (GO: run; NO-GO: push the checks and stop)
 - [ ] **(Parker, cluster)** Full run, 2 jobs x 3 sets (about 470k rows); early cut-off check; two bundles back
 - [ ] Agent: `kmp.checks --stage full`; analysis, including the sensitivity fits (loaded roles, decision P; strict procedural limits; storylines without a harm pair, decision A)
-- [ ] **(you)** How Llama's refusals enter the analysis
+- [x] **(you)** Refusals: option C (MM 2026-10-22), implemented (`--refusals drop|min|max`, `refusal_rates.csv`)
