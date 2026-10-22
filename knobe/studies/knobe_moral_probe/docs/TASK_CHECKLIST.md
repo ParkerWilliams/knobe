@@ -55,12 +55,20 @@ waits for you. `HANDOFF.md` has the detail.
 - [ ] Task 21: revisit round (only if Task 20 asks for rewrites)
 - [ ] Task 22: close out
 
-## Before the pilot
+## Screening (done 2026-10-22, screen first; MM)
 
-- [ ] Double-BOS check: done in the first look
-- [ ] Pilot cost estimate including the `--no-examples` run, for all 6 models. **STOP (you):** go-ahead
-- [ ] Pilot: about 40 items × 6 models, with and without examples; `kmp.checks --stage pilot --baseline <noex results>`
-- [ ] Revisit `COPY_EXCESS_MAX` (0.10 proposed) on the pilot results
+- [x] OpenRouter route + `--allow-draft`; reply line; ~$2.30 in all (`ANALYSIS_LOG.md`)
+- [x] Procedural valence limits, balanced fairness question, purity and fairness rewrites (DESIGN amendment 2026-10-22)
+- [ ] **(you)** Review survivor sheets 15-19 (452 items) and `tools.review apply` each
+
+## Before the pilot (`docs/PILOT.md`)
+
+- [x] No cut-off reasoning: chat budget 512, finish reasons recorded, `cut_off` gate
+- [x] Llama intentionality wording test (w1a/w1b fix the format misses; refusals remain)
+- [ ] **(you)** Decide intentionality w1 wording (w1a recommended)
+- [ ] Agent: apply the wording, `tools.pilot_select`, commit, push
+- [ ] **(Parker, cluster)** `docs/PILOT.md` steps 1-4 (about 1.2-3 h GPU)
+- [ ] Agent: gates (step 5), log, report; **STOP (you):** refusals and any gate failures
 
 ## Full run
 
