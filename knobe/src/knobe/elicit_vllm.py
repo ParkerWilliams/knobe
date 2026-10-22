@@ -111,6 +111,11 @@ class EngineResponse:
     job_id: str
     raw_response: str
     logprobs_0_10: list[float] | None
+    # Why generation stopped ("stop" = end of answer, "length" = hit max_tokens) and how many tokens
+    # were generated, where the engine reports them; None otherwise. Optional and unused by the main
+    # pipeline; knobe_moral_probe records them to check that no reply was cut off (2026-10-22).
+    finish_reason: str | None = None
+    n_output_tokens: int | None = None
 
 
 class GenerationEngine(Protocol):
@@ -236,14 +241,16 @@ class FakeEngine:
         rating = _rating_from_material(material)
 
         if not req.want_first_token_logprobs:
-            return EngineResponse(job_id=req.job_id, raw_response=str(rating), logprobs_0_10=None)
+            return EngineResponse(job_id=req.job_id, raw_response=str(rating), logprobs_0_10=None,
+                                  finish_reason="stop", n_output_tokens=1)
 
         if self.token_mode == "single":
             logprobs_0_10 = self._single_token_logprobs(material, rating)
         else:
             logprobs_0_10 = self._split_token_logprobs(material, rating)
 
-        return EngineResponse(job_id=req.job_id, raw_response=str(rating), logprobs_0_10=logprobs_0_10)
+        return EngineResponse(job_id=req.job_id, raw_response=str(rating), logprobs_0_10=logprobs_0_10,
+                              finish_reason="stop", n_output_tokens=1)
 
     @staticmethod
     def _single_token_logprobs(material: str, rating: int) -> list[float]:
@@ -483,7 +490,9 @@ class VllmEngine:
                 ]
 
         return [
-            EngineResponse(job_id=req.job_id, raw_response=text, logprobs_0_10=logprobs_by_idx[i])
+            EngineResponse(job_id=req.job_id, raw_response=text, logprobs_0_10=logprobs_by_idx[i],
+                           finish_reason=outputs[i].outputs[0].finish_reason,
+                           n_output_tokens=len(outputs[i].outputs[0].token_ids))
             for i, (req, text) in enumerate(zip(batch, texts))
         ]
 
@@ -618,7 +627,11 @@ class HfEngine:
         logprobs_0_10 = None
         if req.want_first_token_logprobs and out.scores:
             logprobs_0_10 = self._extract_logprobs_0_10(prompt, out.scores[0][0])
-        return EngineResponse(job_id=req.job_id, raw_response=text, logprobs_0_10=logprobs_0_10)
+        eos = self._tokenizer.eos_token_id
+        hit_eos = len(new_tokens) > 0 and int(new_tokens[-1]) == eos
+        finish = "length" if len(new_tokens) >= req.max_tokens and not hit_eos else "stop"
+        return EngineResponse(job_id=req.job_id, raw_response=text, logprobs_0_10=logprobs_0_10,
+                              finish_reason=finish, n_output_tokens=len(new_tokens))
 
     def _extract_logprobs_0_10(self, prompt: str, pos0_logits) -> list[float]:
         log_probs = torch.log_softmax(pos0_logits.float(), dim=-1)

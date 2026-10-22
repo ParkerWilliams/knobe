@@ -65,3 +65,9 @@ def test_reparse_rescores_old_first_integer_rows(tmp_path):
     assert old["parse_ok"].tolist() == [True, True, True, True]
     assert new["parse_ok"].tolist() == [False, False, True, True]
     assert new["parsed_rating_raw"].tolist()[2:] == [8.5, 7]
+
+
+def test_chat_budget_leaves_room_for_reasoning():
+    # 2026-10-22 (MM): don't cut off reasoning in the real run. 512 is twice the stand-in calibration's
+    # 256 (cut-off <= 1.1% there); kmp.checks' cut_off gate verifies it on the study models.
+    assert protocol.MAX_TOKENS["chat"] == 512 and protocol.CUT_OFF_MAX == 0.01

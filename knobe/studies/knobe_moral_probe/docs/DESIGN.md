@@ -147,6 +147,21 @@ the 2026-10-22 screen (`ANALYSIS_LOG.md`; `outputs/screening/`).
   0–3 even when the text said "treating every member fairly" (2/26 pairs,
   then 5/26 after two rounds of item fixes). No subject-model data has used
   the question yet, so nothing collected is affected.
+- **No cut-off reasoning in the real run** (MM). Chat answer budget
+  `protocol.MAX_TOKENS["chat"]` 256 → 512, twice the calibrated budget, as
+  headroom for the study models (the calibration used stand-ins, where 256
+  cut off at most 1.1%). Generating stops at the end of each answer, so the
+  larger budget costs GPU time only for replies that are long anyway. Every
+  run now records each reply's finish reason and output token count
+  (`<out>.finish.jsonl`, from the engine: vLLM, HF, OpenRouter), so a reply
+  cut off at the budget is no longer indistinguishable from one without a
+  number. `kmp.checks`' new `cut_off` gate blocks any chat cell (model ×
+  experiment × question × wording) where more than 1%
+  (`protocol.CUT_OFF_MAX`) of replies stopped at the budget, or where any
+  reply has no recorded finish reason. Raw (pretrained) cells are reported
+  only: base models have no end-of-answer token and always run to their
+  10-token budget, and they write the number right after "Answer:". Runner
+  version 0.3.
 
 ## 1. What the study asks
 

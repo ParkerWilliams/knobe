@@ -254,7 +254,12 @@ def test_example_copying_and_anchor_agreement_are_per_experiment_and_question():
 
 # --- main: coverage, gates, provenance ---------------------------------------
 
-def _write_results(path, rows):
+def _write_results(path, rows, finish_reason="stop"):
+    """Also writes kmp.elicit's finish sidecar (every reply finish_reason), as a real run does."""
+    with open(elicit.finish_path(path), "w", encoding="utf-8") as ffh:
+        for pid, mk, _ in rows:
+            ffh.write(json.dumps({"job_id": f"{pid}::{mk}::0", "finish_reason": finish_reason,
+                                  "n_output_tokens": 2}) + "\n")
     with open(path, "w", encoding="utf-8") as fh:
         for pid, mk, value in rows:
             append_jsonl(ResultRecord(
@@ -713,3 +718,54 @@ def test_main_rejects_unknown_stage(tmp_path):
     items = make_ngo_verbatim_items(1)
     with pytest.raises(SystemExit):
         _run_main(tmp_path, items, _full_rows(items, "gemma-2-9b-instruct"), extra=["--stage", "final"])
+
+
+# --- cut-off gate (2026-10-22: no reply may be cut off at the token budget in chat format) ---
+
+def _cut_frame(n_chat=100, n_raw=10):
+    rows = [_row("mistral-7b-v0.1-instruct", "i1", "blame", "w1", False, "moral", "bad", 5) for _ in range(n_chat)]
+    rows += [_row("mistral-7b-v0.1-pretrained", "i1", "blame", "w1", False, "moral", "bad", 5) for _ in range(n_raw)]
+    df = _frame(rows)
+    df["fmt"] = ["chat"] * n_chat + ["raw"] * n_raw
+    return df
+
+
+def _finish(df, n_length, unrecorded=0):
+    chat = list(df.loc[df["fmt"] == "chat", "job_id"])
+    out = {j: {"finish_reason": "length" if k < n_length else "stop", "n_output_tokens": 3}
+           for k, j in enumerate(chat[unrecorded:])}
+    out.update({j: {"finish_reason": "length", "n_output_tokens": 10} for j in df.loc[df["fmt"] == "raw", "job_id"]})
+    return out
+
+
+def test_cut_off_passes_at_the_max_and_fails_above_it():
+    df = _cut_frame()
+    at = checks.cut_off(df, _finish(df, round(protocol.CUT_OFF_MAX * 100)))
+    over = checks.cut_off(df, _finish(df, round(protocol.CUT_OFF_MAX * 100) + 1))
+    chat = lambda t: t[t["fmt"] == "chat"].iloc[0]
+    assert chat(at)["status"] == "pass" and chat(over)["status"] == "fail"
+    raw = at[at["fmt"] == "raw"].iloc[0]
+    assert raw["status"] == "reported" and raw["cut_off_share"] == 1.0     # pretrained models never stop on their own
+
+
+def test_cut_off_unrecorded_chat_rows_block_and_raw_never_blocks():
+    df = _cut_frame()
+    table = checks.cut_off(df, _finish(df, 0, unrecorded=1))
+    assert table[table["fmt"] == "chat"].iloc[0]["status"] == "not_recorded"
+    gate = checks.gate_summary({**checks.run_checks(df, [], []), "cut_off": table})
+    assert any(b.startswith("cut_off: mistral-7b-v0.1-instruct") and "not_recorded" in b for b in gate["blocking"])
+    assert not any("pretrained" in b for b in gate["blocking"] if b.startswith("cut_off"))
+    fail = checks.cut_off(df, _finish(df, 5))
+    gate = checks.gate_summary({**checks.run_checks(df, [], []), "cut_off": fail})
+    assert any(b.startswith("cut_off: mistral-7b-v0.1-instruct nonmoral blame w1 chat 0.05") for b in gate["blocking"])
+
+
+def test_main_writes_the_cut_off_table_from_the_elicit_sidecar(tmp_path):
+    items = make_items("nonmoral", 1)[:2]
+    items_path, out = tmp_path / "items.csv", tmp_path / "with.jsonl"
+    write_items(items, items_path)
+    assert elicit.main(["--items", str(items_path), "--engine", "fake", "--model-keys",
+                        "mistral-7b-v0.1-instruct", "--out", str(out)]) == 0
+    checks.main(["--results", str(out), "--items", str(items_path), "--out-dir", str(tmp_path / "c")])
+    co = pd.read_csv(tmp_path / "c" / "cut_off.csv")
+    assert set(co["status"]) == {"pass"} and (co["n_length"] == 0).all()

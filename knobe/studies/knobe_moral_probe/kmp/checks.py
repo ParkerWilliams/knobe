@@ -24,6 +24,11 @@ main() exits 1 (gate_summary) if anything blocks:
     is not caught here;
   - gate 1: a model x experiment x question x wording cell below the
     number-rate minimum;
+  - cut-off (2026-10-22): a chat-format cell where more than
+    protocol.CUT_OFF_MAX of replies stopped at the token budget ("length"
+    in kmp.elicit's <out>.finish.jsonl), or where any reply has no recorded
+    finish reason. Raw-format cells (pretrained models, which never stop on
+    their own) are reported only;
   - gate 2, finetuned models: an applicable validity check that fails or
     has no data; example copying that fails (excess above
     protocol.COPY_EXCESS_MAX) or has no data (no --baseline, or no baseline
@@ -70,7 +75,7 @@ import numpy as np
 import pandas as pd
 
 from kmp import protocol
-from kmp.elicit import RUN_FIELDS, manifest_path, read_model_starts, run_field
+from kmp.elicit import RUN_FIELDS, manifest_path, read_finish, read_model_starts, run_field
 from kmp.frame import analysis_rows, load_frame
 from kmp.items import Item, load_items
 
@@ -282,6 +287,33 @@ def throughput(frame: pd.DataFrame, starts: dict[str, float] | None = None) -> p
     return _with_model_cols(out, frame)
 
 
+CUT_OFF_KEYS = ["model_key", "experiment", "qkey", "wording_key", "fmt"]
+NOT_RECORDED, REPORTED = "not_recorded", "reported"
+
+
+def cut_off(frame: pd.DataFrame, finish: dict[str, dict] | None) -> pd.DataFrame:
+    """Per model x experiment x question x wording x format: replies that stopped at the token budget.
+    finish: kmp.elicit.read_finish of the results. Chat cells pass at cut_off_share <= CUT_OFF_MAX and
+    are not_recorded if any reply lacks a finish reason; raw cells are reported only. A frame without
+    fmt (synthetic test frames) gives an empty table."""
+    cols = [*MODEL_COLS, *CUT_OFF_KEYS[1:], "n_rows", "n_recorded", "n_length", "cut_off_share",
+            "max_output_tokens", "status"]
+    if "fmt" not in frame.columns:
+        return pd.DataFrame(columns=cols)
+    finish = finish or {}
+    f = frame[[*CUT_OFF_KEYS, "job_id"]].copy()
+    f["finish_reason"] = f["job_id"].map(lambda j: (finish.get(j) or {}).get("finish_reason"))
+    f["n_tokens"] = f["job_id"].map(lambda j: (finish.get(j) or {}).get("n_output_tokens"))
+    g = f.groupby(CUT_OFF_KEYS).agg(n_rows=("job_id", "size"), n_recorded=("finish_reason", "count"),
+                                    n_length=("finish_reason", lambda x: int((x == "length").sum())),
+                                    max_output_tokens=("n_tokens", "max")).reset_index()
+    g["cut_off_share"] = g["n_length"] / g["n_recorded"].where(g["n_recorded"] > 0)
+    g["status"] = np.select(
+        [g["fmt"] != "chat", g["n_recorded"] < g["n_rows"], g["cut_off_share"] <= protocol.CUT_OFF_MAX],
+        [REPORTED, NOT_RECORDED, PASS], default=FAIL)
+    return _with_model_cols(g, frame)[cols]
+
+
 def expected_cells(items: list[Item]) -> set[tuple[str, str, str]]:
     """(experiment, qkey, wording_key) cells the items should produce for every model."""
     return {(item.experiment, qkey, w.key)
@@ -417,13 +449,15 @@ def provenance(frame: pd.DataFrame, results: Path, items: Path, manifest: dict |
 
 def run_checks(frame: pd.DataFrame, items: list[Item], model_keys: list[str],
                baseline: pd.DataFrame | None = None,
-               model_starts: dict[str, float] | None = None) -> dict[str, pd.DataFrame]:
+               model_starts: dict[str, float] | None = None,
+               finish: dict[str, dict] | None = None) -> dict[str, pd.DataFrame]:
     """baseline: the kmp.frame of the no-examples run, or None (copying is then no_data).
-    model_starts: kmp.elicit.read_model_starts of the results, for throughput."""
+    model_starts: kmp.elicit.read_model_starts of the results, for throughput.
+    finish: kmp.elicit.read_finish of the results, for cut_off (None: chat cells are not_recorded)."""
     return {"coverage": coverage(frame, items, model_keys), "number_rates": number_rates(frame),
             "anchor_agreement": anchor_agreement(frame), "validity": validity(frame),
             "example_copying": example_copying(frame, baseline), "example_effect": example_effect(frame, baseline),
-            "throughput": throughput(frame, model_starts)}
+            "throughput": throughput(frame, model_starts), "cut_off": cut_off(frame, finish)}
 
 
 STAGES = ("pilot", "full")
@@ -458,6 +492,12 @@ def gate_summary(tables: dict[str, pd.DataFrame], stage: str = "pilot") -> dict[
         detail = "" if r.status == NO_DATA else f" (value {r.value:.2f})"
         (blocking if r.tuning_status == "finetuned" else findings).append(
             f"validity: {r.model_key} {r.experiment} {r.check} {r.status}{detail}")
+    for r in tables["cut_off"].itertuples():
+        if r.status in (FAIL, NOT_RECORDED):
+            detail = (f"{r.n_rows - r.n_recorded} of {r.n_rows} replies have no recorded finish reason (not_recorded)"
+                      if r.status == NOT_RECORDED else
+                      f"{r.cut_off_share:.2f} > {protocol.CUT_OFF_MAX:.2f} of replies stopped at the token budget")
+            blocking.append(f"cut_off: {r.model_key} {r.experiment} {r.qkey} {r.wording_key} {r.fmt} {detail}")
     ec = tables["example_copying"]
     for r in ec[ec["status"].isin(PROBLEM_STATUSES)].itertuples():
         detail = ("no_data (no no-examples baseline rows)" if r.status == NO_DATA else
@@ -511,7 +551,7 @@ def main(argv: list[str] | None = None) -> int:
     starts = read_model_starts(args.results)
     prov = provenance(frame, args.results, args.items, manifest, argv, args.baseline, baseline_manifest,
                       baseline, starts)
-    tables = run_checks(frame, items, model_keys, baseline, starts)
+    tables = run_checks(frame, items, model_keys, baseline, starts, read_finish(args.results))
     for name, table in tables.items():
         table.to_csv(args.out_dir / f"{name}.csv", index=False)
         print(f"\n== {name}\n{table.to_string(index=False)}")

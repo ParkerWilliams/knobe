@@ -15,13 +15,18 @@ from types import MappingProxyType
 from knobe import constants
 
 RELEASE = "knobe_moral_probe"                      # seed namespace (knobe.jobs)
-RUNNER_VERSION = "knobe_moral_probe_elicit-0.2"   # 0.2: per-format MAX_TOKENS + kmp.answer readout
+RUNNER_VERSION = "knobe_moral_probe_elicit-0.3"   # 0.2: per-format MAX_TOKENS + kmp.answer readout; 0.3: chat 512 + finish sidecar
 # Answer budget per prompt format (DESIGN.md amendment 2026-10-13, "answer format"):
 # chat (instruct) models often explain before the number, so 10 tokens cut most
 # answers off. 256 from the 2026-10-13 calibration (outputs/first_look/or_calibration_max_tokens.csv):
 # the smallest budget at which cut-off replies fall below 2% for every instruct model.
 # raw (pretrained) stays at 10 until the cluster pilot measures it.
-MAX_TOKENS: Mapping[str, int] = MappingProxyType({"raw": 10, "chat": 256})
+# Chat raised to 512 (DESIGN.md amendment 2026-10-22, MM: don't cut off reasoning in the real run):
+# twice the calibrated budget, as headroom for the study models, which the stand-ins only approximate.
+# kmp.checks' cut_off gate checks it on every run from the engine's finish reasons.
+MAX_TOKENS: Mapping[str, int] = MappingProxyType({"raw": 10, "chat": 512})
+# Most chat replies allowed to stop at the budget, per model x experiment x question x wording.
+CUT_OFF_MAX = 0.01
 REVIEW_MAX_TOKENS = 8
 # Screening prompts only (not the subject models'): the pinned reviewer opens with reasoning, which
 # REVIEW_MAX_TOKENS cut off before any number (2026-10-22 verbatim run: 355 of 502 answers unparsed).
