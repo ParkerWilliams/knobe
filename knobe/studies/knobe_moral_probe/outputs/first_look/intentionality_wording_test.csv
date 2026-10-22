@@ -1,0 +1,4 @@
+wording,template,n,number_rate,yes_no_share,cut_off_share,not_recorded,number_rate_bad,number_rate_good,mean_bad,mean_good,bad_minus_good
+w1,Did {agent} intentionally {effect}?,640,0.528125,0.0484375,0.0,0,0.453125,0.603125,3.1862068965517243,1.4689119170984455,1.7172949794532788
+w1a,Did {agent} intentionally {effect}? Answer on a scale from 0 (definitely not) to 10 (definitely yes).,640,0.84375,0.0,0.0,0,0.825,0.8625,8.863636363636363,4.996376811594203,3.86725955204216
+w1b,Did {agent} intentionally {effect}? Answer with a number from 0 (no) to 10 (yes).,640,0.8609375,0.0,0.0,0,0.803125,0.91875,8.700389105058365,4.829931972789115,3.87045713226925
