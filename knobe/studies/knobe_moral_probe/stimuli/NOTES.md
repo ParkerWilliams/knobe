@@ -260,3 +260,26 @@ Pairs planned: harm 36, fairness 26, loyalty 26, authority 26, purity 26 (6 shar
   question (DESIGN amendment 2026-10-22).
 - Shared storylines whose harm pair failed: 2, 3, 6, 24, 34 (decision A:
   kept, outside the primary pooled contrast).
+
+### Review of the survivors, 2026-10-22 (MM)
+
+Sheets 15–19: 452 items, 319 approved, 131 revise, 2 rejected (purity
+117). MM's summary of the patterns is in
+`../stimulus_reviews_completed_2026-10-22/review_summary.txt`. Rulings
+from the same session (sheet 20, `20_mm_rulings_decisions.csv`):
+- **B8 role changes approved as decision-O exceptions:** storylines 2
+  (CEO → board chair), 18 (Defense Secretary → surgeon general), 34
+  (terrorist → activist), 36 (CEO → product designer; effect tablet →
+  music player, the item-72 fix). The paper names them.
+- **Adapted moral pairs 22, 26, 28 dropped** (decision G). They're
+  implausible under decisions B2 and K: inducing labor to reduce pregnancy
+  pains, a school administrator's health plan for army recruits, a fence
+  to relieve anger. Their verbatim versions still run.
+- **Fairness and storyline 8:** the shared action gets rewritten so it can
+  plausibly allocate turns or time (or, for 8, shorten the route), and
+  every arm of those storylines is redrafted to follow from it (C4),
+  re-screened and re-reviewed.
+
+Pilot items (`stimuli/pilot_run/`) were drawn from the approved set the
+same day, before the revisions. The pilot tests the protocol, not these
+items.
