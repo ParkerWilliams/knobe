@@ -1,6 +1,6 @@
 # knobe_moral_probe: task checklist
 
-Last updated 2026-10-12. Task numbers are `AUTHORING_PLAN.md`'s. **(you)**
+Last updated 2026-10-22. Task numbers are `AUTHORING_PLAN.md`'s. **(you)**
 marks a step only the researcher can do; **STOP** is a gate where the agent
 waits for you. `HANDOFF.md` has the detail.
 
@@ -22,10 +22,10 @@ waits for you. `HANDOFF.md` has the detail.
 - [x] `analysis/first_look.py` (sign-effect fits), tested on the fake engine
 - [x] **(you)** Sheet 01: all 80 approved by MM 2026-10-12 (Codex pre-review), applied
 - [x] **(you)** Confirm the go/no-go rule in `FIRST_LOOK.md` (2 of 3 instruct, confirmed 2026-10-12)
-- [ ] **(cluster)** `tools/check_chat_bos.py`, then with `--vllm`
-- [ ] **(Parker, cluster)** Gemma self-check, then both full elicitation jobs (about 2.2–5.3 h GPU; Parker's call)
-- [ ] `kmp.checks` + `first_look.py`, log, commit
-- [ ] **STOP (you):** go / no-go
+- [x] (Parker, OpenRouter, instead of the cluster) stand-in instruct models, v2 answer format: rule gives "go" (`HANDOFF.md` 2026-10-22)
+- [x] **STOP (you):** go, accepted on the stand-ins 2026-10-22
+- [ ] **(cluster)** `tools/check_chat_bos.py`, then with `--vllm`; first look on the 6 study models (now before the pilot; runbook needs the 256-token chat budget in its cost)
+- [ ] Llama-3.1-8B-Instruct number rate: fix and test on OpenRouter before the full run
 
 ## Stimuli authoring (after a go)
 
@@ -35,7 +35,7 @@ waits for you. `HANDOFF.md` has the detail.
   - [ ] Parser fixes for any `revise`, then re-sheet as the next batch number (**STOP** again)
   - [ ] Lint clean, commit your decisions
 - [ ] Task 8: method for adding draft items (no commit of its own)
-- [ ] Task 9: `stimuli/NOTES.md`, `nonmoral_log.csv`, role-noun table for all 40 storylines
+- [ ] Task 9: `stimuli/NOTES.md`, `nonmoral_log.csv`, role-noun table for all 40 storylines (drafted 2026-10-22)
   - [ ] **STOP (you):** approve the role-noun table (decisions O, P)
 - [ ] Task 10: batches 02–03, adapted Ngo moral pairs (2 × 40 items). **STOP (you):** review
   - Fix in the adapted items (MM, 2026-10-12): pair 9 bad, the effect names the person the scenario names, not "her neighbor"; pair 36 good, the effect says music player, not tablet. Kept as written in `ngo_verbatim`
