@@ -10,17 +10,17 @@
     "--allow-draft",
     "--rescreen-changed"
   ],
-  "calls": 0,
+  "calls": 132,
   "concurrency": 8,
   "engine": "openrouter",
-  "finished_utc": "2026-10-22T20:30:20+00:00",
-  "git_commit": "d24020ccaf17afcbc8ce2bccc59f5fd92f01492f",
+  "finished_utc": "2026-10-22T20:48:02+00:00",
+  "git_commit": "32942975b8265398f68919d69c86bfe780b3f80e",
   "git_dirty": true,
-  "input_tokens": 0,
+  "input_tokens": 25578,
   "items_path": "stimuli/foundations.csv",
-  "items_sha256": "3d98da29cf83a4d296b3f43ae8c6110fd1862ef5bc882e2fcc4239c4ba31c9e7",
+  "items_sha256": "11c3bc00384e42e9ac610df5050adc925a2a3946fbf80cf09d0361bfcdae2c67",
   "n_prompts": 1680,
-  "output_tokens": 0,
+  "output_tokens": 660,
   "pairs_by_arm": {
     "authority": {
       "pairs": 26,
@@ -36,16 +36,18 @@
     },
     "loyalty": {
       "pairs": 26,
-      "pairs_passed": 22
+      "pairs_passed": 20
     },
     "purity": {
       "pairs": 26,
       "pairs_passed": 24
     }
   },
-  "prompts_asked": 0,
-  "prompts_reused": 1680,
-  "providers": [],
+  "prompts_asked": 132,
+  "prompts_reused": 1548,
+  "providers": [
+    "Anthropic"
+  ],
   "raw_reviewer_models": [
     "claude-sonnet-4-6"
   ],
@@ -53,14 +55,16 @@
   "review_max_tokens": 8,
   "reviewer_model": "claude-sonnet-4-6",
   "reviewer_temperature": 0.0,
-  "served_models": [],
+  "served_models": [
+    "anthropic/claude-sonnet-4.6"
+  ],
   "shared_without_harm": [
     2,
     6,
     34
   ],
   "shared_without_nonharm": [],
-  "started_utc": "2026-10-22T20:30:20+00:00",
+  "started_utc": "2026-10-22T20:47:43+00:00",
   "target_min": 6,
   "valence_bad_max": 3,
   "valence_by_arm": {
