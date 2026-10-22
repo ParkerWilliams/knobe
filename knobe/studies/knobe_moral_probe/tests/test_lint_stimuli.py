@@ -94,10 +94,44 @@ def test_adapted_pair_must_share_one_goal():
     bad = MANAGER_BAD.replace("to increase earnings", "to buy a house")
     good = bad.replace("to buy a house", "to buy a car").replace("unhappy.", "happy.")
     items = [adapted(3, "bad", bad, "make employees unhappy"), adapted(3, "good", good, "make employees happy")]
-    assert lint.pair_problems(items) == ["pair (3, 'moral'): bad and good action sentences differ; the good "
-                                         "version takes the bad version's goal (B8, decision B2)"]
+    assert lint.pair_problems(items) == ["pair (3, 'moral'): the good version's action sentence does not end "
+                                         "with the bad version's goal 'to buy a house' (B8, decision B2)"]
     aligned = [items[0], items[1].model_copy(update={"scenario": good.replace("buy a car", "buy a house")})]
     assert lint.pair_problems(aligned) == []
+
+
+def test_adapted_pair_may_differ_in_action_before_the_goal():
+    # Decision K: only agent and goal are equalised; Ngo's gadget / invention stays.
+    bad = ("The engineer released a gadget to make a deadline. The engineer did not care at all about the "
+           "effect the gadget would have on babies. The engineer knew the gadget would kill babies.")
+    good = ("The engineer released an invention to make a deadline. The engineer did not care at all about the "
+            "effect the invention would have on toddlers. The engineer knew the invention would help toddlers.")
+    items = [adapted(1, "bad", bad, "cause the death of babies", "the engineer"),
+             adapted(1, "good", good, "help toddlers", "the engineer")]
+    assert lint.pair_problems(items) == []
+
+
+def test_goal_clause_counts_inner_to():
+    # Storyline 20's goal holds a second "to"; the whole clause has to match, not just its tail.
+    bad = ("The store owner built a road to increase traffic to the country store. The store owner did not care "
+           "at all about the effect this would have on a nearby tree. The store owner knew the road would kill "
+           "the tree.")
+    good = bad.replace("built a road to increase traffic", "bought a trolley to increase visitors")
+    good = good.replace("kill the tree.", "save the tree.")
+    items = [adapted(20, "bad", bad, "kill the tree", "the store owner"),
+             adapted(20, "good", good, "save the tree", "the store owner")]
+    assert lint.pair_problems(items) == ["pair (20, 'moral'): the good version's action sentence does not end "
+                                         "with the bad version's goal 'to increase traffic to the country store' "
+                                         "(B8, decision B2)"]
+
+
+def test_ngo_goals_are_the_verbatim_bad_goals(verbatim):
+    assert set(lint.NGO_GOALS) == set(lint.NGO_STORYLINES)
+    for item in verbatim:
+        if item.sign == "bad":
+            goal = lint.NGO_GOALS[item.storyline_id]
+            assert goal.startswith("to ")
+            assert lint.split_sentences(item.scenario)[0].endswith(f" {goal}.")
 
 
 def test_c2_one_agent_per_storyline():
@@ -295,3 +329,15 @@ def test_b8_is_skipped_when_the_verbatim_file_is_not_ngos(verbatim):
     assert "file: --verbatim differs from Ngo's source; B8 can't be checked (B9)" in problems
     assert not any("(B8)" in p for p in problems)
     assert any("(B8)" in p for p in lint.lint([item], verbatim=verbatim))
+
+
+def test_b8_their_for_his_needs_a_pronoun_row(verbatim):
+    # Storyline 33: the researcher ruled singular "their" (NOTES.md review ruling 4), which is not the role noun.
+    original = next(i for i in verbatim if i.item_id == "kmp-nv-033-moral-bad")
+    scenario = re.sub(r"\bhis\b", "their", original.scenario.replace("Keith", "The newlywed"))
+    item = adapted(33, "bad", scenario, "cause their parents to be miserable", "the newlywed")
+    assert any("changes 'his' to 'their'" in p for p in lint.adaptation_problems([item], verbatim, []))
+    rows = [{"item_id": item.item_id, "field": f, "kind": "pronoun", "from": "his", "to": "their",
+             "note": "singular their, review ruling 4"} for f in ("scenario", "effect")]
+    assert lint.adaptation_problems([item], verbatim, rows) == []
+    assert lint.log_problems([item], rows) == []

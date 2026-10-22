@@ -70,7 +70,7 @@ Why there is a CSV log next to NOTES.md: the B8 lint needs a machine-readable al
 
 `nonmoral_log.csv` columns: `item_id,field,kind,from,to,note`.
 - `field` is `scenario` or `effect`.
-- `kind` is one of `goal` (decision B2), `typo` (C), `other_name` (L), `effect` (C: effect phrase differs from Ngo's question phrase beyond naming), `fresh_action` (E).
+- `kind` is one of `goal` (decision B2), `typo` (C), `other_name` (L), `effect` (C: effect phrase differs from Ngo's question phrase beyond naming), `fresh_action` (E), `pronoun` (an agent pronoun changed to something other than the role noun, by researcher ruling; added 2026-10-22 for storyline 33's singular "their").
 - `from` / `to` are the old and new text, with enough context to be unique. Leave them empty for `fresh_action`.
 - `note` says why, and is required.
 

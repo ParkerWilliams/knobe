@@ -67,7 +67,7 @@ STIMULI = Path(__file__).resolve().parents[1] / "stimuli"
 LOG = STIMULI / "nonmoral_log.csv"
 VERBATIM = STIMULI / "ngo_verbatim.csv"
 LOG_FIELDS = ["item_id", "field", "kind", "from", "to", "note"]
-LOG_KINDS = ("goal", "typo", "other_name", "effect", "fresh_action")
+LOG_KINDS = ("goal", "typo", "other_name", "effect", "fresh_action", "pronoun")
 N_SENTENCES = {"nonmoral": 3, "ngo_verbatim": 3, "foundations": 4}
 ACTION_SENTENCE = {"nonmoral": 0, "ngo_verbatim": 0, "foundations": 1}
 NGO_STORYLINES = range(1, 41)
@@ -82,6 +82,27 @@ NAMING_FILLER = frozenset({"the", "'", "s"})
 NON_AGENT_PRONOUNS = {
     10: "'avoid being his caretaker' / 'placing him' / 'make him extremely unhappy' (bad) and "
         "'make her extremely happy' (good) refer to the relative placed in the home, not the agent",
+}
+
+# The goal phrase of each Ngo storyline's bad version, as it ends that version's first sentence
+# (decision B2: the adapted good version takes it). Read by hand from the verbatim text;
+# tests/test_lint_stimuli.py pins each against the source. Only its count of "to" tokens is used:
+# adaptation changes names and pronouns inside the goal, never its "to"s, so the adapted goal is
+# the adapted bad sentence from that many "to"s before its end.
+NGO_GOALS = {
+    1: "to make a deadline", 2: "to increase profits", 3: "to buy a house", 4: "to improve its appearance",
+    5: "to gain votes", 6: "to increase profits", 7: "to reduce enemy’s steel production",
+    8: "to increase business school funding", 9: "to protect her crops", 10: "to avoid being his caretaker",
+    11: "to decorate his house", 12: "to gain profit", 13: "to make more money", 14: "to clean her floor",
+    15: "to be more popular", 16: "to decorate his yard", 17: "to increase her salary",
+    18: "to keep his position", 19: "to increase earnings", 20: "to increase traffic to her country store",
+    21: "to earn a living", 22: "to reduce her pregnancy pains", 23: "to express his excitement",
+    24: "to get on TV", 25: "to gain publicity", 26: "to cut costs", 27: "to make a point",
+    28: "to relieve her anger", 29: "to meet his monthly quota", 30: "to get back at her mother",
+    31: "to express his views", 32: "to provide a sensational account of the Civil War hero",
+    33: "to finally settle down with a family", 34: "to express her outrage", 35: "to balance the budget",
+    36: "to increase sales", 37: "to keep his influence", 38: "to get a book deal",
+    39: "to decrease his workload", 40: "to make the drug company happy",
 }
 
 _SENTENCE_BREAK = re.compile(r"(?<=[.!?])\s+")
@@ -153,16 +174,28 @@ def _pairs(items: list[Item]) -> dict[tuple[int, str], dict[str, Item]]:
     return pairs
 
 
+def adapted_goal(bad: Item) -> list[str] | None:
+    """The goal clause's tokens (final period included) in an adapted Ngo bad version, found by
+    counting NGO_GOALS' "to"s back from the end of its first sentence; None if it has too few."""
+    tokens = _tokens(split_sentences(bad.scenario)[0])
+    n_to = _tokens(NGO_GOALS[bad.storyline_id]).count("to")
+    starts = [i for i, t in enumerate(tokens) if t == "to"]
+    return tokens[starts[-n_to]:] if len(starts) >= n_to else None
+
+
 def pair_problems(items: list[Item]) -> list[str]:
     out = []
     for key, pair in sorted(_pairs(items).items()):
         if set(pair) != {"bad", "good"}:
             continue
         if is_adapted_ngo(pair["bad"]):
-            bad_action, good_action = (split_sentences(pair[s].scenario)[0] for s in ("bad", "good"))
-            if bad_action != good_action:
-                out.append(f"pair {key}: bad and good action sentences differ; the good version takes the bad "
-                           f"version's goal (B8, decision B2)")
+            # Decision K: the action and its object may differ; decision B2: the goal may not.
+            goal = adapted_goal(pair["bad"])
+            good_action = _tokens(split_sentences(pair["good"].scenario)[0])
+            if goal is None or good_action[-len(goal):] != goal:
+                shown = " ".join(goal[:-1]).replace(" ' ", "'") if goal else "?"
+                out.append(f"pair {key}: the good version's action sentence does not end with the bad version's "
+                           f"goal {shown!r} (B8, decision B2)")
             continue
         if pair["bad"].source == "ngo":
             continue

@@ -60,8 +60,9 @@ module docstrings and tests are current:
   dir, refuses duplicate rows, and refuses to write any status the whole
   review record doesn't back. `sheet` needs an `NN_` batch name and never
   overwrites.
-- `lint_stimuli`: adapted Ngo pairs must have identical action sentences
-  (one goal); pronoun changes in storyline 10 (pronouns that mean the uncle
+- `lint_stimuli`: adapted Ngo pairs must share the bad version's goal
+  clause (`NGO_GOALS`; until 2026-10-22 the whole action sentence, which
+  also forbade the action and object differences decision K keeps); pronoun changes in storyline 10 (pronouns that mean the uncle
   or aunt) need a log row; a log row licenses only its own span; B8 is
   skipped if the verbatim file differs from Ngo's source.
 
