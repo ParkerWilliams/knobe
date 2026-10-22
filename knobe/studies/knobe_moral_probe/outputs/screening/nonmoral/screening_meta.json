@@ -7,23 +7,26 @@
     "outputs/screening/nonmoral",
     "--engine",
     "openrouter",
-    "--allow-draft"
+    "--allow-draft",
+    "--rescreen-changed",
+    "--concurrency",
+    "8"
   ],
-  "calls": 0,
+  "calls": 216,
   "concurrency": 8,
   "engine": "openrouter",
-  "finished_utc": "2026-10-22T18:35:47+00:00",
-  "git_commit": "9f79c4fea9e95d3865a8711bb4a600b4f863761f",
-  "git_dirty": false,
-  "input_tokens": 0,
+  "finished_utc": "2026-10-22T20:27:30+00:00",
+  "git_commit": "82e57e253f7f42eaa4ab8887bace9c823d1212d2",
+  "git_dirty": true,
+  "input_tokens": 37064,
   "items_path": "stimuli/nonmoral.csv",
-  "items_sha256": "69526918359717fe0a9ecb3ffd6a87837f698d0876b8edf6f73fae1e44774697",
-  "n_prompts": 960,
-  "output_tokens": 0,
+  "items_sha256": "916c363480bde117f21597d2847e49cde051bc4b43cab4728effb0aae99026f2",
+  "n_prompts": 936,
+  "output_tokens": 1080,
   "pairs_by_arm": {
     "moral": {
-      "pairs": 40,
-      "pairs_passed": 22
+      "pairs": 37,
+      "pairs_passed": 19
     },
     "procedural": {
       "pairs": 40,
@@ -34,20 +37,24 @@
       "pairs_passed": 39
     }
   },
-  "prompts_asked": 0,
-  "prompts_reused": 960,
-  "providers": [],
+  "prompts_asked": 216,
+  "prompts_reused": 720,
+  "providers": [
+    "Anthropic"
+  ],
   "raw_reviewer_models": [
     "claude-sonnet-4-6"
   ],
-  "rescreen_changed": false,
+  "rescreen_changed": true,
   "review_max_tokens": 8,
   "reviewer_model": "claude-sonnet-4-6",
   "reviewer_temperature": 0.0,
-  "served_models": [],
+  "served_models": [
+    "anthropic/claude-sonnet-4.6"
+  ],
   "shared_without_harm": [],
   "shared_without_nonharm": [],
-  "started_utc": "2026-10-22T18:35:47+00:00",
+  "started_utc": "2026-10-22T20:27:00+00:00",
   "target_min": 6,
   "valence_bad_max": 3,
   "valence_by_arm": {
