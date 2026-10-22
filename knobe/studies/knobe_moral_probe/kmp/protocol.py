@@ -23,6 +23,9 @@ RUNNER_VERSION = "knobe_moral_probe_elicit-0.2"   # 0.2: per-format MAX_TOKENS +
 # raw (pretrained) stays at 10 until the cluster pilot measures it.
 MAX_TOKENS: Mapping[str, int] = MappingProxyType({"raw": 10, "chat": 256})
 REVIEW_MAX_TOKENS = 8
+# Screening prompts only (not the subject models'): the pinned reviewer opens with reasoning, which
+# REVIEW_MAX_TOKENS cut off before any number (2026-10-22 verbatim run: 355 of 502 answers unparsed).
+SCREENING_REPLY = "Reply with only the number."
 # Screening reviewer (a Claude model ID, never a subject; DESIGN.md section 4), pinned
 # by the researcher (DESIGN.md amendment 2026-10-01, reviewer pin). The reviewer client
 # sends temperature 0 with thinking disabled; the current generation (Opus 5.5,
