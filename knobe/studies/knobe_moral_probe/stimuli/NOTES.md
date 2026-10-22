@@ -106,5 +106,7 @@ Loaded storylines for the decision P sensitivity fit: 5, 7, 18, 34, 37, 38.
 
 | batch | file | storylines / arms | items | drafting model | drafted | sheet commit | decisions applied |
 |---|---|---|---|---|---|---|---|
+| 02_nm_moral_01-20 | nonmoral.csv | 1–20 / moral (adapted Ngo) | 40 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
+| 03_nm_moral_21-40 | nonmoral.csv | 21–40 / moral (adapted Ngo) | 40 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
 
 ## Foundations scaffold roster (Task 14)
