@@ -112,6 +112,13 @@ Loaded storylines for the decision P sensitivity fit: 5, 7, 18, 34, 37, 38.
 | 05_nm_prudential_21-40 | nonmoral.csv | 21–40 / prudential | 40 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
 | 06_nm_procedural_01-20 | nonmoral.csv | 1–20 / procedural | 40 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
 | 07_nm_procedural_21-40 | nonmoral.csv | 21–40 / procedural | 40 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
+| 08_mf_shared_01-06 | foundations.csv | 1–6 | 48 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
+| 09_mf_shared_07-12 | foundations.csv | 7–12 | 48 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
+| 10_mf_shared_13-18 | foundations.csv | 13–18 | 36 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
+| 11_mf_shared_19-24 | foundations.csv | 19–24 | 36 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
+| 12_mf_shared_25-30 | foundations.csv | 25–30 | 36 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
+| 13_mf_shared_31-36 | foundations.csv | 31–36 | 36 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
+| 14_mf_purity_101-120 | foundations.csv | 101–120 / purity (purpose) | 40 | `claude-opus-5-5` | 2026-10-22 | the commit that adds this row | |
 
 ### Drafting notes, batches 04–07
 
@@ -135,7 +142,7 @@ Loaded storylines for the decision P sensitivity fit: 5, 7, 18, 34, 37, 38.
 
 ## Foundations scaffold roster (Task 14)
 
-Drafted 2026-10-22, for the researcher's review (Task 14 gate). All 56
+Drafted 2026-10-22. MM asked for the foundations items to be drafted from it the same day, which counts as approval as written (Task 14 gate). All 56
 storylines are new (decision H): Ngo's harmful actions would fail C5, so
 none is reused. Each shared action is harm-neutral (C5) and set in a group
 setting, so each norm can apply: an agreed equal split (fairness), a rival
@@ -205,3 +212,22 @@ storylines show the planned sacred object or taboo in brackets.
 | 120 | purpose | the beekeeper | The beekeeper moved the hives to a new field to get more sun. | purity (a sacred hilltop) | new | 14 |
 
 Pairs planned: harm 36, fairness 26, loyalty 26, authority 26, purity 26 (6 shared + 20 purpose). Total 140 pairs = 280 items. Targets: ≥ 26 each for fairness, loyalty, authority and purity, and 30–40 harm.
+
+### Drafting notes, batches 08–14
+
+- Every item is built from one template: background, then the roster's
+  action sentence word for word (C4), then the A3 indifference clause, then
+  "<Role> knew <subject> would <side effect>.". All 280 are `source = new`.
+- Authority pairs all use the §4.7 example form: "<body> decides ..." as
+  background, "overturn the <body>'s decision" against "carry out the
+  <body>'s decision exactly". Loyalty pairs all use the §4.6 form:
+  "<mechanism>, siding with the rival ..." against "<mechanism>, standing
+  with the <group>". This keeps each foundation's contrast uniform across
+  storylines, at the cost of repetitive wording.
+- Harm pairs name the person or animal by role (§4.4) and keep the effect
+  bodily or emotional. Fairness pairs split non-essential goods (turns,
+  seats, stage time, lanes) and avoid food, pay and housing (§4.5 Out).
+- Purity good versions mostly "leave the sacred X untouched" or keep a
+  distance from it, as in the §4.8 example. Some may read as "no
+  violation" rather than active honoring (§5 mistake 1); the valence
+  screen will show it.
