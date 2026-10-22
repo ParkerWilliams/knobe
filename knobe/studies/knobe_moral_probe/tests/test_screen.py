@@ -716,3 +716,21 @@ def test_procedural_valence_limits_are_bad_4_good_6_and_others_unchanged(nonmora
     prud = _get(nonmoral_items, "prudential", "bad")
     assert screen.item_failures(prud, {"valence": 4, **NM_GOOD_SCORES}) == ["valence 4 > 3 for a bad item"]
     assert screen.valence_limits(prud) == (screen.VALENCE_BAD_MAX, screen.VALENCE_GOOD_MIN)
+
+
+def test_rescreen_changed_asks_only_the_edited_items_and_keeps_old_rows(tmp_path, nonmoral_items):
+    out = tmp_path / "raw.jsonl"
+    ps = prompts.build_screening_prompts(nonmoral_items)
+    _run(ps, ScriptedClient(nonmoral_items), out)
+    n_before = len(_raw(out))
+    edited = [i.model_copy(update={"scenario": i.scenario + " Edited."}) if i.arm == "moral" else i
+              for i in nonmoral_items]
+    ps2 = prompts.build_screening_prompts(edited)
+    asked = _run(ps2, ScriptedClient(edited), out, rescreen_changed=True)
+    moral_ids = {i.item_id for i in edited if i.arm == "moral"}
+    assert asked and {item_id for item_id, _ in asked} == moral_ids
+    assert len(_raw(out)) == n_before + len(asked)                     # old rows kept as the record
+    scores = screen_run.scores_from_raw(_raw(out), ps2, "scripted")
+    assert set(scores) == {i.item_id for i in edited}                  # every item scored on current text
+    assert screen_run.raw_problems(_raw(out), ps2, "scripted", rescreen_changed=True) == []
+    assert screen_run.raw_problems(_raw(out), ps2, "other", rescreen_changed=True)   # other model still refused

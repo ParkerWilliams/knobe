@@ -207,8 +207,10 @@ def _current(rows: list[ScreeningRawResult], prompts: list[ScreeningPrompt],
 
 
 def raw_problems(rows: list[ScreeningRawResult], prompts: list[ScreeningPrompt], reviewer_model: str,
-                 limit: int = 5) -> list[str]:
-    """Reasons rows already on disk can't be resumed by this run. Empty = fine."""
+                 limit: int = 5, rescreen_changed: bool = False) -> list[str]:
+    """Reasons rows already on disk can't be resumed by this run. Empty = fine.
+    rescreen_changed accepts rows for an earlier text of an item: they stay in the file as the record,
+    _current ignores them, and the item is asked again on its current text."""
     problems = []
     others = sorted({r.reviewer_model for r in rows} - {reviewer_model})
     if others:
@@ -217,7 +219,7 @@ def raw_problems(rows: list[ScreeningRawResult], prompts: list[ScreeningPrompt],
     want = {(p.item_id, p.qkey): p.text_sha256 for p in prompts}
     changed = sorted({r.variant_id for r in rows
                       if (r.variant_id, r.field) in want and r.text_sha256 != want[(r.variant_id, r.field)]})
-    if changed:
+    if changed and not rescreen_changed:
         shown = ", ".join(changed[:limit]) + (" ..." if len(changed) > limit else "")
         problems.append(f"text_sha256 changed for {len(changed)} item(s) that already have rows: {shown}")
     return problems
@@ -235,7 +237,8 @@ def scores_from_raw(rows: list[ScreeningRawResult], prompts: list[ScreeningPromp
 
 
 async def run_screening(prompts: list[ScreeningPrompt], client, reviewer_model: str, out_path: Path,
-                        concurrency: int = 8, max_retries: int = 3) -> list[tuple[str, str]]:
+                        concurrency: int = 8, max_retries: int = 3,
+                        rescreen_changed: bool = False) -> list[tuple[str, str]]:
     """Attempt 1 asks everything not yet asked; attempt 2 re-asks, once, what
     came back unparsed. Resumable: matching rows already in out_path count;
     non-matching ones raise ResumeRefused before anything is asked. Any error
@@ -243,7 +246,7 @@ async def run_screening(prompts: list[ScreeningPrompt], client, reviewer_model: 
     Returns the (item_id, qkey) of every call made, retries included."""
     if concurrency < 1:
         raise ValueError("concurrency must be >= 1")
-    problems = raw_problems(_read_raw(out_path), prompts, reviewer_model)
+    problems = raw_problems(_read_raw(out_path), prompts, reviewer_model, rescreen_changed=rescreen_changed)
     if problems:
         raise ResumeRefused(f"refusing to resume {out_path}:\n  " + "\n  ".join(problems))
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -349,6 +352,9 @@ def main(argv: list[str] | None = None) -> int:
                         "Anthropic-served only (OPENROUTER_API_KEY)")
     p.add_argument("--allow-draft", action="store_true",
                    help="also screen draft items (researcher's choice 2026-10-22: screen first, review the survivors)")
+    p.add_argument("--rescreen-changed", action="store_true",
+                   help="resume even where an item's text changed since its rows were written: those rows stay "
+                        "as the record and the item is asked again (redrafts after a screen)")
     p.add_argument("--dry-run", action="store_true", help="print the call and token estimate, ask nothing")
     p.add_argument("--concurrency", type=int, default=8)
     args = p.parse_args(argv)
@@ -392,7 +398,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
 
     raw_path = args.out_dir / "screening_raw.jsonl"
-    problems = raw_problems(_read_raw(raw_path), screening_prompts, reviewer)
+    problems = raw_problems(_read_raw(raw_path), screening_prompts, reviewer, rescreen_changed=args.rescreen_changed)
     if problems:
         print(f"refusing to resume {raw_path}:\n  " + "\n  ".join(problems), file=sys.stderr)
         return 2
@@ -403,7 +409,8 @@ def main(argv: list[str] | None = None) -> int:
         client = OpenRouterScreeningClient(reviewer)
     else:
         client = ScreeningClient(reviewer)
-    asked = asyncio.run(run_screening(screening_prompts, client, reviewer, raw_path, concurrency=args.concurrency))
+    asked = asyncio.run(run_screening(screening_prompts, client, reviewer, raw_path, concurrency=args.concurrency,
+                                      rescreen_changed=args.rescreen_changed))
     rows = _read_raw(raw_path)
     selected, report = select_pairs(approved, scores_from_raw(rows, screening_prompts, reviewer))
     write_items(selected, args.out_dir / "selected_items.csv")
@@ -431,6 +438,7 @@ def main(argv: list[str] | None = None) -> int:
         "reviewer_model": reviewer,
         "engine": "mock" if args.mock else args.engine,
         "allow_draft": args.allow_draft,
+        "rescreen_changed": args.rescreen_changed,
         "providers": sorted(getattr(client, "providers", ())),
         "reviewer_temperature": temperature,
         "served_models": sorted(getattr(client, "served_models", ())),
