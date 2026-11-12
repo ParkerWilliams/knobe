@@ -1,5 +1,11 @@
 # Jev as the subject, asked natively (2026-11-12)
 
+> **Protocol status.** These results were made at commit 983ef56, under the question wordings from before Mer's 2026-10-22 amendments:
+> - Intentionality w1 was Ngo's bare "Did X intentionally …?" (now w1a, which adds "0 (definitely not) to 10 (definitely yes)").
+> - `fnd_fairness` had its old wording.
+>
+> All other cells are unchanged. A rerun under the current wordings was blocked on 2026-11-12: the OpenRouter key had hit its $100 total limit (HTTP 403). The merged code refuses to analyze these answers, because their recorded request hashes no longer match the current questions. To rerun, raise the key limit, set the old `outputs/elicit/jev_native_*.jsonl` files aside with their manifests, then run the commands under Reproduce.
+
 **Question (Parker, 2026-11-12):** is the Knobe effect present in Jev itself, with no LLM output and no wrapper?
 Each moral-bias question is posed as Jev's own multiple-choice ("scantron") question.
 
