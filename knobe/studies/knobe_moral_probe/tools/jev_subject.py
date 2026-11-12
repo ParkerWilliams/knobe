@@ -1,4 +1,10 @@
-"""Jev as a subject model: Jev rates the scenarios itself, as the chat models did.
+"""Jev as a subject model, WRAPPED: Jev answers the chat models' prompt, as the chat models did.
+
+Not the native test (2026-11-12): this hands Jev the whole chat prompt as its
+state and one meta-question ("answer the question at the end of `prompt`"),
+then feeds its pick back through the chat-reply pipeline. Jev asked natively --
+the scenario as its state, each question as its own labelled 0..10 Choice -- is
+kmp/jev_native.py + tools/jev_native.py. This run is kept as the wrapped contrast.
 
 Why (Parker, 2026-10-22): "did jev recover the original paper ... i care about
 jev now" -- does Jev, asked Ngo et al. (2015)'s questions, rate a bad foreseen

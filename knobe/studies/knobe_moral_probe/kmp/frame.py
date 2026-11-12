@@ -128,7 +128,17 @@ def load_frame(results_path: str | Path, items: list[Item], registry: dict | Non
 
     parts = pd.DataFrame([parse_prompt_id(p) for p in df["prompt_id"]],
                          columns=["item_id", "qkey", "wording_key", "fmt"], index=df.index)
-    df = pd.concat([df, parts], axis=1)
+    return join_items(pd.concat([df, parts], axis=1), items, results_path)
+
+
+def join_items(df: pd.DataFrame, items: list[Item], source: str | Path) -> pd.DataFrame:
+    """The item join and coding half of load_frame, for answers that are not
+    result records (kmp.jev_native). df needs item_id, qkey, wording_key,
+    parsed_rating_raw, parse_ok and tuning_status; this adds the experiment,
+    storyline_id, arm, sign, scaffold, cluster_id, ngo_pair_id, reversed,
+    rating (recoded), sign_c and tuning_c columns of the contract above, drops
+    rows for unknown items as load_frame does, and names `source` in errors."""
+    results_path = source
     meta = pd.DataFrame([i.model_dump() for i in items])[["item_id", "experiment", "storyline_id", "arm", "sign",
                                                  "scaffold"]]
     # Rows for items no longer in the items file (removed after a partial run) are dropped.
