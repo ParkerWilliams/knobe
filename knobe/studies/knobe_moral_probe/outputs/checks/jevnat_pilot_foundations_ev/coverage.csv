@@ -1,0 +1,16 @@
+model_key,experiment,qkey,wording_key,expected_model,n_rows
+jev-1.14-native,foundations,blame,w1,True,152
+jev-1.14-native,foundations,blame,w2,True,152
+jev-1.14-native,foundations,blame,w3r,True,152
+jev-1.14-native,foundations,fnd_authority,w1,True,26
+jev-1.14-native,foundations,fnd_fairness,w1,True,26
+jev-1.14-native,foundations,fnd_harm,w1,True,152
+jev-1.14-native,foundations,fnd_loyalty,w1,True,26
+jev-1.14-native,foundations,fnd_purity,w1,True,14
+jev-1.14-native,foundations,intentionality,w1,True,152
+jev-1.14-native,foundations,intentionality,w2,True,152
+jev-1.14-native,foundations,intentionality,w3r,True,152
+jev-1.14-native,foundations,praise,w1,True,152
+jev-1.14-native,foundations,praise,w2,True,152
+jev-1.14-native,foundations,praise,w3r,True,152
+jev-1.14-native,foundations,significance,w1,True,152

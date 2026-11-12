@@ -1,0 +1,4 @@
+model_key,tuning_status,family,experiment,qkey,n_items,r,mean_diff
+jev-1.14-native,finetuned,jev,nonmoral,blame,240,0.48842590517047946,-3.1625
+jev-1.14-native,finetuned,jev,nonmoral,intentionality,240,0.9296821028043084,0.325
+jev-1.14-native,finetuned,jev,nonmoral,praise,240,-0.21245363557601607,6.835416666666666

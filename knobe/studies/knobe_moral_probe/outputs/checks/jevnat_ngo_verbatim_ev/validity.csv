@@ -1,0 +1,4 @@
+model_key,tuning_status,family,experiment,check,value,status
+jev-1.14-native,finetuned,jev,ngo_verbatim,blame_bad_minus_good,4.09225,pass
+jev-1.14-native,finetuned,jev,ngo_verbatim,praise_good_minus_bad,0.9370833333333337,pass
+jev-1.14-native,finetuned,jev,ngo_verbatim,significance_moral_minus_procedural,,not_applicable

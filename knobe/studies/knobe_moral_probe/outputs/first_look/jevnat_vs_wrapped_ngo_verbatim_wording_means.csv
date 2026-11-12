@@ -1,0 +1,14 @@
+qkey,wording_key,reversed,bad_wrapped,good_wrapped,bad_minus_good_wrapped,bad_native,good_native,bad_minus_good_native
+blame,w1,False,9.3,0.575,8.725000000000001,9.125,0.85,8.275
+blame,w2,False,9.975,1.25,8.725,9.875,1.25,8.625
+blame,w3r,True,0.55,9.425,-8.875,3.075,0.55,2.5250000000000004
+domain_moral,w1,False,9.25,8.775,0.4749999999999996,9.15,8.4,0.75
+domain_procedural,w1,False,0.0,0.0,0.0,0.0,0.0,0.0
+domain_prudential,w1,False,0.0,0.0,0.0,0.0,0.0,0.0
+intentionality,w1,False,10.0,0.5,9.5,10.0,0.5,9.5
+intentionality,w2,False,9.95,0.5,9.45,9.675,1.0,8.675
+intentionality,w3r,True,10.0,2.775,7.225,10.0,1.25,8.75
+praise,w1,False,0.0,1.275,-1.275,0.0,1.025,-1.025
+praise,w2,False,0.0,0.3,-0.3,0.0,0.15,-0.15
+praise,w3r,True,10.0,8.675,1.3249999999999993,9.7,7.475,2.2249999999999996
+significance,w1,False,8.175,6.85,1.325000000000001,7.875,6.2,1.6749999999999998

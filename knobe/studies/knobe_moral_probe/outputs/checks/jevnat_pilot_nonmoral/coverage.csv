@@ -1,0 +1,14 @@
+model_key,experiment,qkey,wording_key,expected_model,n_rows
+jev-1.14-native,nonmoral,blame,w1,True,240
+jev-1.14-native,nonmoral,blame,w2,True,240
+jev-1.14-native,nonmoral,blame,w3r,True,240
+jev-1.14-native,nonmoral,domain_moral,w1,True,240
+jev-1.14-native,nonmoral,domain_procedural,w1,True,240
+jev-1.14-native,nonmoral,domain_prudential,w1,True,240
+jev-1.14-native,nonmoral,intentionality,w1,True,240
+jev-1.14-native,nonmoral,intentionality,w2,True,240
+jev-1.14-native,nonmoral,intentionality,w3r,True,240
+jev-1.14-native,nonmoral,praise,w1,True,240
+jev-1.14-native,nonmoral,praise,w2,True,240
+jev-1.14-native,nonmoral,praise,w3r,True,240
+jev-1.14-native,nonmoral,significance,w1,True,240
