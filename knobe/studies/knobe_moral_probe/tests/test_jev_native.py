@@ -211,7 +211,12 @@ def test_analyze_writes_checks_sign_and_arm_tables_for_both_readers(tmp_path, mo
         a = pd.read_csv(outputs / "first_look" / f"{reader_name}_arm_effects.csv")
         assert "moral_vs_rest" in set(a["arm"])
         assert {p.name for p in (outputs / "checks" / reader_name).iterdir()} == {
-            "coverage.csv", "anchor_agreement.csv", "validity.csv", "wording_means.csv"}
+            "coverage.csv", "anchor_agreement.csv", "validity.csv", "wording_means.csv", "pair_direction.csv"}
+        normal = pd.read_csv(outputs / "first_look" / f"{reader_name}_normal_sign_effects.csv")
+        assert set(normal["n_rows"]) == {72, 36}              # 2 of 3 wordings: 6 storylines x 3 arms x 2 signs x 2
+    pd_ = pd.read_csv(outputs / "checks" / "jn" / "pair_direction.csv").set_index(["qkey", "arm", "wordings"])
+    assert pd_.loc[("blame", "moral", "normal"), "bad_above"] == 6     # 8 vs 3 in every storyline
+    assert pd_.loc[("blame", "moral", "all"), "mean_bad_minus_good"] == pytest.approx(5 / 3)
     s = pd.read_csv(outputs / "first_look" / "jn_sign_effects.csv").set_index("qkey")
     # FakeJev fills in 8 / 3 on every wording, reversed too: pooled (8 + 8 + 2) / 3 and (3 + 3 + 7) / 3
     assert s.loc["intentionality", "mean_bad"] == 6 and math.isclose(s.loc["intentionality", "mean_good"], 13 / 3)

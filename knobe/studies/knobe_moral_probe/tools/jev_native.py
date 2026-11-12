@@ -21,8 +21,9 @@ Exit 0 when every question has an answer, 1 when some calls failed (re-run).
 analyze: for each reader (top bubble -> <name>, expected value -> <name>_ev),
 reusing the existing code, not reimplementing it:
   outputs/first_look/<name>_sign_effects.csv   analysis/first_look.sign_effects
+  outputs/first_look/<name>_normal_sign_effects.csv   the same, reversed wordings left out
   outputs/first_look/<name>_arm_effects.csv    analysis/arm_effects.arm_effects (--experiment)
-  outputs/checks/<name>/{coverage,anchor_agreement,validity,wording_means}.csv
+  outputs/checks/<name>/{coverage,anchor_agreement,validity,wording_means,pair_direction}.csv
                                                kmp.checks + tools/jev_subject.wording_means
 (B=1999 wild cluster bootstrap by storyline, first_look's seeds.) kmp.checks'
 number rates, example copying, example effect and throughput don't apply: every
@@ -136,6 +137,22 @@ def cmd_elicit(a: argparse.Namespace, transport=None) -> int:
     return 1 if missing else 0
 
 
+def pair_direction(frame: pd.DataFrame) -> pd.DataFrame:
+    """Per question x arm x wordings ("all", or "normal" = reversed wordings left out):
+    how many storylines rate the bad side effect above, level with, or below the good
+    one (storyline means of the recoded rating). A descriptive count beside the fits."""
+    d = analysis_rows(frame)
+    rows = []
+    for wordings, s in (("all", d), ("normal", d[~d["reversed"]])):
+        for (qkey, arm), cell in s[s["qkey"].isin(("intentionality", "blame", "praise"))].groupby(["qkey", "arm"]):
+            m = cell.groupby(["cluster_id", "sign"])["rating"].mean().unstack("sign").dropna()
+            diff = m["bad"] - m["good"]
+            rows.append(dict(qkey=qkey, arm=arm, wordings=wordings, n_storylines=len(diff),
+                             bad_above=int((diff > 0).sum()), level=int((diff == 0).sum()),
+                             bad_below=int((diff < 0).sum()), mean_bad_minus_good=float(diff.mean())))
+    return pd.DataFrame(rows)
+
+
 def cmd_analyze(a: argparse.Namespace) -> int:
     import first_look
     from arm_effects import arm_effects
@@ -147,7 +164,9 @@ def cmd_analyze(a: argparse.Namespace) -> int:
         name = a.name if reader == "top" else f"{a.name}_ev"
         frame = jev_native.native_frame(a.results, items, reader=reader)
         tables = {
-            outputs / "first_look" / f"{name}_sign_effects.csv": first_look.sign_effects(frame)}
+            outputs / "first_look" / f"{name}_sign_effects.csv": first_look.sign_effects(frame),
+            outputs / "first_look" / f"{name}_normal_sign_effects.csv":
+                first_look.sign_effects(frame[~frame["reversed"]].reset_index(drop=True))}
         if a.experiment:
             tables[outputs / "first_look" / f"{name}_arm_effects.csv"] = arm_effects(analysis_rows(frame),
                                                                                       a.experiment)
@@ -156,7 +175,8 @@ def cmd_analyze(a: argparse.Namespace) -> int:
         tables.update({cdir / "coverage.csv": checks.coverage(frame, items, [jev_native.MODEL_KEY]),
                        cdir / "anchor_agreement.csv": checks.anchor_agreement(frame),
                        cdir / "validity.csv": checks.validity(frame),
-                       cdir / "wording_means.csv": wording_means(frame)})
+                       cdir / "wording_means.csv": wording_means(frame),
+                       cdir / "pair_direction.csv": pair_direction(frame)})
         for path, table in tables.items():
             table.to_csv(path, index=False)
         sign = tables[outputs / "first_look" / f"{name}_sign_effects.csv"]
