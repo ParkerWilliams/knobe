@@ -1,0 +1,134 @@
+item_id,field,kind,from,to,note
+kmp-nm-002-moral-good,scenario,goal,to increase revenue,to increase profits,bad version's goal (B2)
+kmp-nm-003-moral-good,scenario,goal,to buy a car,to buy a house,bad version's goal (B2)
+kmp-nm-004-moral-good,scenario,goal,to improve its playability,to improve its appearance,bad version's goal (B2)
+kmp-nm-005-moral-good,scenario,goal,to win an election,to gain votes,bad version's goal (B2)
+kmp-nm-007-moral-bad,scenario,typo,to reduce enemy's steel production,to reduce the enemy's steel production,missing article (decision C)
+kmp-nm-007-moral-good,scenario,goal,to reduce the enemy's iron production,to reduce the enemy's steel production,"bad version's goal (B2), with the bad version's article fix"
+kmp-nm-008-moral-good,scenario,goal,to increase basketball funding,to increase business school funding,bad version's goal (B2)
+kmp-nm-009-moral-bad,scenario,other_name,Susie-Ann's crops,the neighbor's crops,non-agent name to role (decision L); the effect already says neighbor (MM 2026-10-12)
+kmp-nm-009-moral-good,scenario,other_name,Billy-Bob's crops,the neighbor's crops,non-agent name to role (decision L)
+kmp-nm-009-moral-good,effect,other_name,Billy-Bob's crops,the neighbor's crops,non-agent name to role (decision L)
+kmp-nm-010-moral-bad,scenario,other_name,her uncle in,an uncle in,kin noun with an article (review ruling 1)
+kmp-nm-010-moral-bad,scenario,other_name,being his caretaker,being the caretaker,his is the uncle; restructured so the goal matches the good version's (B2)
+kmp-nm-010-moral-bad,scenario,other_name,on her uncle,on the uncle,her is the agent; kin noun with an article (review ruling 1)
+kmp-nm-010-moral-bad,scenario,other_name,placing him in,placing the uncle in,him is the uncle
+kmp-nm-010-moral-bad,scenario,other_name,make him extremely,make the uncle extremely,him is the uncle
+kmp-nm-010-moral-bad,effect,other_name,make her uncle,make the uncle,kin noun with an article (review ruling 1)
+kmp-nm-010-moral-good,scenario,other_name,his aunt in a nursing home to,an aunt in a nursing home to,kin noun with an article (review ruling 1)
+kmp-nm-010-moral-good,scenario,other_name,being her caretaker,being the caretaker,her is the aunt; restructured so the goal matches the bad version's (B2)
+kmp-nm-010-moral-good,scenario,other_name,on his aunt,on the aunt,his is the agent; kin noun with an article (review ruling 1)
+kmp-nm-010-moral-good,scenario,other_name,placing his aunt,placing the aunt,his is the agent; kin noun with an article (review ruling 1)
+kmp-nm-010-moral-good,scenario,other_name,make her extremely,make the aunt extremely,her is the aunt
+kmp-nm-010-moral-good,effect,other_name,make his aunt,make the aunt,kin noun with an article (review ruling 1)
+kmp-nm-011-moral-good,scenario,goal,to decorate her yard,to decorate the homeowner's house,bad version's goal (B2)
+kmp-nm-012-moral-bad,scenario,typo,would have rates of cancer,would have on rates of cancer,"missing 'on' (decision C, item 23)"
+kmp-nm-012-moral-good,scenario,goal,to make a deadline,to gain profit,bad version's goal (B2)
+kmp-nm-013-moral-good,scenario,goal,to increase revenue,to make more money,bad version's goal (B2)
+kmp-nm-014-moral-good,scenario,goal,to make it shiny,to clean the floor,bad version's goal (B2)
+kmp-nm-015-moral-bad,scenario,other_name,"his roommate, Curtis",the roommate,non-agent name to role (decision L)
+kmp-nm-015-moral-bad,scenario,other_name,make Curtis fail,make the roommate fail,non-agent name to role (decision L)
+kmp-nm-015-moral-bad,effect,other_name,make Curtis fail,make the roommate fail,non-agent name to role (decision L)
+kmp-nm-015-moral-good,scenario,goal,to have fun,to be more popular,bad version's goal (B2)
+kmp-nm-015-moral-good,scenario,other_name,"her roommate, Jackie",the roommate,non-agent name to role (decision L)
+kmp-nm-015-moral-good,scenario,other_name,help Jackie make,help the roommate make,non-agent name to role (decision L)
+kmp-nm-015-moral-good,effect,other_name,help Jackie make,help the roommate make,non-agent name to role (decision L)
+kmp-nm-016-moral-good,scenario,goal,to have fruit in the fall,to decorate the gardener's yard,bad version's goal (B2)
+kmp-nm-017-moral-good,scenario,goal,to increase his pay,to increase the shelter director's salary,bad version's goal (B2)
+kmp-nm-018-moral-good,scenario,goal,to remain politically popular,to keep the position,bad version's goal (B2)
+kmp-nm-020-moral-good,scenario,goal,to increase visitors to his theme park,to increase traffic to the country store,bad version's goal (B2)
+kmp-nm-020-moral-good,scenario,typo,his new road,the new trolley,"the good version buys a trolley, not a road (decision C, item 40)"
+kmp-nm-021-moral-good,scenario,goal,to do research,to earn a living,bad version's goal (B2)
+kmp-nm-022-moral-good,scenario,goal,to get her pregnancy over with,to reduce the pregnancy pains,bad version's goal (B2)
+kmp-nm-023-moral-good,scenario,typo,cause golfer to win,cause the golfer to win,"missing article (decision C, item 46)"
+kmp-nm-024-moral-good,scenario,goal,to get onto newspapers,to get on TV,bad version's goal (B2)
+kmp-nm-025-moral-good,scenario,goal,to gain news coverage,to gain publicity,bad version's goal (B2)
+kmp-nm-027-moral-bad,scenario,typo,Phillip,The adult child,"Ngo spells the agent Philip and Phillip (decision C, item 53)"
+kmp-nm-028-moral-good,scenario,goal,to improve its looks,to relieve anger,"bad version's goal (B2), its pronoun dropped as in the bad version"
+kmp-nm-029-moral-good,scenario,typo,the effect would have,the effect this would have,"missing 'this' (decision C, item 58)"
+kmp-nm-032-moral-good,scenario,goal,to provide an enthralling account of the World War II hero,to provide a sensational account of the Civil War hero,"bad version's goal (B2); the hero is part of the goal, so the good version's hero is now the Civil War hero too"
+kmp-nm-033-moral-bad,scenario,pronoun,married his wife,married their wife,singular their (review ruling 4)
+kmp-nm-033-moral-bad,scenario,pronoun,on his parents,on their parents,singular their (review ruling 4)
+kmp-nm-033-moral-bad,scenario,pronoun,knew his parents,knew their parents,singular their (review ruling 4)
+kmp-nm-033-moral-bad,effect,pronoun,cause his parents,cause their parents,singular their (review ruling 4)
+kmp-nm-033-moral-good,scenario,pronoun,married her husband,married their husband,singular their (review ruling 4)
+kmp-nm-033-moral-good,scenario,goal,for some financial security,to finally settle down with a family,bad version's goal (B2)
+kmp-nm-033-moral-good,scenario,pronoun,on her parents,on their parents,singular their (review ruling 4)
+kmp-nm-033-moral-good,scenario,pronoun,knew her parents,knew their parents,singular their (review ruling 4)
+kmp-nm-033-moral-good,effect,pronoun,cause her parents,cause their parents,singular their (review ruling 4)
+kmp-nm-035-moral-good,scenario,goal,to streamline costs,to balance the budget,bad version's goal (B2)
+kmp-nm-036-moral-good,effect,effect,make the tablet accessible,make the music player accessible,"the scenario is about a music player (MM 2026-10-12, item 72)"
+kmp-nm-037-moral-good,scenario,goal,to recruit more members,to keep the cult leader's influence,bad version's goal (B2)
+kmp-nm-038-moral-good,scenario,goal,to get a nice tour bus,to get a book deal,bad version's goal (B2)
+kmp-nm-039-moral-good,scenario,goal,to increase sales,to decrease the farmer's workload,bad version's goal (B2)
+kmp-nm-040-moral-good,scenario,goal,to please the drug vendor,to make the drug company happy,bad version's goal (B2)
+kmp-nm-028-prudential-bad,scenario,fresh_action,,,"Ngo's action (smacking the puppy) is itself wrongdoing, which the reviewer reads instead of the self-regarding effect (DEFINITIONS §4.2 Out)"
+kmp-nm-028-prudential-good,scenario,fresh_action,,,"Ngo's action (smacking the puppy) is itself wrongdoing, which the reviewer reads instead of the self-regarding effect (DEFINITIONS §4.2 Out)"
+kmp-nm-030-prudential-bad,scenario,fresh_action,,,"Ngo's action (faking a death) is itself fraud, which the reviewer reads instead of the self-regarding effect (DEFINITIONS §4.2 Out; pilot pair 30 failed)"
+kmp-nm-030-prudential-good,scenario,fresh_action,,,"Ngo's action (faking a death) is itself fraud, which the reviewer reads instead of the self-regarding effect (DEFINITIONS §4.2 Out; pilot pair 30 failed)"
+kmp-nm-034-prudential-bad,scenario,fresh_action,,,Ngo's action (a bomb threat) is itself wrongdoing (DEFINITIONS §4.2 Out; pilot used a fresh domain too)
+kmp-nm-034-prudential-good,scenario,fresh_action,,,Ngo's action (a bomb threat) is itself wrongdoing (DEFINITIONS §4.2 Out; pilot used a fresh domain too)
+kmp-nm-037-prudential-bad,scenario,fresh_action,,,"Ngo's action is the cult's declaration, which reaches the followers (pilot used a fresh domain too)"
+kmp-nm-037-prudential-good,scenario,fresh_action,,,"Ngo's action is the cult's declaration, which reaches the followers (pilot used a fresh domain too)"
+kmp-nm-040-prudential-bad,scenario,fresh_action,,,Ngo's action (prescribing to please a drug company) is itself a breach of medical ethics (DEFINITIONS §4.2 Out)
+kmp-nm-040-prudential-good,scenario,fresh_action,,,Ngo's action (prescribing to please a drug company) is itself a breach of medical ethics (DEFINITIONS §4.2 Out)
+kmp-nm-022-procedural-bad,scenario,fresh_action,,,"no arbitrary convention plausibly follows from inducing labor, and the action involves the baby's welfare"
+kmp-nm-022-procedural-good,scenario,fresh_action,,,"no arbitrary convention plausibly follows from inducing labor, and the action involves the baby's welfare"
+kmp-nm-023-procedural-bad,scenario,fresh_action,,,"the conventions screaming breaks at a match (quiet during play) protect the players, which is moral (DEFINITIONS §4.3 Out)"
+kmp-nm-023-procedural-good,scenario,fresh_action,,,"the conventions screaming breaks at a match (quiet during play) protect the players, which is moral (DEFINITIONS §4.3 Out)"
+kmp-nm-027-procedural-bad,scenario,fresh_action,,,no arbitrary convention plausibly follows from telling the mother the adult child's views
+kmp-nm-027-procedural-good,scenario,fresh_action,,,no arbitrary convention plausibly follows from telling the mother the adult child's views
+kmp-nm-037-procedural-bad,scenario,fresh_action,,,"Ngo's action is the cult's declaration, which reaches the followers"
+kmp-nm-037-procedural-good,scenario,fresh_action,,,"Ngo's action is the cult's declaration, which reaches the followers"
+kmp-nm-040-procedural-bad,scenario,fresh_action,,,Ngo's action (prescribing to please a drug company) is itself a breach of medical ethics (same fresh action as the prudential pair)
+kmp-nm-040-procedural-good,scenario,fresh_action,,,Ngo's action (prescribing to please a drug company) is itself a breach of medical ethics (same fresh action as the prudential pair)
+kmp-nm-007-prudential-bad,scenario,fresh_action,,,"Ngo's action is a wartime bombing; the earlier fresh action (a longer route to save fuel) was implausible (MM, A11)"
+kmp-nm-007-prudential-good,scenario,fresh_action,,,"Ngo's action is a wartime bombing; the earlier fresh action (a longer route to save fuel) was implausible (MM, A11)"
+kmp-nm-010-prudential-bad,scenario,fresh_action,,,"Ngo's action (placing an uncle in a home to avoid caregiving) carries moral content (MM, A11)"
+kmp-nm-010-prudential-good,scenario,fresh_action,,,"Ngo's action (placing an uncle in a home to avoid caregiving) carries moral content (MM, A11)"
+kmp-nm-017-prudential-bad,scenario,fresh_action,,,"Ngo's action (cutting shelter spending for the director's own salary) carries moral content (MM, A11)"
+kmp-nm-017-prudential-good,scenario,fresh_action,,,"Ngo's action (cutting shelter spending for the director's own salary) carries moral content (MM, A11)"
+kmp-nm-022-prudential-bad,scenario,fresh_action,,,"Ngo's action (inducing labor) is medically charged and morally salient (MM, A11)"
+kmp-nm-022-prudential-good,scenario,fresh_action,,,"Ngo's action (inducing labor) is medically charged and morally salient (MM, A11)"
+kmp-nm-023-prudential-bad,scenario,fresh_action,,,"Ngo's action (screaming during a match) implies disrupting play (MM, A11)"
+kmp-nm-023-prudential-good,scenario,fresh_action,,,"Ngo's action (screaming during a match) implies disrupting play (MM, A11)"
+kmp-nm-003-procedural-bad,scenario,fresh_action,,,"the scheme itself can't set the bank's numbering (MM, A11)"
+kmp-nm-003-procedural-good,scenario,fresh_action,,,"the scheme itself can't set the bank's numbering (MM, A11)"
+kmp-nm-004-procedural-bad,scenario,fresh_action,,,"the color scheme was a means to the renovation's goal (MM, A5)"
+kmp-nm-004-procedural-good,scenario,fresh_action,,,"the color scheme was a means to the renovation's goal (MM, A5)"
+kmp-nm-005-procedural-bad,scenario,fresh_action,,,"diverting water can't change the canal-naming convention (MM, A11)"
+kmp-nm-005-procedural-good,scenario,fresh_action,,,"diverting water can't change the canal-naming convention (MM, A11)"
+kmp-nm-006-procedural-bad,scenario,fresh_action,,,"a profit plan has no link to shift names (MM, A11)"
+kmp-nm-006-procedural-good,scenario,fresh_action,,,"a profit plan has no link to shift names (MM, A11)"
+kmp-nm-007-procedural-bad,scenario,fresh_action,,,"a route can't break a log format (MM, A11)"
+kmp-nm-007-procedural-good,scenario,fresh_action,,,"a route can't break a log format (MM, A11)"
+kmp-nm-009-procedural-bad,scenario,fresh_action,,,"spreading weed killer can't change the field color code (MM, A11)"
+kmp-nm-009-procedural-good,scenario,fresh_action,,,"spreading weed killer can't change the field color code (MM, A11)"
+kmp-nm-010-procedural-bad,scenario,fresh_action,,,"the nursing-home placement can't set room numbers and carries moral content (MM, A11)"
+kmp-nm-010-procedural-good,scenario,fresh_action,,,"the nursing-home placement can't set room numbers and carries moral content (MM, A11)"
+kmp-nm-014-procedural-bad,scenario,fresh_action,,,"vacuuming can't break or fit the chart's format (MM, A11)"
+kmp-nm-014-procedural-good,scenario,fresh_action,,,"vacuuming can't break or fit the chart's format (MM, A11)"
+kmp-nm-015-procedural-bad,scenario,fresh_action,,,"throwing a party has no link to party names (MM, A11)"
+kmp-nm-015-procedural-good,scenario,fresh_action,,,"throwing a party has no link to party names (MM, A11)"
+kmp-nm-017-procedural-bad,scenario,fresh_action,,,"Ngo's action carries moral content and can't set budget-code syntax (MM, A11)"
+kmp-nm-017-procedural-good,scenario,fresh_action,,,"Ngo's action carries moral content and can't set budget-code syntax (MM, A11)"
+kmp-nm-019-procedural-bad,scenario,fresh_action,,,"enacting a plan doesn't set a memo format without a memo (MM, A11)"
+kmp-nm-019-procedural-good,scenario,fresh_action,,,"enacting a plan doesn't set a memo format without a memo (MM, A11)"
+kmp-nm-020-procedural-bad,scenario,fresh_action,,,"building a road doesn't choose its name (MM, A11)"
+kmp-nm-020-procedural-good,scenario,fresh_action,,,"building a road doesn't choose its name (MM, A11)"
+kmp-nm-021-procedural-bad,scenario,fresh_action,,,"hunting can't change tag colors (MM, A11)"
+kmp-nm-021-procedural-good,scenario,fresh_action,,,"hunting can't change tag colors (MM, A11)"
+kmp-nm-025-procedural-bad,scenario,fresh_action,,,"releasing documents doesn't name archive files (MM, A11)"
+kmp-nm-025-procedural-good,scenario,fresh_action,,,"releasing documents doesn't name archive files (MM, A11)"
+kmp-nm-028-procedural-bad,scenario,fresh_action,,,"buying a collar doesn't imply club membership (MM, A11)"
+kmp-nm-028-procedural-good,scenario,fresh_action,,,"buying a collar doesn't imply club membership (MM, A11)"
+kmp-nm-029-procedural-bad,scenario,fresh_action,,,"pulling over a car doesn't number reports (MM, A11)"
+kmp-nm-029-procedural-good,scenario,fresh_action,,,"pulling over a car doesn't number reports (MM, A11)"
+kmp-nm-030-procedural-bad,scenario,fresh_action,,,"choosing a plan doesn't number the insurer's policies (MM, A11)"
+kmp-nm-030-procedural-good,scenario,fresh_action,,,"choosing a plan doesn't number the insurer's policies (MM, A11)"
+kmp-nm-031-procedural-bad,scenario,fresh_action,,,"the protest wasn't described as having banners (MM, A11)"
+kmp-nm-031-procedural-good,scenario,fresh_action,,,"the protest wasn't described as having banners (MM, A11)"
+kmp-nm-033-procedural-bad,scenario,fresh_action,,,"the marriage action was awkward and the naming consequence unexplained (MM, A11)"
+kmp-nm-033-procedural-good,scenario,fresh_action,,,"the marriage action was awkward and the naming consequence unexplained (MM, A11)"
+kmp-nm-034-procedural-bad,scenario,fresh_action,,,"moving meetings doesn't change the flyer format (MM, A11)"
+kmp-nm-034-procedural-good,scenario,fresh_action,,,"moving meetings doesn't change the flyer format (MM, A11)"

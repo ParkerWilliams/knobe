@@ -15,14 +15,22 @@ from types import MappingProxyType
 from knobe import constants
 
 RELEASE = "knobe_moral_probe"                      # seed namespace (knobe.jobs)
-RUNNER_VERSION = "knobe_moral_probe_elicit-0.2"   # 0.2: per-format MAX_TOKENS + kmp.answer readout
+RUNNER_VERSION = "knobe_moral_probe_elicit-0.4"   # 0.2: per-format MAX_TOKENS + kmp.answer readout; 0.3: chat 512 + finish sidecar; 0.4: kmp.answer answer_line
 # Answer budget per prompt format (DESIGN.md amendment 2026-10-13, "answer format"):
 # chat (instruct) models often explain before the number, so 10 tokens cut most
 # answers off. 256 from the 2026-10-13 calibration (outputs/first_look/or_calibration_max_tokens.csv):
 # the smallest budget at which cut-off replies fall below 2% for every instruct model.
 # raw (pretrained) stays at 10 until the cluster pilot measures it.
-MAX_TOKENS: Mapping[str, int] = MappingProxyType({"raw": 10, "chat": 256})
+# Chat raised to 512 (DESIGN.md amendment 2026-10-22, MM: don't cut off reasoning in the real run):
+# twice the calibrated budget, as headroom for the study models, which the stand-ins only approximate.
+# kmp.checks' cut_off gate checks it on every run from the engine's finish reasons.
+MAX_TOKENS: Mapping[str, int] = MappingProxyType({"raw": 10, "chat": 512})
+# Most chat replies allowed to stop at the budget, per model x experiment x question x wording.
+CUT_OFF_MAX = 0.01
 REVIEW_MAX_TOKENS = 8
+# Screening prompts only (not the subject models'): the pinned reviewer opens with reasoning, which
+# REVIEW_MAX_TOKENS cut off before any number (2026-10-22 verbatim run: 355 of 502 answers unparsed).
+SCREENING_REPLY = "Reply with only the number."
 # Screening reviewer (a Claude model ID, never a subject; DESIGN.md section 4), pinned
 # by the researcher (DESIGN.md amendment 2026-10-01, reviewer pin). The reviewer client
 # sends temperature 0 with thinking disabled; the current generation (Opus 5.5,
@@ -55,7 +63,11 @@ _EXTENT = ", on a scale from 0 (not at all) to 10 (entirely)?"
 
 QUESTIONS: Mapping[str, tuple[Wording, ...]] = MappingProxyType({
     "intentionality": (
-        Wording("w1", "Did {agent} intentionally {effect}?"),
+        # Ngo's question with a 0-10 scale appended (DESIGN.md amendment 2026-10-22, MM: w1a). As a bare
+        # yes/no question it drew "Yes"/"No" or prose without a number (Llama-3.1-8B-Instruct: 53% numeric;
+        # w1a 84%, outputs/first_look/intentionality_wording_test.csv).
+        Wording("w1", "Did {agent} intentionally {effect}? Answer on a scale from 0 (definitely not) "
+                      "to 10 (definitely yes)."),
         Wording("w2", "To what extent did {agent} {effect} on purpose, on a scale from 0 (not at all) to 10 (completely)?"),
         Wording("w3r", "How intentionally did {agent} {effect}, on a scale from 0 (completely intentionally) "
                        "to 10 (not at all intentionally)?", reversed=True),
@@ -98,8 +110,9 @@ QUESTIONS: Mapping[str, tuple[Wording, ...]] = MappingProxyType({
                       "physically or emotionally" + _EXTENT),
     ),
     "fnd_fairness": (
-        Wording("w1", _LEAD + "To what extent does this side effect involve fair or unfair treatment, such as unequal "
-                      "treatment, cheating or going back on a deal" + _EXTENT),
+        # Both poles in the examples, like the other foundations (DESIGN.md amendment 2026-10-22).
+        Wording("w1", _LEAD + "To what extent does this side effect involve fair or unfair treatment, such as equal or "
+                      "unequal treatment, playing fair or cheating, or keeping or going back on a deal" + _EXTENT),
     ),
     "fnd_loyalty": (
         Wording("w1", _LEAD + "To what extent does this side effect involve loyalty to, or betrayal of, one's group, "

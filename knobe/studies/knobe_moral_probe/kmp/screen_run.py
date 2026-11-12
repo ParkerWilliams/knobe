@@ -28,9 +28,12 @@ import argparse
 import asyncio
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.request
 from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -56,6 +59,7 @@ from kmp.prompts import ScreeningPrompt, build_screening_prompts
 from kmp.screen import (
     TARGET_MIN,
     VALENCE_BAD_MAX,
+    VALENCE_BY_ARM,
     VALENCE_GOOD_MIN,
     ScreeningRawResult,
     select_pairs,
@@ -104,6 +108,69 @@ class ScreeningClient(AnthropicClient):
         return "".join(b.text for b in resp.content if b.type == "text").strip()
 
 
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+# The same pinned model reached through OpenRouter, served only by Anthropic (no fallbacks), so the
+# reviewer is the pin whichever route carries it (added 2026-10-22: the researcher has an OpenRouter key,
+# not an Anthropic one). Rows keep the pin's ID as reviewer_model; the meta records the route.
+OPENROUTER_IDS = {"claude-sonnet-4-6": "anthropic/claude-sonnet-4.6"}
+OPENROUTER_PROVIDERS = ["Anthropic"]
+OPENROUTER_RETRY_STATUS = {408, 409, 425, 429, 500, 502, 503, 504, 520, 522, 524, 529}
+
+
+class OpenRouterScreeningClient:
+    """CurationClient over OpenRouter chat completions: one user message, temperature 0, the pinned
+    model on Anthropic only. Tracks served models, answering providers and tokens like ScreeningClient.
+    HTTP as in tools/openrouter_first_look.OpenRouterEngine (stdlib urllib, no new dependency); retries
+    are left to knobe.curate._complete_with_retry via TransientCallError."""
+
+    def __init__(self, model: str, api_key: str | None = None, timeout: float = 60.0):
+        if model not in OPENROUTER_IDS:
+            raise ValueError(f"{model!r} has no OpenRouter ID in OPENROUTER_IDS")
+        self.model, self.openrouter_id, self.timeout = model, OPENROUTER_IDS[model], timeout
+        self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY", "").strip()
+        self.served_models: set[str] = set()
+        self.providers: set[str] = set()
+        self.input_tokens_used = self.output_tokens_used = 0
+
+    def _post(self, prompt: str, max_tokens: int) -> dict:
+        body = json.dumps({
+            "model": self.openrouter_id,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": REVIEWER_TEMPERATURE,
+            "max_tokens": max_tokens,
+            "provider": {"order": OPENROUTER_PROVIDERS, "allow_fallbacks": False},
+        }).encode()
+        headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json",
+                   "X-Title": "knobe_moral_probe screening"}
+        try:
+            with urllib.request.urlopen(urllib.request.Request(OPENROUTER_URL, body, headers),
+                                        timeout=self.timeout) as r:
+                data = json.loads(r.read())
+        except urllib.error.HTTPError as exc:
+            if exc.code in OPENROUTER_RETRY_STATUS:
+                raise TransientCallError(f"HTTP {exc.code}") from exc
+            raise
+        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+            raise TransientCallError(str(exc)) from exc
+        if "error" in data:
+            code = int(data["error"].get("code") or 500)
+            if code in OPENROUTER_RETRY_STATUS:
+                raise TransientCallError(str(data["error"]))
+            raise RuntimeError(f"OpenRouter error {code}: {data['error']}")
+        return data
+
+    async def complete(self, prompt: str, max_tokens: int) -> str:
+        data = await asyncio.to_thread(self._post, prompt, max_tokens)
+        if data.get("model"):
+            self.served_models.add(data["model"])
+        if data.get("provider"):
+            self.providers.add(data["provider"])
+        usage = data.get("usage") or {}
+        self.input_tokens_used += usage.get("prompt_tokens", 0) or 0
+        self.output_tokens_used += usage.get("completion_tokens", 0) or 0
+        return (data["choices"][0]["message"].get("content") or "").strip()
+
+
 class ResumeRefused(ValueError):
     """The raw file's rows don't belong to this run (other reviewer, changed prompts)."""
 
@@ -140,8 +207,10 @@ def _current(rows: list[ScreeningRawResult], prompts: list[ScreeningPrompt],
 
 
 def raw_problems(rows: list[ScreeningRawResult], prompts: list[ScreeningPrompt], reviewer_model: str,
-                 limit: int = 5) -> list[str]:
-    """Reasons rows already on disk can't be resumed by this run. Empty = fine."""
+                 limit: int = 5, rescreen_changed: bool = False) -> list[str]:
+    """Reasons rows already on disk can't be resumed by this run. Empty = fine.
+    rescreen_changed accepts rows for an earlier text of an item: they stay in the file as the record,
+    _current ignores them, and the item is asked again on its current text."""
     problems = []
     others = sorted({r.reviewer_model for r in rows} - {reviewer_model})
     if others:
@@ -150,7 +219,7 @@ def raw_problems(rows: list[ScreeningRawResult], prompts: list[ScreeningPrompt],
     want = {(p.item_id, p.qkey): p.text_sha256 for p in prompts}
     changed = sorted({r.variant_id for r in rows
                       if (r.variant_id, r.field) in want and r.text_sha256 != want[(r.variant_id, r.field)]})
-    if changed:
+    if changed and not rescreen_changed:
         shown = ", ".join(changed[:limit]) + (" ..." if len(changed) > limit else "")
         problems.append(f"text_sha256 changed for {len(changed)} item(s) that already have rows: {shown}")
     return problems
@@ -168,7 +237,8 @@ def scores_from_raw(rows: list[ScreeningRawResult], prompts: list[ScreeningPromp
 
 
 async def run_screening(prompts: list[ScreeningPrompt], client, reviewer_model: str, out_path: Path,
-                        concurrency: int = 8, max_retries: int = 3) -> list[tuple[str, str]]:
+                        concurrency: int = 8, max_retries: int = 3,
+                        rescreen_changed: bool = False) -> list[tuple[str, str]]:
     """Attempt 1 asks everything not yet asked; attempt 2 re-asks, once, what
     came back unparsed. Resumable: matching rows already in out_path count;
     non-matching ones raise ResumeRefused before anything is asked. Any error
@@ -176,7 +246,7 @@ async def run_screening(prompts: list[ScreeningPrompt], client, reviewer_model: 
     Returns the (item_id, qkey) of every call made, retries included."""
     if concurrency < 1:
         raise ValueError("concurrency must be >= 1")
-    problems = raw_problems(_read_raw(out_path), prompts, reviewer_model)
+    problems = raw_problems(_read_raw(out_path), prompts, reviewer_model, rescreen_changed=rescreen_changed)
     if problems:
         raise ResumeRefused(f"refusing to resume {out_path}:\n  " + "\n  ".join(problems))
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -277,6 +347,14 @@ def main(argv: list[str] | None = None) -> int:
     who = p.add_mutually_exclusive_group()
     who.add_argument("--mock", action="store_true", help="deterministic fake reviewer, no API")
     who.add_argument("--reviewer-model", help="Claude model ID; must equal protocol.REVIEWER_MODEL (the default)")
+    p.add_argument("--engine", choices=("anthropic", "openrouter"), default="anthropic",
+                   help="route to the pinned reviewer: Anthropic SDK (ANTHROPIC_API_KEY) or OpenRouter, "
+                        "Anthropic-served only (OPENROUTER_API_KEY)")
+    p.add_argument("--allow-draft", action="store_true",
+                   help="also screen draft items (researcher's choice 2026-10-22: screen first, review the survivors)")
+    p.add_argument("--rescreen-changed", action="store_true",
+                   help="resume even where an item's text changed since its rows were written: those rows stay "
+                        "as the record and the item is asked again (redrafts after a screen)")
     p.add_argument("--dry-run", action="store_true", help="print the call and token estimate, ask nothing")
     p.add_argument("--concurrency", type=int, default=8)
     args = p.parse_args(argv)
@@ -289,10 +367,11 @@ def main(argv: list[str] | None = None) -> int:
     if problems:
         print("refusing to screen:\n  " + "\n  ".join(problems), file=sys.stderr)
         return 2
-    approved = [i for i in items if i.review_status == "approved"]
+    statuses = ("approved", "draft") if args.allow_draft else ("approved",)
+    approved = [i for i in items if i.review_status in statuses]
     screening_prompts = build_screening_prompts(approved)
     n = len(screening_prompts)
-    print(f"screening {len(approved)} approved of {len(items)} items")
+    print(f"screening {len(approved)} {' or '.join(statuses)} of {len(items)} items")
 
     if args.dry_run:
         in_tokens = sum(len(sp.text) for sp in screening_prompts) // 4
@@ -314,15 +393,24 @@ def main(argv: list[str] | None = None) -> int:
         except ReviewerSubjectConflictError as exc:
             print(f"refusing to screen: {exc}", file=sys.stderr)
             return 2
+        if args.engine == "openrouter" and not os.environ.get("OPENROUTER_API_KEY", "").strip():
+            print("refusing to screen: --engine openrouter needs OPENROUTER_API_KEY", file=sys.stderr)
+            return 2
 
     raw_path = args.out_dir / "screening_raw.jsonl"
-    problems = raw_problems(_read_raw(raw_path), screening_prompts, reviewer)
+    problems = raw_problems(_read_raw(raw_path), screening_prompts, reviewer, rescreen_changed=args.rescreen_changed)
     if problems:
         print(f"refusing to resume {raw_path}:\n  " + "\n  ".join(problems), file=sys.stderr)
         return 2
 
-    client = MockClient(unparseable_rate=0.0) if args.mock else ScreeningClient(reviewer)
-    asked = asyncio.run(run_screening(screening_prompts, client, reviewer, raw_path, concurrency=args.concurrency))
+    if args.mock:
+        client = MockClient(unparseable_rate=0.0)
+    elif args.engine == "openrouter":
+        client = OpenRouterScreeningClient(reviewer)
+    else:
+        client = ScreeningClient(reviewer)
+    asked = asyncio.run(run_screening(screening_prompts, client, reviewer, raw_path, concurrency=args.concurrency,
+                                      rescreen_changed=args.rescreen_changed))
     rows = _read_raw(raw_path)
     selected, report = select_pairs(approved, scores_from_raw(rows, screening_prompts, reviewer))
     write_items(selected, args.out_dir / "selected_items.csv")
@@ -348,6 +436,10 @@ def main(argv: list[str] | None = None) -> int:
         "items_path": str(args.items),
         "items_sha256": file_sha256(args.items),
         "reviewer_model": reviewer,
+        "engine": "mock" if args.mock else args.engine,
+        "allow_draft": args.allow_draft,
+        "rescreen_changed": args.rescreen_changed,
+        "providers": sorted(getattr(client, "providers", ())),
         "reviewer_temperature": temperature,
         "served_models": sorted(getattr(client, "served_models", ())),
         "input_tokens": getattr(client, "input_tokens_used", None),
@@ -356,6 +448,7 @@ def main(argv: list[str] | None = None) -> int:
         "review_max_tokens": protocol.REVIEW_MAX_TOKENS,
         "valence_bad_max": VALENCE_BAD_MAX,
         "valence_good_min": VALENCE_GOOD_MIN,
+        "valence_by_arm": {arm: list(lim) for arm, lim in VALENCE_BY_ARM.items()},
         "target_min": TARGET_MIN,
         "n_prompts": n,
         "calls": len(asked),

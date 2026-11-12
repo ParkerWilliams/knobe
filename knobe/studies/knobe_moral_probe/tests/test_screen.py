@@ -625,3 +625,112 @@ def test_default_pin_reaches_the_client_with_no_api_call(tmp_path, nonmoral_item
     assert screen_run.main(["--items", str(_write(nonmoral_items, tmp_path)), "--out-dir", str(out_dir)]) == 0
     assert built == ["claude-sonnet-4-6"]
     assert {r.reviewer_model for r in _raw(out_dir / "screening_raw.jsonl")} == {"claude-sonnet-4-6"}
+
+
+# --- OpenRouter route and draft screening (2026-10-22) ---
+
+class _Resp:
+    def __init__(self, payload):
+        self.payload = json.dumps(payload).encode()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+    def read(self):
+        return self.payload
+
+
+def test_openrouter_client_sends_the_pin_at_t0_with_one_provider(monkeypatch):
+    sent = {}
+
+    def fake_urlopen(req, timeout):
+        sent.update(json.loads(req.data))
+        return _Resp({"model": "anthropic/claude-4.6-sonnet-20260217", "provider": "Anthropic",
+                      "choices": [{"message": {"content": " 7 "}}],
+                      "usage": {"prompt_tokens": 120, "completion_tokens": 1}})
+
+    monkeypatch.setattr(screen_run.urllib.request, "urlopen", fake_urlopen)
+    client = screen_run.OpenRouterScreeningClient("claude-sonnet-4-6", api_key="k")
+    assert asyncio.run(client.complete("prompt", 8)) == "7"
+    assert sent["model"] == "anthropic/claude-sonnet-4.6"
+    assert sent["temperature"] == 0.0 and sent["max_tokens"] == 8
+    assert sent["provider"] == {"order": ["Anthropic"], "allow_fallbacks": False}
+    assert sent["messages"] == [{"role": "user", "content": "prompt"}]
+    assert client.served_models == {"anthropic/claude-4.6-sonnet-20260217"}
+    assert client.providers == {"Anthropic"}
+    assert (client.input_tokens_used, client.output_tokens_used) == (120, 1)
+
+
+def test_openrouter_client_maps_only_transient_http_errors(monkeypatch):
+    def raiser(code):
+        def fake_urlopen(req, timeout):
+            raise screen_run.urllib.error.HTTPError(req.full_url, code, "x", None, None)
+        return fake_urlopen
+
+    client = screen_run.OpenRouterScreeningClient("claude-sonnet-4-6", api_key="k")
+    monkeypatch.setattr(screen_run.urllib.request, "urlopen", raiser(429))
+    with pytest.raises(curate.TransientCallError):
+        asyncio.run(client.complete("p", 8))
+    monkeypatch.setattr(screen_run.urllib.request, "urlopen", raiser(401))
+    with pytest.raises(screen_run.urllib.error.HTTPError):
+        asyncio.run(client.complete("p", 8))
+
+
+def test_openrouter_client_refuses_unmapped_model():
+    with pytest.raises(ValueError, match="no OpenRouter ID"):
+        screen_run.OpenRouterScreeningClient("claude-other-20260101", api_key="k")
+
+
+def test_allow_draft_screens_drafts_and_says_so(tmp_path, nonmoral_items, capsys):
+    drafts = [i.model_copy(update={"review_status": "draft"}) for i in nonmoral_items]
+    path = _write(drafts, tmp_path)
+    assert screen_run.main(["--items", str(path), "--out-dir", str(tmp_path / "a"), "--mock"]) == 0
+    assert "screening 0 approved" in capsys.readouterr().out
+    assert screen_run.main(["--items", str(path), "--out-dir", str(tmp_path / "b"), "--mock", "--allow-draft"]) == 0
+    assert f"screening {len(drafts)} approved or draft" in capsys.readouterr().out
+    meta = json.loads((tmp_path / "b" / "screening_meta.json").read_text())
+    assert meta["allow_draft"] is True and meta["engine"] == "mock"
+
+
+def test_openrouter_engine_needs_a_key(tmp_path, nonmoral_items, monkeypatch, capsys):
+    monkeypatch.setattr(protocol, "REVIEWER_MODEL", "claude-sonnet-4-6")
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    assert screen_run.main(["--items", str(_write(nonmoral_items, tmp_path)), "--out-dir", str(tmp_path / "s"),
+                            "--engine", "openrouter"]) == 2
+    assert "OPENROUTER_API_KEY" in capsys.readouterr().err
+
+
+# --- procedural valence thresholds (DESIGN amendment 2026-10-22, decision F) ---
+
+def test_procedural_valence_limits_are_bad_4_good_6_and_others_unchanged(nonmoral_items):
+    good_domains = {"domain_moral": 1, "domain_prudential": 1, "domain_procedural": 8}
+    bad = _get(nonmoral_items, "procedural", "bad")
+    good = _get(nonmoral_items, "procedural", "good")
+    assert screen.item_failures(bad, {"valence": 4, **good_domains}) == []
+    assert screen.item_failures(bad, {"valence": 5, **good_domains}) == ["valence 5 > 4 for a bad item"]
+    assert screen.item_failures(good, {"valence": 6, **good_domains}) == []
+    assert screen.item_failures(good, {"valence": 5, **good_domains}) == ["valence 5 < 6 for a good item"]
+    prud = _get(nonmoral_items, "prudential", "bad")
+    assert screen.item_failures(prud, {"valence": 4, **NM_GOOD_SCORES}) == ["valence 4 > 3 for a bad item"]
+    assert screen.valence_limits(prud) == (screen.VALENCE_BAD_MAX, screen.VALENCE_GOOD_MIN)
+
+
+def test_rescreen_changed_asks_only_the_edited_items_and_keeps_old_rows(tmp_path, nonmoral_items):
+    out = tmp_path / "raw.jsonl"
+    ps = prompts.build_screening_prompts(nonmoral_items)
+    _run(ps, ScriptedClient(nonmoral_items), out)
+    n_before = len(_raw(out))
+    edited = [i.model_copy(update={"scenario": i.scenario + " Edited."}) if i.arm == "moral" else i
+              for i in nonmoral_items]
+    ps2 = prompts.build_screening_prompts(edited)
+    asked = _run(ps2, ScriptedClient(edited), out, rescreen_changed=True)
+    moral_ids = {i.item_id for i in edited if i.arm == "moral"}
+    assert asked and {item_id for item_id, _ in asked} == moral_ids
+    assert len(_raw(out)) == n_before + len(asked)                     # old rows kept as the record
+    scores = screen_run.scores_from_raw(_raw(out), ps2, "scripted")
+    assert set(scores) == {i.item_id for i in edited}                  # every item scored on current text
+    assert screen_run.raw_problems(_raw(out), ps2, "scripted", rescreen_changed=True) == []
+    assert screen_run.raw_problems(_raw(out), ps2, "other", rescreen_changed=True)   # other model still refused

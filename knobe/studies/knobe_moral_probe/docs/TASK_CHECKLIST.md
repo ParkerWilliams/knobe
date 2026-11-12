@@ -1,6 +1,6 @@
 # knobe_moral_probe: task checklist
 
-Last updated 2026-10-12. Task numbers are `AUTHORING_PLAN.md`'s. **(you)**
+Last updated 2026-10-22. Task numbers are `AUTHORING_PLAN.md`'s. **(you)**
 marks a step only the researcher can do; **STOP** is a gate where the agent
 waits for you. `HANDOFF.md` has the detail.
 
@@ -22,10 +22,10 @@ waits for you. `HANDOFF.md` has the detail.
 - [x] `analysis/first_look.py` (sign-effect fits), tested on the fake engine
 - [x] **(you)** Sheet 01: all 80 approved by MM 2026-10-12 (Codex pre-review), applied
 - [x] **(you)** Confirm the go/no-go rule in `FIRST_LOOK.md` (2 of 3 instruct, confirmed 2026-10-12)
-- [ ] **(cluster)** `tools/check_chat_bos.py`, then with `--vllm`
-- [ ] **(Parker, cluster)** Gemma self-check, then both full elicitation jobs (about 2.2–5.3 h GPU; Parker's call)
-- [ ] `kmp.checks` + `first_look.py`, log, commit
-- [ ] **STOP (you):** go / no-go
+- [x] (Parker, OpenRouter, instead of the cluster) stand-in instruct models, v2 answer format: rule gives "go" (`HANDOFF.md` 2026-10-22)
+- [x] **STOP (you):** go, accepted on the stand-ins 2026-10-22
+- [ ] **(cluster)** `tools/check_chat_bos.py`, then with `--vllm`; first look on the 6 study models (now before the pilot; runbook needs the 256-token chat budget in its cost)
+- [ ] Llama-3.1-8B-Instruct number rate: fix and test on OpenRouter before the full run
 
 ## Stimuli authoring (after a go)
 
@@ -35,7 +35,7 @@ waits for you. `HANDOFF.md` has the detail.
   - [ ] Parser fixes for any `revise`, then re-sheet as the next batch number (**STOP** again)
   - [ ] Lint clean, commit your decisions
 - [ ] Task 8: method for adding draft items (no commit of its own)
-- [ ] Task 9: `stimuli/NOTES.md`, `nonmoral_log.csv`, role-noun table for all 40 storylines
+- [ ] Task 9: `stimuli/NOTES.md`, `nonmoral_log.csv`, role-noun table for all 40 storylines (drafted 2026-10-22)
   - [ ] **STOP (you):** approve the role-noun table (decisions O, P)
 - [ ] Task 10: batches 02–03, adapted Ngo moral pairs (2 × 40 items). **STOP (you):** review
   - Fix in the adapted items (MM, 2026-10-12): pair 9 bad, the effect names the person the scenario names, not "her neighbor"; pair 36 good, the effect says music player, not tablet. Kept as written in `ngo_verbatim`
@@ -55,15 +55,25 @@ waits for you. `HANDOFF.md` has the detail.
 - [ ] Task 21: revisit round (only if Task 20 asks for rewrites)
 - [ ] Task 22: close out
 
-## Before the pilot
+## Screening (done 2026-10-22, screen first; MM)
 
-- [ ] Double-BOS check: done in the first look
-- [ ] Pilot cost estimate including the `--no-examples` run, for all 6 models. **STOP (you):** go-ahead
-- [ ] Pilot: about 40 items × 6 models, with and without examples; `kmp.checks --stage pilot --baseline <noex results>`
-- [ ] Revisit `COPY_EXCESS_MAX` (0.10 proposed) on the pilot results
+- [x] OpenRouter route + `--allow-draft`; reply line; ~$2.30 in all (`ANALYSIS_LOG.md`)
+- [x] Procedural valence limits, balanced fairness question, purity and fairness rewrites (DESIGN amendment 2026-10-22)
+- [x] **(you)** Reviews 15-23 (MM 2026-10-22), applied
 
-## Full run
+## Before the pilot (`docs/PILOT.md`)
 
-- [ ] Cost estimate (about 85k rows per model, about 7–9.5 h for 6 models). **STOP (you):** go-ahead
-- [ ] Full run; `kmp.checks --stage full`
-- [ ] Analysis, including the sensitivity fit without the loaded-role storylines (decision P)
+- [x] No cut-off reasoning: chat budget 512, finish reasons recorded, `cut_off` gate
+- [x] Llama intentionality wording test (w1a/w1b fix the format misses; refusals remain)
+- [x] **(you)** Intentionality w1 wording: w1a (MM 2026-10-22), applied
+- [x] Agent: `tools.pilot_select` (re-picked 2026-10-22 from the final approved set), pushed
+- [ ] **(Parker, cluster)** `docs/PILOT.md` steps 1-4 (about 1.2-3 h GPU)
+- [ ] Agent: gates (step 5), log, report; **STOP (you):** refusals and any gate failures
+
+## Full run (`docs/FULL_RUN.md`)
+
+- [x] Agent: `tools.pilot_select --full` (2026-10-22, after sheets 15-23): 236 pairs, 432,288 rows; pilot re-picked from the current approved set
+- [ ] **(Parker)** Pilot checks, then `tools.go_no_go` (GO: run; NO-GO: push the checks and stop)
+- [ ] **(Parker, cluster)** Full run, 2 jobs x 3 sets (about 470k rows); early cut-off check; two bundles back
+- [ ] Agent: `kmp.checks --stage full`; analysis, including the sensitivity fits (loaded roles, decision P; strict procedural limits; storylines without a harm pair, decision A)
+- [x] **(you)** Refusals: option C (MM 2026-10-22), implemented (`--refusals drop|min|max`, `refusal_rates.csv`)

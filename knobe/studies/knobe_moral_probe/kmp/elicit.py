@@ -19,6 +19,11 @@ returns no response for make the run exit 1; re-running resumes them.
 without the worked examples. Job IDs match a normal run, so it needs its
 own --out; the manifest's examples field refuses a resume across the two.
 
+Cut-off (2026-10-22): each reply's finish reason ("stop" or "length", from the engine)
+and output token count go to <out>.finish.jsonl, one line per row, for kmp.checks'
+cut_off gate. The line is written right after its row, so a crash between the two leaves
+that row not recorded (the gate then blocks, rather than passing silently).
+
 Throughput (DESIGN.md section 8, gate 5): just before a model's first batch
 in each invocation, one line {"model_key", "start"} (time.time()) is
 appended to <out>.starts.jsonl. Append-only and written under the lock, so
@@ -204,6 +209,36 @@ def read_model_starts(out: Path) -> dict[str, float]:
     return starts
 
 
+def finish_path(out: Path) -> Path:
+    """``<out>.finish.jsonl``: one line per reply, {"job_id", "finish_reason", "n_output_tokens"}, so
+    kmp.checks can tell a reply cut off at max_tokens ("length") from one without a number
+    (2026-10-22). ResultRecord is the main study's schema (extra="forbid"), hence a sidecar."""
+    out = Path(out)
+    return out.with_name(out.name + ".finish.jsonl")
+
+
+def finish_row(response: EngineResponse) -> dict:
+    return {"job_id": response.job_id, "finish_reason": response.finish_reason,
+            "n_output_tokens": response.n_output_tokens}
+
+
+def read_finish(out: Path) -> dict[str, dict]:
+    """job_id -> {"finish_reason", "n_output_tokens"}; {} if the sidecar is absent. Unreadable lines
+    (a torn last write) are skipped, so that reply counts as not recorded."""
+    path = finish_path(out)
+    if not path.exists():
+        return {}
+    rows: dict[str, dict] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            entry = json.loads(line)
+            rows[entry["job_id"]] = {"finish_reason": entry["finish_reason"],
+                                     "n_output_tokens": entry["n_output_tokens"]}
+        except (json.JSONDecodeError, KeyError, TypeError):
+            continue
+    return rows
+
+
 def lock_path(out: Path) -> Path:
     """``<out>.lock``, held (flock) for the whole run."""
     out = Path(out)
@@ -317,7 +352,7 @@ def _run_locked(args: argparse.Namespace, jobs: list[Job], model_keys: list[str]
         by_model.setdefault(job.model_key, []).append(job)
 
     n_missing = 0
-    with open(args.out, "a", encoding="utf-8") as fh:
+    with open(args.out, "a", encoding="utf-8") as fh, open(finish_path(args.out), "a", encoding="utf-8") as ffh:
         for model_key, model_jobs in by_model.items():
             model_id, _family, pinned = resolve_model_id(model_key, registry)
             revision = engine.load(model_id, revision=pinned)
@@ -334,6 +369,8 @@ def _run_locked(args: argparse.Namespace, jobs: list[Job], model_keys: list[str]
                         n_missing += 1
                         continue
                     append_jsonl(to_result(job, request, response, revision), fh)  # flushes per row
+                    ffh.write(json.dumps(finish_row(response)) + "\n")
+                    ffh.flush()
     if n_missing:
         print(f"ERROR: {n_missing} job(s) got no response; re-run the same command to resume them",
               file=sys.stderr)

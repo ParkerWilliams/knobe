@@ -1,8 +1,22 @@
 # knobe_moral_probe: handoff
 
-Last updated 2026-10-12. Branch `knobe_moral_probe`. Read this first (the
+Last updated 2026-10-22. Branch `knobe_moral_probe`. Read this first (the
 one-page status is `TASK_CHECKLIST.md`), then
 the amendments at the top of `DESIGN.md`.
+
+**2026-10-22: go, on stand-ins (researcher's decision).** The cluster was
+unavailable (job submission needs an AWS SSO login on Parker's side), so
+Parker ran the first look through OpenRouter on stand-in instruct models
+(`tools/openrouter_first_look.py`, `ANALYSIS_LOG.md` 2026-10-12 to
+2026-10-21). On the v2 answer format the go/no-go rule gives "go": the
+intentionality sign effect is Gemma-3-4B +1.20, Mistral-Nemo +2.42 and
+Llama-3.1-8B +0.72 (all Holm p ≤ .001). Gemma and Mistral-Nemo pass the
+gates, and Llama-3.1-8B-Instruct fails number rate. MM accepted this as the
+go and resumed authoring at Task 9. The first look on the 6 study models
+still runs on the cluster before the pilot, and Llama-3.1-8B-Instruct's
+number rate (intentionality w1 yes/no answers, praise refusals on bad
+items) needs a fix before the full run. That model is also served on
+OpenRouter, so a fix can be tested there.
 
 **2026-10-12: the plan is reordered.** Before any more authoring, Ngo's 80
 vignettes (word for word) run on all 6 models as a go/no-go:
@@ -46,8 +60,9 @@ module docstrings and tests are current:
   dir, refuses duplicate rows, and refuses to write any status the whole
   review record doesn't back. `sheet` needs an `NN_` batch name and never
   overwrites.
-- `lint_stimuli`: adapted Ngo pairs must have identical action sentences
-  (one goal); pronoun changes in storyline 10 (pronouns that mean the uncle
+- `lint_stimuli`: adapted Ngo pairs must share the bad version's goal
+  clause (`NGO_GOALS`; until 2026-10-22 the whole action sentence, which
+  also forbade the action and object differences decision K keeps); pronoun changes in storyline 10 (pronouns that mean the uncle
   or aunt) need a log row; a log row licenses only its own span; B8 is
   skipped if the verbatim file differs from Ngo's source.
 

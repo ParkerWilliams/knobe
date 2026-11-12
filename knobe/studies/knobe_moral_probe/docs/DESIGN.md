@@ -100,6 +100,126 @@ This sets two §6/§12 open items. The prompt text is unchanged.
   These cells are reported per §8, not silently analyzed. Whether
   `intentionality` w1 should become a scale wording is a design decision.
 
+**Amended 2026-10-22 (screening; MM, with Claude):** three changes, each from
+the 2026-10-22 screen (`ANALYSIS_LOG.md`; `outputs/screening/`).
+- **Reply line.** Screening prompts end "Reply with only the number." before
+  "Answer:" (`protocol.SCREENING_REPLY`; subject-model prompts unchanged).
+  Without it, the pinned reviewer opened with reasoning and the 8-token
+  budget cut it off: 355 of 502 answers were unparsed, and 0/40 verbatim pairs
+  passed. With it, all 2,960 answers parsed on the first call. The pass rule
+  uses only the 0–10 ratings, so no information the screen needs is lost.
+- **Route and order.** The pinned reviewer is reached through OpenRouter,
+  served by Anthropic only, with no fallbacks
+  (`kmp.screen --engine openrouter`; the meta records served model and
+  provider). Drafts are screened before the researcher's item review
+  (`--allow-draft`), and the researcher reviews the survivors. A failing item
+  stays `draft` until it is redrafted or dropped.
+- **Procedural valence limits: bad ≤ 4, good ≥ 6** (`screen.VALENCE_BY_ARM`;
+  every other arm keeps ≤ 3 / ≥ 7). Justification:
+  - The procedural definition says no one's welfare is at stake. A valence
+    question about effects "for those it affects" therefore has little range
+    to work with: a faithful procedural item should sit just off the
+    midpoint, not at the extremes.
+  - The real distribution shows exactly that. All 40 bad versions rated 3
+    or 4 (25 at 4), all 40 good versions 6–8, and no item fell on the wrong
+    side of 5. The direction was right in every pair; only the distance from
+    5 was short.
+  - Decision F (DEFINITIONS §7, resolved 2026-10-01) anticipated this case:
+    author to the definition, and if procedural items fail valence in bulk,
+    revisit the threshold against the real distribution and record the
+    change. It rules out the alternative, adding welfare stakes to push
+    valence out, because that turns procedural items into moral ones.
+  - The other procedural checks are unchanged (procedural ≥ 6 and highest
+    of the three domains), so the domain reading is what still guards the
+    arm.
+  - Under the new limits 38 of 40 procedural pairs pass (13 under the
+    general limits; the other 2 fail the domain check). The analysis plan reports the threshold, and a
+    sensitivity fit keeps only the 13 pairs that pass the general limits.
+- **Fairness question names both poles** (`protocol.QUESTIONS["fnd_fairness"]`,
+  asked of the reviewer and of the subject models): "…fair or unfair
+  treatment, such as equal or unequal treatment, playing fair or cheating,
+  or keeping or going back on a deal". It was "…such as unequal treatment,
+  cheating or going back on a deal". Justification: it was the only
+  foundation question whose examples named only the negative pole. Harm
+  says "or care for them", loyalty "loyalty to, or betrayal of", authority
+  "respecting or undermining", purity "honoring or violating". On the
+  screen, fairness bad versions rated 8–10 while the good versions rated
+  0–3 even when the text said "treating every member fairly" (2/26 pairs,
+  then 5/26 after two rounds of item fixes). No subject-model data has used
+  the question yet, so nothing collected is affected.
+- **No cut-off reasoning in the real run** (MM). Chat answer budget
+  `protocol.MAX_TOKENS["chat"]` 256 → 512, twice the calibrated budget, as
+  headroom for the study models (the calibration used stand-ins, where 256
+  cut off at most 1.1%). Generating stops at the end of each answer, so the
+  larger budget costs GPU time only for replies that are long anyway. Every
+  run now records each reply's finish reason and output token count
+  (`<out>.finish.jsonl`, from the engine: vLLM, HF, OpenRouter), so a reply
+  cut off at the budget is no longer indistinguishable from one without a
+  number. `kmp.checks`' new `cut_off` gate blocks any chat cell (model ×
+  experiment × question × wording) where more than 1%
+  (`protocol.CUT_OFF_MAX`) of replies stopped at the budget, or where any
+  reply has no recorded finish reason. Raw (pretrained) cells are reported
+  only: base models have no end-of-answer token and always run to their
+  10-token budget, and they write the number right after "Answer:". Runner
+  version 0.3.
+- **Intentionality w1 gets a scale (MM chose w1a).** w1 is now "Did {agent}
+  intentionally {effect}? Answer on a scale from 0 (definitely not) to 10
+  (definitely yes)." It was Ngo's bare yes/no question. The question itself
+  is unchanged, and the paper reports w1 as Ngo's question with an appended
+  scale. Justification (`outputs/first_look/intentionality_wording_test.csv`,
+  Llama-3.1-8B-Instruct on OpenRouter, Ngo's 80 items × 8 samples): as a
+  yes/no question, 53% of answers were numbers, and the misses leaned to bad
+  items (39% vs 34%). With w1a, 84% were numbers, with format misses at 4%
+  and 7%. The sign effect (bad − good) rose from 1.7 to 3.9. The
+  alternative w1b ("…0 (no) to 10 (yes)") was 86% numeric but less even
+  across bad and good (80% vs 92%). Refusals to rate harm (bad items
+  14–16%) remain under every wording: that's model behavior, for the
+  analysis plan. Earlier kmp runs (the OpenRouter stand-ins) used the old
+  w1. w2 and w3r are unchanged.
+- **Refusals (MM chose option C; fixed before any study-model data).**
+  Applies to every model, not only Llama-3.1-8B-Instruct. A refusal is a
+  reply with no rating that `kmp.answer` reads as a refusal ("I cannot …",
+  "I can't …", "Unfortunately …"; the frame's `refusal` column).
+  - **Primary fits:** answered rows only (refusals missing).
+  - **Refusal as an outcome:** refusal share per model × experiment ×
+    question × sign (`kmp.checks` `refusal_rates.csv`), reported for every
+    run. A model that refuses more on bad items is itself a finding about
+    the asymmetry.
+  - **Bounds:** each sign-effect fit is repeated with refusals filled at
+    the extremes they allow, on the recoded scale (`frame.with_refusal_bound`;
+    `--refusals min|max` in `analysis/first_look.py` and
+    `analysis/arm_effects.py`). **min:** bad → 0, good → 10, the smallest
+    bad − good gap. **max:** bad → 10, good → 0, the largest. An effect is
+    robust to refusals if it keeps its sign and significance under both.
+    Otherwise it is reported as not robust to refusals.
+  - **Why not the alternatives:** dropping refusals alone hides a selection
+    effect, because refusals cluster on bad items (Llama: 14–16% vs 5–7%).
+    Coding them as a value imposes a reading, which a refusal to rate
+    intentionality doesn't support. Dropping the model loses it on the core
+    questions.
+  - Non-refusal misses (prose with no number) stay missing under every
+    bound. The number-rate gate reports them.
+- **Reader: answers after a lead-in** (`kmp.answer`, runner 0.4). It now
+  also reads:
+  - an answer line after a line that ends in ":" and announces an answer
+    ("I would rate the answer as:\n\n10 (definitely yes)");
+  - a labelled line after such a lead-in ("Russell intentionally made his
+    neighbor unhappy: 10");
+  - "the answer is …" with an article or a hedge ("is a clear 10", "would
+    be a 2", "is likely 0", "should be 0"), with a longer gap ("the answer
+    to the question about X is: 10"), and "To answer the question: 0".
+
+  Why: on Llama's w1a replies, 28 of 35 non-refusal misses had a plain
+  answer. Validation on all 121,265 distinct OpenRouter replies (the
+  2026-10-12/13 corpus Parker validated the reader on, plus the wording
+  test): 66 readings change. 64 replies are newly read; each was checked by
+  hand and is the number the reply gives as its answer. 2 replies that
+  contradict themselves ("9 … the answer should be 10, not 9") go from a
+  number to ambiguous. No reading changes value. 21 new fixtures in
+  `tests/test_answer.py` are real replies or marked guards. w1a on Llama:
+  84.4% → 88.3% numeric (bad 85.3%, good 91.2%). Nearly all of the
+  remaining bad-item misses are refusals (13.8%).
+
 ## 1. What the study asks
 
 **Background.** In Ngo et al. (2015), people rate an agent as acting more
@@ -222,7 +342,7 @@ authors.
 
 | check | pass |
 |---|---|
-| valence | bad version ≤ 3, good version ≥ 7 |
+| valence | bad version ≤ 3, good version ≥ 7 (procedural: ≤ 4 / ≥ 6, amendment 2026-10-22) |
 | nonmoral domain | the intended domain rates ≥ 6 and highest of the three |
 | foundation item | the intended foundation rates ≥ 6 and higher than harm |
 | harm control | harm rates ≥ 6 |

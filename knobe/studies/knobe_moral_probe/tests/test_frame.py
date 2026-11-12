@@ -229,3 +229,50 @@ def test_scaffold_is_missing_outside_foundations(tmp_path):
     path = tmp_path / "r.jsonl"
     _write(path, [("kmp-nm-001-moral-bad::blame::w1::raw", "gemma-2-9b-pretrained", 3)])
     assert frame.load_frame(path, make_items("nonmoral", 1))["scaffold"].isna().all()
+
+
+# --- refusals (DESIGN.md amendment 2026-10-22, option C) ---
+
+def _write_raw(path, rows):
+    with open(path, "w", encoding="utf-8") as fh:
+        for pid, mk, raw, value in rows:
+            append_jsonl(ResultRecord(
+                job_id=f"{pid}::{mk}::0", prompt_id=pid, model_key=mk, sample_idx=0, temperature=1.0, seed=1,
+                raw_response=raw, parsed_rating=value, parse_ok=value is not None, parse_method="regex",
+                logprobs_0_10=None, model_revision="r", runner_version="t", timestamp=0.0), fh)
+
+
+def _refusal_frame(tmp_path):
+    items = make_items("nonmoral", 1)
+    mk = "llama-3.1-8b-instruct"
+    rows = [("kmp-nm-001-moral-bad::praise::w1::chat", mk, "I cannot rate praise for causing harm.", None),
+            ("kmp-nm-001-moral-bad::praise::w3r::chat", mk, "I can't provide a number for that.", None),
+            ("kmp-nm-001-moral-good::praise::w1::chat", mk, "I cannot answer that.", None),
+            ("kmp-nm-001-moral-bad::blame::w1::chat", mk, "Hard to say, the scenario is unclear.", None),
+            ("kmp-nm-001-moral-bad::blame::w2::chat", mk, "7", 7)]
+    path = tmp_path / "r.jsonl"
+    _write_raw(path, rows)
+    return frame.load_frame(path, items)
+
+
+def test_refusal_column_marks_only_unrated_refusals(tmp_path):
+    d = _refusal_frame(tmp_path).set_index(["item_id", "qkey", "wording_key"])
+    assert d.loc[("kmp-nm-001-moral-bad", "praise", "w1"), "refusal"]
+    assert d.loc[("kmp-nm-001-moral-good", "praise", "w1"), "refusal"]
+    assert not d.loc[("kmp-nm-001-moral-bad", "blame", "w1"), "refusal"]      # no number, but not a refusal
+    assert not d.loc[("kmp-nm-001-moral-bad", "blame", "w2"), "refusal"]
+
+
+def test_refusal_bounds_push_bad_minus_good_to_each_extreme(tmp_path):
+    d = _refusal_frame(tmp_path)
+    key = ["item_id", "qkey", "wording_key"]
+    lo = frame.with_refusal_bound(d, "min").set_index(key)["rating"]
+    hi = frame.with_refusal_bound(d, "max").set_index(key)["rating"]
+    bad_w1, bad_w3r = ("kmp-nm-001-moral-bad", "praise", "w1"), ("kmp-nm-001-moral-bad", "praise", "w3r")
+    good = ("kmp-nm-001-moral-good", "praise", "w1")
+    assert (lo[bad_w1], lo[bad_w3r], lo[good]) == (0, 0, 10)       # on the recoded scale, reversed wordings too
+    assert (hi[bad_w1], hi[bad_w3r], hi[good]) == (10, 10, 0)
+    assert np.isnan(lo[("kmp-nm-001-moral-bad", "blame", "w1")])  # non-refusal misses stay missing
+    assert frame.with_refusal_bound(d, "drop")["rating"].equals(d["rating"])
+    with pytest.raises(ValueError):
+        frame.with_refusal_bound(d, "zero")

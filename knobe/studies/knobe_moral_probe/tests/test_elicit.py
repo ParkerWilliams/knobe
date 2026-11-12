@@ -373,3 +373,20 @@ def test_read_model_starts_skips_a_torn_line_and_tolerates_absence(tmp_path):
     assert elicit.read_model_starts(out) == {}
     elicit.starts_path(out).write_text('{"model_key": "m", "start": 5.0}\n{"model_key": "m", "st', encoding="utf-8")
     assert elicit.read_model_starts(out) == {"m": 5.0}
+
+
+def test_run_records_each_replys_finish_reason(tmp_path):
+    # 2026-10-22: a reply cut off at the token budget must be told apart from one without a number.
+    items = make_items("nonmoral", 1)[:2]
+    _, out = _run(tmp_path, items)
+    finish = elicit.read_finish(out)
+    rows = read_jsonl(out, ResultRecord)
+    assert set(finish) == {r.job_id for r in rows}
+    assert {f["finish_reason"] for f in finish.values()} == {"stop"}
+
+
+def test_read_finish_skips_a_torn_last_line(tmp_path):
+    out = tmp_path / "o.jsonl"
+    elicit.finish_path(out).write_text('{"job_id": "a", "finish_reason": "length", "n_output_tokens": 512}\n{"job_',
+                                       encoding="utf-8")
+    assert elicit.read_finish(out) == {"a": {"finish_reason": "length", "n_output_tokens": 512}}

@@ -30,6 +30,11 @@ Column contract:
                     recorded. Fit on this.
   parsed_rating_raw the number as written, NOT recoded. Never fit on it.
   parse_ok, raw_response  kept from the result record
+  refusal           True where the row has no rating and kmp.answer reads the reply as a
+                    refusal ("I cannot ...", "I can't ...", "Unfortunately ..."). Re-derived
+                    from raw_response, since ResultRecord.parse_method can't hold it.
+                    with_refusal_bound fills these rows for the bounds (DESIGN.md amendment
+                    2026-10-22, option C).
   model_family, tuning_status   from the registry via
                     knobe.analysis.ingest.build_model_key_index
                     (tuning_status is "finetuned" / "pretrained")
@@ -128,7 +133,12 @@ def load_frame(results_path: str | Path, items: list[Item], registry: dict | Non
 
     parts = pd.DataFrame([parse_prompt_id(p) for p in df["prompt_id"]],
                          columns=["item_id", "qkey", "wording_key", "fmt"], index=df.index)
-    return join_items(pd.concat([df, parts], axis=1), items, results_path)
+    d = join_items(pd.concat([df, parts], axis=1), items, results_path)
+    # Refusals are read from the reply text, which only result records have (join_items' other callers
+    # set the column themselves).
+    d["refusal"] = [bool(np.isnan(r)) and extract_rating(t)[2] == "refusal"
+                    for r, t in zip(d["rating"], d["raw_response"])]
+    return d
 
 
 def join_items(df: pd.DataFrame, items: list[Item], source: str | Path) -> pd.DataFrame:
@@ -163,6 +173,25 @@ def join_items(df: pd.DataFrame, items: list[Item], source: str | Path) -> pd.Da
     d.attrs["n_dropped_unknown_items"] = n_dropped
     d.attrs["dropped_unknown_item_ids"] = dropped_ids
     return d
+
+
+REFUSAL_BOUNDS = ("drop", "min", "max")
+
+
+def with_refusal_bound(frame: pd.DataFrame, bound: str) -> pd.DataFrame:
+    """Option C's refusal handling (DESIGN.md amendment 2026-10-22), on the recoded rating scale.
+    drop: refusals stay missing (the primary fit). min: bad-version refusals -> 0, good -> 10, the
+    smallest bad - good gap the refusals allow. max: bad -> 10, good -> 0, the largest. Non-refusal
+    misses stay missing under every bound."""
+    if bound not in REFUSAL_BOUNDS:
+        raise ValueError(f"bound must be one of {REFUSAL_BOUNDS}, not {bound!r}")
+    out = frame.copy()
+    if bound == "drop":
+        return out
+    bad_value, good_value = (0.0, 10.0) if bound == "min" else (10.0, 0.0)
+    fill = np.where(out["sign"] == "bad", bad_value, good_value)
+    out["rating"] = np.where(out["refusal"], fill, out["rating"])
+    return out
 
 
 def analysis_rows(frame: pd.DataFrame) -> pd.DataFrame:

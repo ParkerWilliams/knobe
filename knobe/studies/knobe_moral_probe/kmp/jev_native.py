@@ -19,9 +19,10 @@ wordings unchanged):
             "Question:"); its options are the eleven bubbles "0".."10", each
             labelled as the wording labels it -- a number the wording anchors
             carries its words ("0 (not at all)", "10 (completely)"), the rest are
-            bare numbers. A wording with no anchors (intentionality w1, "Did X
-            intentionally ...?") gets eleven bare bubbles, as the chat models got
-            a bare 0-10 question. No "none": a participant fills in a bubble.
+            bare numbers. A wording with no anchors would get eleven bare bubbles;
+            since the DESIGN amendment of 2026-10-22 every wording has them
+            (intentionality w1 = Ngo's question + "0 (definitely not) to 10
+            (definitely yes)"). No "none": a participant fills in a bubble.
 One call per question, each on its own (Jev never sees a question's other
 wordings, as no chat prompt held more than one question); sample 0 only, as in
 the wrapped run (Jev is close to deterministic; its probability vector stands
@@ -183,4 +184,6 @@ def native_frame(results: str | Path, items: list[Item], reader: str = "top") ->
                         "served_model": r.get("model")} for j, r in rows.items()])
     df["model_key"], df["model_family"], df["family"] = MODEL_KEY, MODEL_FAMILY, FAMILY
     df["tuning_status"] = TUNING_STATUS
-    return join_items(df, items, results)
+    d = join_items(df, items, results)
+    d["refusal"] = False            # every answer is a bubble: nothing to refuse (kmp.frame contract column)
+    return d

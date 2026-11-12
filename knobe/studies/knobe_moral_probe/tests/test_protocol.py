@@ -26,7 +26,9 @@ def test_reversed_wordings_put_the_high_pole_at_zero():
 
 
 def test_w1_matches_the_pilot_and_production_wording():
-    assert protocol.wording("intentionality", "w1").template == "Did {agent} intentionally {effect}?"
+    # intentionality w1 is Ngo's question with a scale appended (DESIGN.md amendment 2026-10-22).
+    assert protocol.wording("intentionality", "w1").template == (
+        "Did {agent} intentionally {effect}? Answer on a scale from 0 (definitely not) to 10 (definitely yes).")
     for qkey in ("blame", "praise"):
         ours = protocol.wording(qkey, "w1").template.format(agent="the CEO", effect="x")
         theirs = constants.QUESTIONS[f"q_{qkey}"].format(agent_lower="the CEO")
@@ -96,3 +98,11 @@ def test_every_arm_has_a_question_key():
         assert f"fnd_{arm}" in protocol.QUESTIONS, arm
     for arm in ARMS["nonmoral"]:
         assert f"domain_{arm}" in protocol.QUESTIONS, arm
+
+
+def test_fairness_question_names_both_poles_like_the_other_foundations():
+    # DESIGN amendment 2026-10-22: the negative-only examples scored fair outcomes as 0-3.
+    text = protocol.QUESTIONS["fnd_fairness"][0].template
+    for both in ("fair or unfair treatment", "equal or unequal treatment", "playing fair or cheating",
+                 "keeping or going back on a deal"):
+        assert both in text

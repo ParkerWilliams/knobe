@@ -73,6 +73,9 @@ def build_screening_prompts(items: list[Item]) -> list[ScreeningPrompt]:
         for qkey in protocol.screening_qkeys(item):
             text = render_text(item.scenario, render_question(item, protocol.QUESTIONS[qkey][0].template),
                                examples=())
+            head, answer = text.rsplit("\n", 1)
+            assert answer == "Answer:", text
+            text = f"{head}\n{protocol.SCREENING_REPLY}\n{answer}"
             out.append(ScreeningPrompt(item.item_id, qkey, text, sha256_for_text(text)))
     return out
 

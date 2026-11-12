@@ -106,3 +106,60 @@ def test_rule_names_the_path_taken():
     assert extract_rating("Given the scenario, the answer would be 10")[2] == "phrase"
     assert extract_rating("Some reasoning first.\n\n6")[2] == "final_line"
     assert extract_rating("Based on the scenario, the CEO deserves 0")[2] == "first_number"
+
+
+# 2026-10-22: real Llama-3.1-8B-Instruct replies to intentionality w1a/w1b (outputs/elicit/
+# wording_test_llama.jsonl) that the reader missed. Truncated where the rest adds no number.
+ANSWERED_2026_10_22 = [
+    # an answer line (the number, maybe its anchor label) after a lead-in line ending in ":"
+    ("Based on the scenario, the CEO intentionally harmed the environment, so I would rate the answer as:\n\n"
+     "10 (definitely yes)\n\nThe CEO's statement \"She knew her plan would harm the environment\" suggests", 10),
+    ("Therefore, I would rate the answer as:\n\n8\n\nThis suggests that Natasha likely knew that her renovation "
+     "would increase membership costs, but we can't be certain if that was her intention.", 8),
+    ("Based on the information in the scenario, I would rate:\n\n0 (definitely not)\n\nThe reason is that the "
+     "scenario states Ronald did not care at all", 0),
+    ("I would rate her intention as:\n\n7 (neutral, with a hint of indifference to customer health)\n\nThis "
+     "answer is not a straightforward", 7),
+    ("I'd rate the answer as:\n\n**10**\n\nPhil knew his cat would be entertained by the waxing, so he did it "
+     "intentionally.", 10),
+    ("I'm going to answer the question with a number from 0 to 10. Here it is:\n\n8\n\nThe question asks if "
+     "Ernest intentionally benefited the family", 8),
+    ("So, the number would be:\n\n10 (yes)", 10),
+    # a labelled line after such a lead-in
+    ("Based on the given scenario, I would answer:\n\nThe scientist intentionally decreased the rate of heart "
+     "attacks: 10\n\nThe scenario clearly states that the scientist knew", 10),
+    ("A clever set of scenarios! Here's my answer:\n\nTina intentionally caused the 1000-year-old tree to die: 10"
+     "\n\nThe scenario explicitly states that Tina built the road knowing it would cause the tree to die.", 10),
+    ("A clever question! Based on the scenario, I would answer:\n\n Joe intentionally harmed nearby vendors: 10 (yes)",
+     10),
+    # "the answer is ..." with an article, a hedge, or a longer gap
+    ("What a cleverly worded scenario!\n\nTo answer the question: 0\n\nThe scenario states that Helen", 0),
+    ("A fun series of scenarios!\n\nThe answer to the question about Phil's intentions is: 10 (definitely yes).", 10),
+    ("What a delightful set of scenarios!\n\nThe answer to the question, on a scale from 0 to 10, is: 10\n\nSince Sean "
+     "knew his protests would cause the release", 10),
+    ("A philosophical question!\n\nThe answer is a clear 10. The scenario explicitly states that Tina knew", 10),
+    ("Therefore, the answer would be a 2.", 2),
+    ("Given the scenario, the answer is likely 0 (no). The text states that the director", 0),
+    ("the answer to the question is that Renee did not intend to help old retirees. \n\nThe answer should be 0.", 0),
+    ("A clever scenario!\n\nThe answer to the question about Christopher's intention is 0. The text states that "
+     "Christopher did not care at all", 0),
+]
+
+NOT_ANSWERED_2026_10_22 = [
+    # constructed guards: the new rules must not read these
+    ("Here's why:\n\n1.\nThe scenario states that Eugene did not care", "no_number"),   # a list marker after ":"
+    ("The scenario has several parts:\n\nThe gadget was released in 2 weeks.", "no_number"),  # no answer lead-in
+    ("Question 3: 5\nQuestion 4: 7", "ambiguous"),                                       # two labelled values
+]
+
+
+@pytest.mark.parametrize("reply,expected", ANSWERED_2026_10_22)
+def test_reads_answers_after_a_lead_in_or_with_an_article(reply, expected):
+    value, ok, rule = extract_rating(reply)
+    assert ok and value == expected, (reply, value, rule)
+
+
+@pytest.mark.parametrize("reply,rule", NOT_ANSWERED_2026_10_22)
+def test_new_rules_leave_these_unread(reply, rule):
+    value, ok, got_rule = extract_rating(reply)
+    assert not ok and value is None and got_rule == rule, (reply, value, got_rule)

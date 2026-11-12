@@ -54,7 +54,10 @@ class FakeJev:
 # --- the sheet --------------------------------------------------------------------------
 
 def test_anchors_are_read_from_each_wording_template():
-    assert jev_native.anchors(protocol.wording("intentionality", "w1").template) == {}
+    # w1 = Ngo's question + a 0-10 scale since the DESIGN amendment of 2026-10-22 (w1a)
+    assert jev_native.anchors(protocol.wording("intentionality", "w1").template) == {
+        0: "definitely not", 10: "definitely yes"}
+    assert jev_native.anchors("Did {agent} intentionally {effect}?") == {}
     assert jev_native.anchors(protocol.wording("intentionality", "w2").template) == {0: "not at all", 10: "completely"}
     assert jev_native.anchors(protocol.wording("intentionality", "w3r").template) == {
         0: "completely intentionally", 10: "not at all intentionally"}
@@ -78,7 +81,7 @@ def test_bubbles_label_anchored_numbers_and_leave_the_rest_bare():
     assert list(b) == list(jev.LEVELS)                       # 0..10, in order, no "none"
     assert b["0"] == "0 (not at all)" and b["10"] == "10 (extremely)"
     assert [b[str(i)] for i in range(1, 10)] == [str(i) for i in range(1, 10)]
-    bare = jev_native.bubbles(protocol.wording("intentionality", "w1").template)
+    bare = jev_native.bubbles("Did {agent} intentionally {effect}?")    # a wording with no anchors
     assert bare == {lv: lv for lv in jev.LEVELS}
 
 

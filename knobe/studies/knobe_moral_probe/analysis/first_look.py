@@ -43,7 +43,7 @@ STUDY_DIR = Path(__file__).resolve().parents[1]
 REPO = STUDY_DIR.parents[1]
 sys.path.insert(0, str(STUDY_DIR))
 sys.path.insert(0, str(REPO / "analysis" / "rq1_v1_1_robustness"))
-from kmp.frame import analysis_rows, load_frame  # noqa: E402
+from kmp.frame import REFUSAL_BOUNDS, analysis_rows, load_frame, with_refusal_bound  # noqa: E402
 from kmp.items import load_items  # noqa: E402
 from lib import wild_cluster_bootstrap  # noqa: E402
 
@@ -94,16 +94,19 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--results", required=True, type=Path, nargs="+", help="with-examples results (kmp.elicit)")
     p.add_argument("--items", required=True, type=Path)
     p.add_argument("--out", required=True, type=Path)
+    p.add_argument("--refusals", choices=REFUSAL_BOUNDS, default="drop",
+                   help="drop: refusals stay missing (primary); min / max: refusals filled to the smallest / "
+                        "largest bad - good gap they allow (DESIGN.md amendment 2026-10-22, option C)")
     a = p.parse_args(argv)
     items = load_items(a.items)
-    frames = [load_frame(r, items) for r in a.results]
+    frames = [with_refusal_bound(load_frame(r, items), a.refusals) for r in a.results]
     seen = [set(f["model_key"]) for f in frames]
     if len(seen) > 1 and sum(map(len, seen)) != len(set().union(*seen)):
         raise ValueError("a model appears in more than one results file; pass each model's results once")
     frame = pd.concat(frames, ignore_index=True)
     if (frame.groupby("family")["model_family"].nunique() > 1).any():
         raise ValueError("a short family name covers several registry families across the results files")
-    out = sign_effects(frame)
+    out = sign_effects(frame).assign(refusals=a.refusals)
     a.out.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(a.out, index=False)
     with pd.option_context("display.width", 200, "display.max_columns", 20):

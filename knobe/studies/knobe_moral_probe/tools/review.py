@@ -212,6 +212,8 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--batch", required=True, help="NN_<name>, e.g. 02_nm_moral_01-20")
     s.add_argument("--storylines", help="e.g. 1-20 (default: all)")
     s.add_argument("--arms", help="comma-separated (default: all)")
+    s.add_argument("--only", type=Path, help="items CSV whose item_ids limit the sheet, e.g. a screening "
+                                             "run's selected_items.csv (default: no limit)")
     s.add_argument("--review-dir", type=Path, default=REVIEW_DIR)
     s.add_argument("--verbatim", type=Path, default=lint_stimuli.VERBATIM)
     s.add_argument("--log", type=Path, default=lint_stimuli.LOG)
@@ -238,6 +240,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     selected = select(items, parse_range(args.storylines) if args.storylines else None,
                       set(args.arms.split(",")) if args.arms else None)
+    if args.only:
+        keep = {i.item_id for i in load_items(args.only)}
+        selected = [i for i in selected if i.item_id in keep]
     if not selected:
         print("no draft items match; nothing written", file=sys.stderr)
         return 2

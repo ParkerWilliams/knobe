@@ -33,7 +33,8 @@ def test_subject_prompts_unique_and_rendered(nonmoral_items):
     assert len({s.stem for s in specs}) == len(specs)
     spec = next(s for s in specs if s.qkey == "intentionality" and s.wording_key == "w1")
     item = next(i for i in nonmoral_items if i.item_id == spec.item_id)
-    assert f"Question: Did {item.agent} intentionally {item.effect}?\nAnswer:" in spec.text
+    assert (f"Question: Did {item.agent} intentionally {item.effect}? Answer on a scale from 0 (definitely not) "
+            f"to 10 (definitely yes).\nAnswer:") in spec.text
     assert spec.n_samples == protocol.N_PER_WORDING
     assert next(s for s in specs if s.qkey == "significance").n_samples == protocol.N_SINGLE
 
@@ -77,3 +78,11 @@ def test_scenario_change_changes_hash_not_stem(nonmoral_items):
     b = prompts.build_subject_prompts([item.model_copy(update={"scenario": item.scenario + " Extra."})])
     assert [s.stem for s in a] == [s.stem for s in b]
     assert all(x.text_sha256 != y.text_sha256 for x, y in zip(a, b))
+
+
+def test_screening_prompts_ask_for_only_the_number(nonmoral_items):
+    # 2026-10-22: the pinned reviewer reasons first and an 8-token budget cut it off (0/40 verbatim pairs).
+    for sp in prompts.build_screening_prompts(nonmoral_items[:2]):
+        assert sp.text.endswith(f"\n{protocol.SCREENING_REPLY}\nAnswer:")
+    elicit = prompts.render_text(nonmoral_items[0].scenario, "Q?", examples=())
+    assert protocol.SCREENING_REPLY not in elicit

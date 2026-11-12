@@ -102,7 +102,10 @@ class OpenRouterEngine:
                 text = (data["choices"][0]["message"].get("content") or "")
                 with self._lock:
                     self.providers[data.get("provider", "?")] += 1
-                return EngineResponse(job_id=req.job_id, raw_response=text, logprobs_0_10=None)
+                # OpenRouter normalises finish reasons ("stop", "length", ...), so the cut-off gate reads them as vLLM's.
+                return EngineResponse(job_id=req.job_id, raw_response=text, logprobs_0_10=None,
+                                      finish_reason=data["choices"][0].get("finish_reason"),
+                                      n_output_tokens=(data.get("usage") or {}).get("completion_tokens"))
             except urllib.error.HTTPError as e:
                 with self._lock:
                     self.errors[e.code] += 1
