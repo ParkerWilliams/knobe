@@ -10,6 +10,7 @@ Subcommands, from the study folder (elicit needs OPENROUTER_API_KEY):
     ../../.venv/bin/python tools/jev_native.py analyze --items <items.csv> --results <run.jsonl> --name <name> \\
         [--experiment nonmoral|foundations]
     ../../.venv/bin/python tools/jev_native.py compare --native <a.csv> --wrapped <b.csv> --out <c.csv>
+    ../../.venv/bin/python tools/jev_native.py retest --first <run1.jsonl> --second <run2.jsonl> --out <d.csv>
 
 elicit: one Decisions API call per question, appended to <run.jsonl> as it
 arrives (resumes by job_id; one writer per file, <run.jsonl>.lock). The manifest
@@ -31,6 +32,10 @@ answer is a bubble, and there are no worked examples.
 
 compare: two sign-effect (or wording_means) tables side by side, e.g. native vs
 the 2026-10-22 wrapped run (tools/jev_subject.py).
+
+retest: two runs' answers to the same questions, per question key: how often the
+top bubble repeats, and how far the expected value moves. Jev is not
+deterministic: the same request to the same snapshot can come back different.
 """
 from __future__ import annotations
 
@@ -49,6 +54,7 @@ STUDY = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(STUDY))
 sys.path.insert(0, str(STUDY / "analysis"))
 
+import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from kmp import checks, jev_native  # noqa: E402
@@ -190,6 +196,43 @@ def cmd_analyze(a: argparse.Namespace) -> int:
     return 0
 
 
+def retest(first: dict[str, dict], second: dict[str, dict]) -> pd.DataFrame:
+    """Two runs' answers (jev_native.read_results) compared question by question, per
+    question key and over all ("all"). Only questions asked word for word in both runs
+    (same request hash) are compared; n_reworded counts those whose request changed.
+    Readings are as Jev gave them (not recoded), so a question is compared with itself."""
+    both = sorted(set(first) & set(second))
+    same = [j for j in both if first[j]["body_sha256"] == second[j]["body_sha256"]]
+    reworded = Counter(second[j]["qkey"] for j in both if first[j]["body_sha256"] != second[j]["body_sha256"])
+    d = pd.DataFrame([{"qkey": second[j]["qkey"], "top_1": first[j]["top"], "top_2": second[j]["top"],
+                       "ev_1": first[j]["ev"], "ev_2": second[j]["ev"],
+                       "probs_identical": first[j]["probabilities"] == second[j]["probabilities"]} for j in same])
+    rows = []
+    cells = [(q, d[d["qkey"] == q]) for q in sorted(set(d["qkey"]) | set(reworded))] + [("all", d)]
+    for qkey, cell in cells:       # a question key whose every question was reworded gets a row of NaNs
+        ev_diff = (cell["ev_1"] - cell["ev_2"]).abs()
+        top_diff = (cell["top_1"] - cell["top_2"]).abs()
+        with np.errstate(invalid="ignore", divide="ignore"):    # r is NaN where a run gave one answer throughout
+            top_r, ev_r = cell["top_1"].corr(cell["top_2"]), cell["ev_1"].corr(cell["ev_2"])
+        rows.append(dict(qkey=qkey, n_questions=len(cell),
+                         n_reworded=sum(reworded.values()) if qkey == "all" else reworded.get(qkey, 0),
+                         top_same=float((top_diff == 0).mean()), top_moved_3plus=float((top_diff >= 3).mean()),
+                         top_r=top_r, ev_r=ev_r,
+                         ev_mean_abs_diff=float(ev_diff.mean()), ev_max_abs_diff=float(ev_diff.max()),
+                         probs_identical=float(cell["probs_identical"].mean())))
+    return pd.DataFrame(rows)
+
+
+def cmd_retest(a: argparse.Namespace) -> int:
+    out = retest(jev_native.read_results(a.first), jev_native.read_results(a.second))
+    a.out.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(a.out, index=False)
+    with pd.option_context("display.width", 200, "display.float_format", "{:.3f}".format):
+        print(out.to_string(index=False))
+    print(f"\nwrote {a.out}")
+    return 0
+
+
 def cmd_compare(a: argparse.Namespace) -> int:
     nat, wrp = pd.read_csv(a.native), pd.read_csv(a.wrapped)
     if "level" in nat.columns:
@@ -229,10 +272,14 @@ def main(argv: list[str] | None = None, transport=None) -> int:
     c.add_argument("--native", required=True, type=Path)
     c.add_argument("--wrapped", required=True, type=Path)
     c.add_argument("--out", required=True, type=Path)
+    r = sub.add_parser("retest")
+    r.add_argument("--first", required=True, type=Path)
+    r.add_argument("--second", required=True, type=Path)
+    r.add_argument("--out", required=True, type=Path)
     a = p.parse_args(argv)
     if a.cmd == "elicit":
         return cmd_elicit(a, transport)
-    return cmd_analyze(a) if a.cmd == "analyze" else cmd_compare(a)
+    return {"analyze": cmd_analyze, "compare": cmd_compare, "retest": cmd_retest}[a.cmd](a)
 
 
 if __name__ == "__main__":

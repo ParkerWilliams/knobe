@@ -25,8 +25,9 @@ wordings unchanged):
             (definitely yes)"). No "none": a participant fills in a bubble.
 One call per question, each on its own (Jev never sees a question's other
 wordings, as no chat prompt held more than one question); sample 0 only, as in
-the wrapped run (Jev is close to deterministic; its probability vector stands
-in for the spread of samples).
+the wrapped run (its probability vector stands in for the spread of samples).
+Jev is not deterministic: asked the same request twice, about 8% of top bubbles
+differ (tools/jev_native.py retest; docs/JEV_NATIVE.md).
 
 Readouts per answer: the top bubble (ties go to the lower number) and the
 expected value over 0..10 (the counterpart of a chat model's mean over its

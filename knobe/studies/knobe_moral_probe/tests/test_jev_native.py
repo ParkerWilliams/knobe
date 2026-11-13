@@ -227,3 +227,23 @@ def test_analyze_writes_checks_sign_and_arm_tables_for_both_readers(tmp_path, mo
     assert w.loc[("blame", "w3r"), "bad"] == 2                # same bubble on a reversed sheet -> recoded 2
     cov = pd.read_csv(outputs / "checks" / "jn" / "coverage.csv")
     assert (cov["n_rows"] > 0).all()
+
+
+def test_retest_compares_only_questions_asked_word_for_word_in_both_runs(tmp_path, monkeypatch):
+    tool = _tool()
+    _, _, _, out = _elicit(tool, tmp_path, monkeypatch, FakeJev())
+    first = jev_native.read_results(out)
+    second = {j: dict(r) for j, r in first.items()}
+    blame = sorted(j for j, r in second.items() if r["qkey"] == "blame")
+    second[blame[0]].update(top=second[blame[0]]["top"] + 4, ev=second[blame[0]]["ev"] + 1.0)   # Jev moved
+    second[blame[1]]["body_sha256"] = "0" * 64                                               # question reworded
+    t = tool.retest(first, second).set_index("qkey")
+    n_blame = len(blame) - 1
+    assert t.loc["blame", "n_questions"] == n_blame and t.loc["blame", "n_reworded"] == 1
+    assert t.loc["blame", "top_same"] == pytest.approx((n_blame - 1) / n_blame)
+    assert t.loc["blame", "top_moved_3plus"] == pytest.approx(1 / n_blame)
+    assert t.loc["blame", "ev_max_abs_diff"] == pytest.approx(1.0)
+    assert t.loc["intentionality", "top_same"] == 1 and t.loc["intentionality", "ev_mean_abs_diff"] == 0
+    assert t.loc["all", "n_questions"] == len(first) - 1 and t.loc["all", "n_reworded"] == 1
+    rc = tool.main(["retest", "--first", str(out), "--second", str(out), "--out", str(tmp_path / "r.csv")])
+    assert rc == 0 and (pd.read_csv(tmp_path / "r.csv")["top_same"] == 1).all()
