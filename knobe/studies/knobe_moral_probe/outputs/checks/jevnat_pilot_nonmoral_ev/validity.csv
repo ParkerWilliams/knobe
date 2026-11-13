@@ -1,4 +1,4 @@
 model_key,tuning_status,family,experiment,check,value,status
-jev-1.14-native,finetuned,jev,nonmoral,blame_bad_minus_good,4.205722222222223,pass
-jev-1.14-native,finetuned,jev,nonmoral,praise_good_minus_bad,0.7884166666666665,pass
-jev-1.14-native,finetuned,jev,nonmoral,significance_moral_minus_procedural,4.137874999999999,pass
+jev-1.14-native,finetuned,jev,nonmoral,blame_bad_minus_good,4.159777777777778,pass
+jev-1.14-native,finetuned,jev,nonmoral,praise_good_minus_bad,0.7646111111111114,pass
+jev-1.14-native,finetuned,jev,nonmoral,significance_moral_minus_procedural,4.097249999999999,pass

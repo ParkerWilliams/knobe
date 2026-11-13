@@ -1,7 +1,7 @@
 qkey,arm,wordings,n_storylines,bad_above,level,bad_below,mean_bad_minus_good
-blame,moral,all,40,40,0,0,4.09225
-intentionality,moral,all,40,40,0,0,5.151166666666667
-praise,moral,all,40,1,0,39,-0.9370833333333334
-blame,moral,normal,40,40,0,0,6.5173749999999995
-intentionality,moral,normal,40,40,0,0,5.239125
-praise,moral,normal,40,0,0,40,-2.1747500000000004
+blame,moral,all,40,40,0,0,4.140333333333333
+intentionality,moral,all,40,40,0,0,5.352666666666667
+praise,moral,all,40,2,0,38,-0.9219166666666666
+blame,moral,normal,40,40,0,0,6.563249999999999
+intentionality,moral,normal,40,40,0,0,5.485625000000001
+praise,moral,normal,40,0,0,40,-2.1258749999999997

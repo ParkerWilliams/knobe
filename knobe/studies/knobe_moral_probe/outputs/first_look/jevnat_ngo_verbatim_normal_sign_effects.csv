@@ -1,5 +1,5 @@
 level,cell,family,tuning_status,qkey,term,n_rows,number_rate,mean_bad,mean_good,untestable,beta_obs,se_obs,t_obs,p_wcb,n_groups,B
-model,jev-1.14-native,jev,finetuned,blame,sign_c,160,1.0,9.5,1.05,False,8.449999999999998,0.42149234106151323,20.04781386707758,0.0,40,1999
-model,jev-1.14-native,jev,finetuned,intentionality,sign_c,160,1.0,9.8375,0.75,False,9.087499999999999,0.33497479795187823,27.12890657913163,0.0,40,1999
-model,jev-1.14-native,jev,finetuned,praise,sign_c,160,1.0,0.0,0.5875,False,-0.5874999999999997,0.17494326351107806,-3.358231624407744,0.0,40,1999
-model,jev-1.14-native,jev,finetuned,significance,sign_c,80,1.0,7.875,6.2,False,1.6750000000000083,0.44773908800441065,3.741018027855339,0.0,40,1999
+model,jev-1.14-native,jev,finetuned,blame,sign_c,160,1.0,9.55,0.975,False,8.575,0.41367176671183226,20.728995039135526,0.0,40,1999
+model,jev-1.14-native,jev,finetuned,intentionality,sign_c,160,1.0,9.825,1.025,False,8.799999999999999,0.4549802846237402,19.34149741736046,0.0,40,1999
+model,jev-1.14-native,jev,finetuned,praise,sign_c,160,1.0,0.0,0.5625,False,-0.5625000000000001,0.18852063176938055,-2.9837583012564526,0.0,40,1999
+model,jev-1.14-native,jev,finetuned,significance,sign_c,80,1.0,7.9,6.15,False,1.7500000000000062,0.47498659104226704,3.684314532248093,0.0,40,1999

@@ -1,4 +1,4 @@
 model_key,tuning_status,family,experiment,qkey,n_items,r,mean_diff
-jev-1.14-native,finetuned,jev,foundations,blame,152,0.24798590836879122,-5.417763157894737
-jev-1.14-native,finetuned,jev,foundations,intentionality,152,0.8463983286811282,0.875
-jev-1.14-native,finetuned,jev,foundations,praise,152,-0.4272877449633673,7.953947368421052
+jev-1.14-native,finetuned,jev,foundations,blame,152,0.32193402038051533,-5.467105263157895
+jev-1.14-native,finetuned,jev,foundations,intentionality,152,0.9247492248178598,0.3618421052631579
+jev-1.14-native,finetuned,jev,foundations,praise,152,-0.4005538025684664,7.753289473684211

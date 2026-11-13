@@ -1,4 +1,4 @@
 model_key,tuning_status,family,experiment,qkey,n_items,r,mean_diff
-jev-1.14-native,finetuned,jev,ngo_verbatim,blame,80,-0.222057130713945,-1.9233125000000004
-jev-1.14-native,finetuned,jev,ngo_verbatim,intentionality,80,0.9689734410045941,0.47818749999999977
-jev-1.14-native,finetuned,jev,ngo_verbatim,praise,80,-0.8383775007373861,5.354625
+jev-1.14-native,finetuned,jev,ngo_verbatim,blame,80,-0.21465511325665343,-1.8802500000000002
+jev-1.14-native,finetuned,jev,ngo_verbatim,intentionality,80,0.976221244612002,0.41743749999999985
+jev-1.14-native,finetuned,jev,ngo_verbatim,praise,80,-0.8011633376094297,5.3119375
