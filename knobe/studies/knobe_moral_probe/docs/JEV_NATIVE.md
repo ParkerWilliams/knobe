@@ -6,6 +6,8 @@
 >
 > The run was made on 2026-11-12, after merging Mer's work (02140a8). It replaces the first native run (983ef56), which used the older wordings. That run's answers are kept locally as `outputs/elicit/jev_native_<set>_pre1022.jsonl`, and their manifests are committed beside them. The 5,426 questions asked word for word in both runs are the test-retest check below.
 
+A short shareable version with verbatims (scenarios, questions and Jev's answers) is [`JEV_NATIVE_REPORT.html`](JEV_NATIVE_REPORT.html), written by `tools/jev_native_report.py`.
+
 **Question (Parker, 2026-11-12):** is the Knobe effect present in Jev itself, with no LLM output and no wrapper?
 Each moral-bias question is posed as Jev's own multiple-choice ("scantron") question.
 
