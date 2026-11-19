@@ -1,0 +1,21 @@
+Stimulus review | 2026-10-22 | reviewer MM
+
+Scope: R1; B2/B3/B4/B5; A5; A11/A12, with extra attention to adapted Ngo items, rewritten fairness and purity, and storylines 10/17/22.
+Each decision is at item level. For a flawed bad/good contrast, both items are marked revise. “Rejected” marks a pair needing conceptual replacement rather than a quick wording fix.
+Original Ngo verbatim decisions (01) were already approved 2026-10-12, and remain so; previous approved-row notes were cleared to satisfy the note-only-for-revise/rejected rule.
+
+01_nv_all_decisions.csv  approved: 80, revise: 0, rejected: 0
+15_nm_surv_moral_decisions.csv  approved: 35, revise: 9, rejected: 0
+16_nm_surv_prudential_decisions.csv  approved: 64, revise: 14, rejected: 0
+17_nm_surv_procedural_decisions.csv  approved: 36, revise: 40, rejected: 0
+18_mf_surv_01-18_decisions.csv  approved: 83, revise: 33, rejected: 0
+19_mf_surv_19-36_101-120_decisions.csv  approved: 101, revise: 35, rejected: 2
+
+Patterns identified:
+• Several procedural items attribute document naming, numbering, or color-scheme outcomes to unrelated actions; revise the action/effect link rather than simply changing “fit” to another verb.
+• A number of fairness outcomes presuppose the actor is reallocating turns/time, although the fixed action merely moves a venue or furniture; specify an action that could affect allocation.
+• Several purity good variants only avoid committing a prohibited act. These were flagged B5 where the baseline remains untouched.
+• Items 10 and 17 reuse morally evaluable nursing-home placement and salary-enriching animal-shelter cost cutting, weakening nonmoral contrasts; item 22 prudential retains a medically charged labor-induction action.
+• The adapted Ngo good arms for storylines 18, 34, and 36 contain role or effect edits beyond a narrow names/pronouns/goals-only rule; review the logged exceptions.
+
+All notes and check labels are contained in the individual CSVs. The checks are human editorial judgments, not a second automated validation of valence, domain, or foundation.

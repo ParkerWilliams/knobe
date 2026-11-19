@@ -1,0 +1,45 @@
+Revised stimulus review | 2026-10-22 | MM
+
+21_nm_revised: approved 39, revise 15, rejected 0
+22_mf_revised: approved 113, revise 19, rejected 0
+
+Review scope: R1 (natural role nouns, no names), B2/B3 (matched contrast), B4 (size), B5 (active positive effect), A5 (side effect vs goal/means), and A11/A12 (plain, coherent, non-graphic). Meaning/domain/foundation automated screening was not repeated.
+Single-sided revised items were also checked against the corresponding earlier opposite-valence item from sheets 16-19 when available. This did not modify those earlier decisions.
+
+Revisions still needed:
+kmp-nm-004-prudential-good: A11: the tax credit may offset renovation costs but does not explain a net increase in existing personal savings
+kmp-nm-005-procedural-bad: A11: an election-oriented newsletter is not established as an official town notice governed by that format
+kmp-nm-005-procedural-good: A11: an election-oriented newsletter is not established as an official town notice governed by that format
+kmp-nm-007-prudential-good: A11: the early flight requires an earlier wake-up; free evenings alone do not explain improved sleep
+kmp-nm-008-prudential-good: A11: a plan to increase school funding has no explained mechanism for giving the president more free time
+kmp-nm-015-prudential-good: A11: bringing a study group to a party the night before an exam does not establish that studying occurs or grades improve
+kmp-nm-020-procedural-bad: A11: a private store owner is not established as authorized to erect or set the colors of county road signs
+kmp-nm-020-procedural-good: A11: a private store owner is not established as authorized to erect or set the colors of county road signs
+kmp-nm-023-prudential-bad: B4: season-ticket cost is compared with unspecified single tickets; say the same matches to hold use and size comparable
+kmp-nm-023-prudential-good: B4: season-ticket cost is compared with unspecified single tickets; say the same matches to hold use and size comparable
+kmp-nm-029-procedural-bad: A11: numbering reports by street or by time is unclear; ordering or filing them by street/time is more natural
+kmp-nm-029-procedural-good: A11: numbering reports by street or by time is unclear; ordering or filing them by street/time is more natural
+kmp-nm-031-procedural-bad: A11: no plausible public-square banner color rule is established; the church protest also introduces independent moral content
+kmp-nm-031-procedural-good: A11: no plausible public-square banner color rule is established; the church protest also introduces independent moral content
+kmp-nm-033-procedural-good: A11: “signed with the family’s full names” implies additional signers; specify the newlyweds’ first and last names
+kmp-mf-007-loyalty-bad: A11: changing one club’s practice schedule is not shown to control a rival club’s gym reservation
+kmp-mf-010-harm-bad: B2: Saturday morning games both expose the player to cold morning air and remove dusty evening games; the claimed opposite effects could coexist
+kmp-mf-010-harm-good: B2: Saturday morning games both expose the player to cold morning air and remove dusty evening games; the claimed opposite effects could coexist
+kmp-mf-012-loyalty-bad: A11: the rival troop is not established as using the same campsite or fire pit controlled by this leader
+kmp-mf-015-loyalty-bad: A11: meeting at a rival library does not itself establish siding with the rival book club
+kmp-mf-015-loyalty-good: B5: continuing to meet at the club’s usual library is not an affirmative benefit or support action
+kmp-mf-017-loyalty-bad: A11: ordering names on a sign-up sheet is too weak to establish siding with either street; attendance or resource allocation needs to matter
+kmp-mf-017-loyalty-good: A11: ordering names on a sign-up sheet is too weak to establish siding with either street; attendance or resource allocation needs to matter
+kmp-mf-018-loyalty-bad: A11: ending a walking tour at another company’s office does not necessarily amount to siding with that company
+kmp-mf-024-harm-good: B5: leaving a strip of the bushes intact mainly preserves the cat’s existing shelter rather than creating a positive benefit
+kmp-mf-029-loyalty-good: B5: having the station’s own crews train together is routine scheduling, not an affirmative loyalty benefit
+kmp-mf-032-loyalty-bad: A11: moving rehearsals to the gym does not explain transferring opening night on the stage to the rival club
+kmp-mf-032-loyalty-good: B5: retaining the stage for the club’s already-planned opening night is only non-loss, not an affirmative good
+kmp-mf-109-purity-bad: A11: the scenario does not establish why crates of meat are unclean, or why their contact with the stone is desecrating
+kmp-mf-110-purity-good: A11: making the sacred stone a centerpiece of a new entrance may still entail building over it; clarify the structure leaves the stone untouched
+kmp-mf-115-purity-good: A11: changing commercial flower suppliers does not explain why the new supplier possesses and returns flowers from the temple garden
+kmp-mf-116-purity-good: A11: replacing roof tiles does not by itself install a new protective stone hood; the consequence introduces another construction action
+kmp-mf-120-purity-good: B5: honey that “can be offered” is only a possible future offering; the text does not establish an actual positive act
+kmp-mf-121-purity-bad: A11: nailing newly built pews to a sacred cross as a structural brace is physically implausible without a layout explaining why
+
+Item IDs, SHA-256 hashes, row order, and original column layout were preserved. The repository review-apply command was not run.
